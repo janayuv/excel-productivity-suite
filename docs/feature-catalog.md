@@ -228,17 +228,42 @@ To ensure stability, code quality, and maintainability, features are categorized
 
 ---
 
+### 2.16 Compare Ranges / Datasets (Phase 2)
+- **ID:** `CMD_RANGE_COMPARE`
+- **Category:** Range & Cells
+- **Description:** Performs high-performance memory comparison between two worksheet ranges or datasets, identifying cell discrepancies, value mismatches, and missing entries.
+- **Options:**
+  - Mode: `Cell-by-cell (Side-by-side)`, `Values in Source Not in Target`, `Common / Matching Values`.
+  - Criteria: `Match case`, `Trim whitespace`, `Ignore blank cells`.
+- **Output:** Interactive discrepancy table displaying cell position, source value, target value, and discrepancy classification.
+- **Status:** **Implemented (Phase 2)**
+
+---
+
+### 2.17 Select Special Cells (Phase 2)
+- **ID:** `CMD_SELECT_SPECIAL`
+- **Category:** Range & Cells
+- **Description:** Locates, filters, and inspects cells matching specific attributes within the active selection.
+- **Criteria:**
+  - `Blank Cells`, `Non-Blank / Constant Cells`, `Error Cells (#N/A, #VALUE!, etc.)`.
+  - `Formula Cells`, `Numeric Cells`, `Text / Label Cells`, `Maximum Numeric Value`, `Minimum Numeric Value`.
+- **Interactivity:** Displays tabular list of matched cells with coordinates and values; allows one-click navigation/selection in Excel.
+- **Status:** **Implemented (Phase 2)**
+
+---
+
 ## 3. Phase 2 & 3 Catalog Overview (Roadmap)
 
-| Feature | Category | Target Phase |
-| :--- | :--- | :--- |
-| **Compare Ranges & Worksheets** | Range & Cells | Phase 2 |
-| **Merge / Combine Worksheets** | Consolidation | Phase 2 |
-| **Split Data by Key Column** | Worksheet | Phase 2 |
-| **Swap Two Ranges** | Range & Cells | Phase 2 |
-| **Transpose Table Dimensions** | Range & Cells | Phase 2 |
-| **Exact Formula Copy** | Formulas | Phase 2 |
-| **Convert Formula References (Abs/Rel)** | Formulas | Phase 2 |
-| **Table of Contents (Index Sheet)** | Worksheet | Phase 3 |
-| **Export Range to CSV / JSON / Image** | Import & Export | Phase 3 |
-| **Sort Worksheets in Bulk** | Worksheet | Phase 3 |
+| Feature | Category | Target Phase | Status |
+| :--- | :--- | :--- | :--- |
+| **Compare Ranges & Datasets** | Range & Cells | Phase 2 | **Implemented** |
+| **Select Special Cells** | Range & Cells | Phase 2 | **Implemented** |
+| **Merge / Combine Worksheets** | Consolidation | Phase 3 | Backlog |
+| **Split Data by Key Column** | Worksheet | Phase 3 | Backlog |
+| **Swap Two Ranges** | Range & Cells | Phase 3 | Backlog |
+| **Transpose Table Dimensions** | Range & Cells | Phase 3 | Backlog |
+| **Exact Formula Copy** | Formulas | Phase 3 | Backlog |
+| **Convert Formula References (Abs/Rel)** | Formulas | Phase 3 | Backlog |
+| **Table of Contents (Index Sheet)** | Worksheet | Phase 3 | Backlog |
+| **Export Range to CSV / JSON / Image** | Import & Export | Phase 3 | Backlog |
+| **Sort Worksheets in Bulk** | Worksheet | Phase 3 | Backlog |

@@ -13,6 +13,20 @@ namespace ExcelProductivitySuite.UnitTests
         public string? SelectionAddress { get; set; } = "$A$1:$B$10";
         public int SelectedCellCount => 20;
 
+        public int SelectionStartRow { get; set; } = 1;
+        public int SelectionStartColumn { get; set; } = 1;
+        public int SelectionRowCount { get; set; } = 10;
+        public int SelectionColumnCount { get; set; } = 2;
+
+        public bool IsCurrentSheetProtected { get; set; } = false;
+        public bool IsWorkbookProtected { get; set; } = false;
+        public bool HasMergedCellsInSelection { get; set; } = false;
+        public bool IsMultiAreaSelection { get; set; } = false;
+
+        public bool ConfirmResponse { get; set; } = true;
+        public bool HasDataResponse { get; set; } = false;
+        public (int row, int col, int rCount, int cCount)? LastSelectedRange { get; set; }
+
         public object?[,]? CurrentValues { get; set; }
         public List<string> MessagesShown { get; } = new();
         public List<string> Sheets { get; } = new() { "Sheet1", "Sheet2", "Sheet3" };
@@ -22,6 +36,19 @@ namespace ExcelProductivitySuite.UnitTests
             { "Sheet2", false },
             { "Sheet3", true }
         };
+
+        public bool CheckRangeHasData(int startRow, int startCol, int rowCount, int colCount) => HasDataResponse;
+
+        public object?[,]? GetRangeValues(int startRow, int startCol, int rowCount, int colCount) => CurrentValues;
+
+        public object?[,]? GetRangeValuesByAddress(string address) => CurrentValues;
+
+        public void SelectRange(int startRow, int startCol, int rowCount, int colCount)
+        {
+            LastSelectedRange = (startRow, startCol, rowCount, colCount);
+        }
+
+        public bool Confirm(string message, string title) => ConfirmResponse;
 
         public object?[,]? GetSelectedValues()
         {

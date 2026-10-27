@@ -90,6 +90,136 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
             }
         }
 
+        public int SelectionStartRow
+        {
+            get
+            {
+                try
+                {
+                    if (_app.Selection is Excel.Range range)
+                    {
+                        return range.Row;
+                    }
+                    return 1;
+                }
+                catch { return 1; }
+            }
+        }
+
+        public int SelectionStartColumn
+        {
+            get
+            {
+                try
+                {
+                    if (_app.Selection is Excel.Range range)
+                    {
+                        return range.Column;
+                    }
+                    return 1;
+                }
+                catch { return 1; }
+            }
+        }
+
+        public int SelectionRowCount
+        {
+            get
+            {
+                try
+                {
+                    if (_app.Selection is Excel.Range range)
+                    {
+                        return range.Rows.Count;
+                    }
+                    return 0;
+                }
+                catch { return 0; }
+            }
+        }
+
+        public int SelectionColumnCount
+        {
+            get
+            {
+                try
+                {
+                    if (_app.Selection is Excel.Range range)
+                    {
+                        return range.Columns.Count;
+                    }
+                    return 0;
+                }
+                catch { return 0; }
+            }
+        }
+
+        public bool IsCurrentSheetProtected
+        {
+            get
+            {
+                try
+                {
+                    if (_app.ActiveSheet is Excel.Worksheet ws)
+                    {
+                        return ws.ProtectContents;
+                    }
+                    return false;
+                }
+                catch { return false; }
+            }
+        }
+
+        public bool IsWorkbookProtected
+        {
+            get
+            {
+                try
+                {
+                    if (_app.ActiveWorkbook is Excel.Workbook wb)
+                    {
+                        return wb.ProtectStructure;
+                    }
+                    return false;
+                }
+                catch { return false; }
+            }
+        }
+
+        public bool HasMergedCellsInSelection
+        {
+            get
+            {
+                try
+                {
+                    if (_app.Selection is Excel.Range range)
+                    {
+                        object merge = range.MergeCells;
+                        if (merge is bool b) return b;
+                        return merge != null;
+                    }
+                    return false;
+                }
+                catch { return false; }
+            }
+        }
+
+        public bool IsMultiAreaSelection
+        {
+            get
+            {
+                try
+                {
+                    if (_app.Selection is Excel.Range range)
+                    {
+                        return range.Areas.Count > 1;
+                    }
+                    return false;
+                }
+                catch { return false; }
+            }
+        }
+
         public object?[,]? GetSelectedValues()
         {
             try
@@ -144,6 +274,12 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
             if (values == null) throw new ArgumentNullException(nameof(values));
             if (!(_app.Selection is Excel.Range range)) return;
 
+            if (IsCurrentSheetProtected)
+            {
+                ShowMessage("The active worksheet is protected. Please unprotect the sheet before modifying cell values.", "Sheet Protected", isError: true);
+                return;
+            }
+
             using (new ExcelStateScope(_app))
             {
                 range.Value2 = values;
@@ -154,6 +290,12 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
         {
             if (values == null) throw new ArgumentNullException(nameof(values));
             if (!(_app.ActiveSheet is Excel.Worksheet sheet)) return;
+
+            if (IsCurrentSheetProtected)
+            {
+                ShowMessage("The active worksheet is protected. Please unprotect the sheet before modifying cell values.", "Sheet Protected", isError: true);
+                return;
+            }
 
             int rows = values.GetLength(0);
             int cols = values.GetLength(1);
@@ -168,16 +310,147 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
             }
         }
 
+        public bool CheckRangeHasData(int startRow, int startCol, int rowCount, int colCount)
+        {
+            try
+            {
+                if (!(_app.ActiveSheet is Excel.Worksheet sheet)) return false;
+                Excel.Range topLeft = sheet.Cells[startRow, startCol];
+                Excel.Range bottomRight = sheet.Cells[startRow + rowCount - 1, startCol + colCount - 1];
+                Excel.Range target = sheet.Range[topLeft, bottomRight];
+
+                object raw = target.Value2;
+                if (raw is object[,] matrix)
+                {
+                    int rStart = matrix.GetLowerBound(0);
+                    int rEnd = matrix.GetUpperBound(0);
+                    int cStart = matrix.GetLowerBound(1);
+                    int cEnd = matrix.GetUpperBound(1);
+
+                    for (int r = rStart; r <= rEnd; r++)
+                    {
+                        for (int c = cStart; c <= cEnd; c++)
+                        {
+                            var v = matrix[r, c];
+                            if (v != null && !string.IsNullOrWhiteSpace(v.ToString()))
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                    return false;
+                }
+
+                return raw != null && !string.IsNullOrWhiteSpace(raw.ToString());
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public object?[,]? GetRangeValues(int startRow, int startCol, int rowCount, int colCount)
+        {
+            try
+            {
+                if (!(_app.ActiveSheet is Excel.Worksheet sheet)) return null;
+                Excel.Range topLeft = sheet.Cells[startRow, startCol];
+                Excel.Range bottomRight = sheet.Cells[startRow + rowCount - 1, startCol + colCount - 1];
+                Excel.Range target = sheet.Range[topLeft, bottomRight];
+
+                object raw = target.Value2;
+                if (raw is object[,] matrix)
+                {
+                    return (object?[,])matrix;
+                }
+
+                object?[,] single = new object?[1, 1];
+                single[0, 0] = raw;
+                return single;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public object?[,]? GetRangeValuesByAddress(string address)
+        {
+            if (string.IsNullOrWhiteSpace(address)) return null;
+            try
+            {
+                Excel.Range target;
+                if (address.Contains("!"))
+                {
+                    target = _app.Range[address];
+                }
+                else if (_app.ActiveSheet is Excel.Worksheet sheet)
+                {
+                    target = sheet.Range[address];
+                }
+                else
+                {
+                    target = _app.Range[address];
+                }
+
+                if (target == null) return null;
+
+                object raw = target.Value2;
+                if (raw is object[,] matrix)
+                {
+                    return (object?[,])matrix;
+                }
+
+                object?[,] single = new object?[1, 1];
+                single[0, 0] = raw;
+                return single;
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Unable to read range '{address}': {ex.Message}", "Range Error", isError: true);
+                return null;
+            }
+        }
+
+        public void SelectRange(int startRow, int startCol, int rowCount, int colCount)
+        {
+            try
+            {
+                if (!(_app.ActiveSheet is Excel.Worksheet sheet)) return;
+                Excel.Range topLeft = sheet.Cells[startRow, startCol];
+                Excel.Range bottomRight = sheet.Cells[startRow + rowCount - 1, startCol + colCount - 1];
+                Excel.Range target = sheet.Range[topLeft, bottomRight];
+                target.Select();
+            }
+            catch { }
+        }
+
+        public bool Confirm(string message, string title)
+        {
+            return MessageBox.Show(message, title, MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes;
+        }
+
         public int ConvertSelectionFormulasToValues()
         {
             if (!(_app.Selection is Excel.Range range)) return 0;
 
-            using (new ExcelStateScope(_app))
+            if (IsCurrentSheetProtected)
             {
-                range.Value2 = range.Value2;
+                ShowMessage("The active worksheet is protected. Please unprotect the sheet before converting formulas.", "Sheet Protected", isError: true);
+                return 0;
             }
 
-            return SelectedCellCount;
+            int count = 0;
+            using (new ExcelStateScope(_app))
+            {
+                foreach (Excel.Range area in range.Areas)
+                {
+                    area.Value2 = area.Value2;
+                    count += area.CountLarge is long c ? (int)Math.Min(c, int.MaxValue) : area.Count;
+                }
+            }
+
+            return count;
         }
 
         public IReadOnlyList<string> GetWorksheetNames()
@@ -218,6 +491,12 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
 
         public void SetWorksheetVisibility(string sheetName, bool visible, bool veryHidden = false)
         {
+            if (IsWorkbookProtected)
+            {
+                ShowMessage("The active workbook structure is protected. Please unprotect the workbook before changing worksheet visibility.", "Workbook Protected", isError: true);
+                return;
+            }
+
             try
             {
                 if (_app.ActiveWorkbook != null)
@@ -240,6 +519,12 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
         public void RenameWorksheets(IDictionary<string, string> renameMap)
         {
             if (renameMap == null) return;
+
+            if (IsWorkbookProtected)
+            {
+                ShowMessage("The active workbook structure is protected. Please unprotect the workbook before renaming worksheets.", "Workbook Protected", isError: true);
+                return;
+            }
 
             using (new ExcelStateScope(_app))
             {

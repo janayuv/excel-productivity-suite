@@ -6,7 +6,7 @@
         xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
         mc:Ignorable="d"
         Title="Remove Duplicates - Excel Productivity Suite"
-        Height="420" Width="520"
+        Height="560" Width="620"
         Background="#F8F9FA">
 
     <Window.Resources>
@@ -21,52 +21,89 @@
 
     <Grid Margin="18">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" /> <!-- Header -->
+            <RowDefinition Height="Auto" /> <!-- Retention & Header Settings -->
+            <RowDefinition Height="*" />    <!-- Columns Checklist -->
+            <RowDefinition Height="Auto" /> <!-- Preview / Status Box -->
+            <RowDefinition Height="Auto" /> <!-- Footer -->
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <DockPanel Grid.Row="0" Margin="0,0,0,14">
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                 <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
                     <TextBlock Text="👥" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Border>
                 <StackPanel>
                     <TextBlock Text="Remove Duplicates" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
-                    <TextBlock Text="Identify and clear duplicate rows in selected data" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                    <TextBlock Text="Identify and clear duplicate rows based on selected key columns" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
                 </StackPanel>
             </StackPanel>
+            <TextBlock x:Name="RangeInfoText" Text="Range: $A$1:$D$50" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
         </DockPanel>
 
-        <!-- Options -->
+        <!-- Criteria & Strategy -->
         <GroupBox Grid.Row="1" Header="Duplicate Criteria" Style="{StaticResource ModernGroupBoxStyle}">
             <StackPanel>
-                <TextBlock Text="Retention Strategy:" FontSize="12" Margin="0,0,0,4" Foreground="{StaticResource TextPrimaryBrush}" />
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                    <RadioButton x:Name="KeepFirstRadio" Content="Keep First occurrence" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,18,0" />
-                    <RadioButton x:Name="KeepLastRadio" Content="Keep Last occurrence" Style="{StaticResource ModernRadioButtonStyle}" />
+                <DockPanel Margin="0,0,0,6">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="Strategy:" FontSize="12" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,12,0" VerticalAlignment="Center" />
+                        <RadioButton x:Name="KeepFirstRadio" Content="Keep First occurrence" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,16,0" Checked="CriteriaChanged" />
+                        <RadioButton x:Name="KeepLastRadio" Content="Keep Last occurrence" Style="{StaticResource ModernRadioButtonStyle}" Checked="CriteriaChanged" />
+                    </StackPanel>
+                </DockPanel>
+
+                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                    <CheckBox x:Name="HasHeadersCheckBox" Content="My data has headers (skip first row)" IsChecked="False" Style="{StaticResource ModernCheckBoxStyle}" Margin="0,0,18,0" Checked="HeadersCheckboxChanged" Unchecked="HeadersCheckboxChanged" />
+                    <CheckBox x:Name="MatchCaseCheckBox" Content="Match case (case-sensitive)" Style="{StaticResource ModernCheckBoxStyle}" Checked="CriteriaChanged" Unchecked="CriteriaChanged" />
                 </StackPanel>
-                <CheckBox x:Name="MatchCaseCheckBox" Content="Match case (case-sensitive text comparison)" Style="{StaticResource ModernCheckBoxStyle}" />
-                <CheckBox x:Name="ClearContentOnlyCheckBox" Content="Clear duplicate cell contents (keep row structure intact)" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" />
             </StackPanel>
         </GroupBox>
 
-        <!-- Safe Info Box -->
-        <Border Grid.Row="2" Background="{StaticResource StatusSuccessLightBrush}" BorderBrush="{StaticResource BrandBorderBrush}" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,8,0,0">
-            <StackPanel>
-                <TextBlock Text="🛡️ Data Protection Guarantee" FontWeight="SemiBold" Foreground="{StaticResource BrandPrimaryBrush}" FontSize="12" />
-                <TextBlock Text="Excel Productivity Suite calculates duplicate rows in memory before applying changes. If no duplicates are found, your worksheet is left untouched." TextWrapping="Wrap" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" />
-            </StackPanel>
+        <!-- Column Selection -->
+        <GroupBox Grid.Row="2" Header="Columns to Compare" Style="{StaticResource ModernGroupBoxStyle}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <DockPanel Grid.Row="0" Margin="0,0,0,6">
+                    <TextBlock Text="Select one or more columns to determine duplicate status:" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Select All" Style="{StaticResource SecondaryButtonStyle}" Padding="6,2" Margin="0,0,6,0" Click="SelectAllColumns_Click" />
+                        <Button Content="Unselect All" Style="{StaticResource SecondaryButtonStyle}" Padding="6,2" Click="UnselectAllColumns_Click" />
+                    </StackPanel>
+                </DockPanel>
+
+                <Border Grid.Row="1" Background="White" BorderBrush="{StaticResource BrandBorderBrush}" BorderThickness="1" CornerRadius="4">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ItemsControl x:Name="ColumnsList" Margin="8">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <CheckBox Content="{Binding DisplayName}" IsChecked="{Binding IsSelected}" Style="{StaticResource ModernCheckBoxStyle}" Margin="0,3" Checked="ColumnCheckChanged" Unchecked="ColumnCheckChanged" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Border>
+            </Grid>
+        </GroupBox>
+
+        <!-- Status Summary Box -->
+        <Border Grid.Row="3" Background="{StaticResource StatusSuccessLightBrush}" BorderBrush="{StaticResource BrandBorderBrush}" BorderThickness="1" CornerRadius="6" Padding="10" Margin="0,8,0,0">
+            <DockPanel>
+                <TextBlock Text="📊 Duplicate Detection Preview:" FontWeight="SemiBold" Foreground="{StaticResource BrandPrimaryBrush}" FontSize="12" VerticalAlignment="Center" />
+                <TextBlock x:Name="DuplicateSummaryText" Text="Calculating..." HorizontalAlignment="Right" FontWeight="SemiBold" FontSize="12" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center" />
+            </DockPanel>
         </Border>
 
         <!-- Footer -->
-        <DockPanel Grid.Row="3" Margin="0,14,0,0">
-            <TextBlock Text="Evaluates active selection" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+        <DockPanel Grid.Row="4" Margin="0,12,0,0">
+            <TextBlock Text="Clears cell contents of duplicate rows; retains row structure" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Content="Cancel" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,8,0" Click="CancelButton_Click" IsCancel="True" />
-                <Button Content="Process Duplicates" Style="{StaticResource PrimaryButtonStyle}" Click="ApplyButton_Click" IsDefault="True" />
+                <Button x:Name="ApplyButton" Content="Clear Duplicates" Style="{StaticResource PrimaryButtonStyle}" Click="ApplyButton_Click" IsDefault="True" />
             </StackPanel>
         </DockPanel>
     </Grid>

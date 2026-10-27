@@ -42,32 +42,66 @@
 
         <!-- Configuration -->
         <GroupBox Grid.Row="1" Header="Text Options" Style="{StaticResource ModernGroupBoxStyle}">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-
-                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,6">
-                    <TextBlock Text="Prefix to prepend:" FontSize="12" Margin="0,0,0,3" Foreground="{StaticResource TextPrimaryBrush}" />
-                    <TextBox x:Name="PrefixTextBox" Style="{StaticResource ModernTextBoxStyle}" TextChanged="OptionChanged" />
+            <StackPanel>
+                <!-- Mode Toggle -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                    <RadioButton x:Name="ModeAffixesRadio" Content="Prefix / Suffix" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,18,0" Checked="ModeChanged" />
+                    <RadioButton x:Name="ModePositionRadio" Content="Insert at Specific Position" Style="{StaticResource ModernRadioButtonStyle}" Checked="ModeChanged" />
                 </StackPanel>
 
-                <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,6">
-                    <TextBlock Text="Suffix to append:" FontSize="12" Margin="0,0,0,3" Foreground="{StaticResource TextPrimaryBrush}" />
-                    <TextBox x:Name="SuffixTextBox" Style="{StaticResource ModernTextBoxStyle}" TextChanged="OptionChanged" />
-                </StackPanel>
+                <!-- Affix Mode Panel -->
+                <Grid x:Name="AffixPanel">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,4,0,0">
-                    <CheckBox x:Name="SkipBlankCheckBox" Content="Skip blank cells" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" Margin="0,0,16,0" Checked="OptionChanged" Unchecked="OptionChanged" />
-                    <CheckBox x:Name="SkipIfContainsCheckBox" Content="Do not add if cell already contains prefix/suffix" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" Checked="OptionChanged" Unchecked="OptionChanged" />
-                </StackPanel>
-            </Grid>
+                    <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,6">
+                        <TextBlock Text="Prefix to prepend:" FontSize="12" Margin="0,0,0,3" Foreground="{StaticResource TextPrimaryBrush}" />
+                        <TextBox x:Name="PrefixTextBox" Style="{StaticResource ModernTextBoxStyle}" TextChanged="OptionChanged" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,6">
+                        <TextBlock Text="Suffix to append:" FontSize="12" Margin="0,0,0,3" Foreground="{StaticResource TextPrimaryBrush}" />
+                        <TextBox x:Name="SuffixTextBox" Style="{StaticResource ModernTextBoxStyle}" TextChanged="OptionChanged" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,4,0,0">
+                        <CheckBox x:Name="SkipBlankCheckBox" Content="Skip blank cells" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" Margin="0,0,16,0" Checked="OptionChanged" Unchecked="OptionChanged" />
+                        <CheckBox x:Name="SkipIfContainsCheckBox" Content="Do not add if cell already contains prefix/suffix" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" Checked="OptionChanged" Unchecked="OptionChanged" />
+                    </StackPanel>
+                </Grid>
+
+                <!-- Position Mode Panel -->
+                <Grid x:Name="PositionPanel" Visibility="Collapsed">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,6">
+                        <TextBlock Text="Text to insert:" FontSize="12" Margin="0,0,0,3" Foreground="{StaticResource TextPrimaryBrush}" />
+                        <TextBox x:Name="InsertTextBox" Style="{StaticResource ModernTextBoxStyle}" TextChanged="OptionChanged" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,6">
+                        <TextBlock Text="Character position (1-based):" FontSize="12" Margin="0,0,0,3" Foreground="{StaticResource TextPrimaryBrush}" />
+                        <TextBox x:Name="PositionIndexTextBox" Text="1" Style="{StaticResource ModernTextBoxStyle}" TextChanged="OptionChanged" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,4,0,0">
+                        <CheckBox x:Name="FromEndCheckBox" Content="Count position from end of text (right-to-left)" Style="{StaticResource ModernCheckBoxStyle}" Checked="OptionChanged" Unchecked="OptionChanged" />
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
         </GroupBox>
 
         <!-- Live Preview -->

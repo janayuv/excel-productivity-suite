@@ -14,6 +14,7 @@ namespace ExcelProductivitySuite.Engine.DataCleaning
         public DuplicateKeepStrategy KeepStrategy { get; set; } = DuplicateKeepStrategy.KeepFirst;
         public bool MatchCase { get; set; } = false;
         public bool CompareEntireRows { get; set; } = true;
+        public bool HasHeaders { get; set; } = false;
         public int[]? KeyColumnIndices { get; set; } = null; // 0-based relative column offsets
     }
 
@@ -38,9 +39,11 @@ namespace ExcelProductivitySuite.Engine.DataCleaning
             var comparer = options.MatchCase ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase;
             var seenKeys = new HashSet<string>(comparer);
 
+            int effectiveStart = options.HasHeaders ? rowStart + 1 : rowStart;
+
             if (options.KeepStrategy == DuplicateKeepStrategy.KeepFirst)
             {
-                for (int r = rowStart; r <= rowEnd; r++)
+                for (int r = effectiveStart; r <= rowEnd; r++)
                 {
                     int rowIndex = r - rowStart;
                     string key = BuildRowKey(matrix, r, colStart, colEnd, options);
@@ -57,7 +60,7 @@ namespace ExcelProductivitySuite.Engine.DataCleaning
             }
             else // KeepLast
             {
-                for (int r = rowEnd; r >= rowStart; r--)
+                for (int r = rowEnd; r >= effectiveStart; r--)
                 {
                     int rowIndex = r - rowStart;
                     string key = BuildRowKey(matrix, r, colStart, colEnd, options);

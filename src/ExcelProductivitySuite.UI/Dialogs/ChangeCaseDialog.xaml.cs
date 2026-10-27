@@ -62,6 +62,18 @@ namespace ExcelProductivitySuite.UI.Dialogs
 
         private void ApplyButton_Click(object sender, RoutedEventArgs e)
         {
+            if (_context.IsCurrentSheetProtected)
+            {
+                _context.ShowMessage("The active worksheet is protected. Please unprotect the sheet before changing case.", "Sheet Protected", isError: true);
+                return;
+            }
+
+            if (_context.IsMultiAreaSelection)
+            {
+                _context.ShowMessage("Please select a single contiguous range of cells to modify.", "Change Case", isError: true);
+                return;
+            }
+
             var matrix = _context.GetSelectedValues();
             if (matrix == null)
             {

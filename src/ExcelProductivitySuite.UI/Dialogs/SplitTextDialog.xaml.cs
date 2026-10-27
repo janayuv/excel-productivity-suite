@@ -75,6 +75,18 @@ namespace ExcelProductivitySuite.UI.Dialogs
 
         private void ApplyButton_Click(object sender, RoutedEventArgs e)
         {
+            if (_context.IsCurrentSheetProtected)
+            {
+                _context.ShowMessage("The active worksheet is protected. Please unprotect the sheet before splitting cells.", "Sheet Protected", isError: true);
+                return;
+            }
+
+            if (_context.IsMultiAreaSelection)
+            {
+                _context.ShowMessage("Please select a single contiguous range of cells to split.", "Split Cells", isError: true);
+                return;
+            }
+
             var matrix = _context.GetSelectedValues();
             if (matrix == null)
             {
@@ -86,10 +98,10 @@ namespace ExcelProductivitySuite.UI.Dialogs
             int rStart = matrix.GetLowerBound(0);
             int rEnd = matrix.GetUpperBound(0);
             int cStart = matrix.GetLowerBound(1);
-            int cEnd = matrix.GetUpperBound(1);
 
             int rows = rEnd - rStart + 1;
-            int cols = cEnd - cStart + 1;
+            int originRow = _context.SelectionStartRow;
+            int originCol = _context.SelectionStartColumn;
 
             if (SplitToColumnsRadio.IsChecked == true)
             {
@@ -116,7 +128,14 @@ namespace ExcelProductivitySuite.UI.Dialogs
                     }
                 }
 
-                _context.SetRangeValues(rStart, cStart, output);
+                // Check for data overwrite in spill columns
+                if (maxTokens > 1 && _context.CheckRangeHasData(originRow, originCol + 1, rows, maxTokens - 1))
+                {
+                    bool proceed = _context.Confirm($"Splitting into {maxTokens} columns will overwrite existing data in adjacent columns. Do you wish to continue?", "Confirm Overwrite");
+                    if (!proceed) return;
+                }
+
+                _context.SetRangeValues(originRow, originCol, output);
                 _context.ShowMessage($"Split data into {maxTokens} columns successfully.", "Split Cells");
             }
             else // Split to rows
@@ -136,7 +155,14 @@ namespace ExcelProductivitySuite.UI.Dialogs
                     output[i, 0] = allRows[i];
                 }
 
-                _context.SetRangeValues(rStart, cStart, output);
+                // Check for data overwrite in spill rows below
+                if (allRows.Count > rows && _context.CheckRangeHasData(originRow + rows, originCol, allRows.Count - rows, 1))
+                {
+                    bool proceed = _context.Confirm($"Splitting into {allRows.Count} rows will overwrite existing data in rows below the selection. Do you wish to continue?", "Confirm Overwrite");
+                    if (!proceed) return;
+                }
+
+                _context.SetRangeValues(originRow, originCol, output);
                 _context.ShowMessage($"Split data into {allRows.Count} rows successfully.", "Split Cells");
             }
 

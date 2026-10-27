@@ -1,7 +1,7 @@
 # Excel Productivity Suite
 
 [![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)]()
-[![Tests](https://img.shields.io/badge/Tests-24%20Passed-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-41%20Passed-brightgreen.svg)]()
 [![Target](https://img.shields.io/badge/Excel-2016%20%7C%202019%20%7C%202021%20%7C%20365-blue.svg)]()
 [![Architecture](https://img.shields.io/badge/Platform-Windows%20x64%20%7C%20x86-blue.svg)]()
 [![Framework](https://img.shields.io/badge/.NET-4.8%20%2B%20WPF-purple.svg)]()
@@ -33,8 +33,10 @@ A Windows desktop Microsoft Excel add-in delivering an Excel productivity experi
 | `CMD_TEXT_CHANGE_CASE` | **Change Case** | Text | Converts text to UPPERCASE, lowercase, Proper Case, or Sentence case. |
 | `CMD_TEXT_ADD_AFFIX` | **Add Text / Affixes** | Text | Prepends prefixes or appends suffixes with duplicate prevention. |
 | `CMD_RANGE_FILL_BLANKS` | **Fill Blank Cells** | Range & Cells | Populates empty cells using values from above, below, left, right, or constants. |
-| `CMD_DATA_REMOVE_DUPLICATES` | **Remove Duplicates** | Data Cleaning | Identifies and clears duplicate rows with keep-first or keep-last options. |
-| `CMD_FORMULA_TO_VALUE` | **Formulas to Values** | Data Cleaning | Replaces calculated formulas with static values in-place instantly. |
+| `CMD_RANGE_COMPARE` | **Compare Ranges** | Range & Cells | Reconciles datasets, side-by-side cell comparison, and missing item detection. |
+| `CMD_SELECT_SPECIAL` | **Select Special** | Range & Cells | Locates and inspects cells matching blank, error, formula, or max/min attributes. |
+| `CMD_DATA_REMOVE_DUPLICATES` | **Remove Duplicates** | Data Cleaning | Identifies and clears duplicate rows with header preservation and column checklist. |
+| `CMD_FORMULA_TO_VALUE` | **Formulas to Values** | Data Cleaning | Replaces calculated formulas with static values in-place with user confirmation. |
 | `CMD_SHEET_VISIBILITY` | **Sheet Visibility** | Worksheets | Bulk manager for Visible, Hidden, and VeryHidden states with unhide-all. |
 | `CMD_SHEET_BATCH_RENAME` | **Rename Worksheets** | Worksheets | Renames sheets in bulk with prefix, suffix, and sequence numbering. |
 | `CMD_ABOUT` | **About Suite** | General | Displays product version, architecture, diagnostics, and environment stats. |
@@ -71,7 +73,7 @@ dotnet restore ExcelProductivitySuite.sln
 ```powershell
 dotnet test tests/ExcelProductivitySuite.UnitTests/ExcelProductivitySuite.UnitTests.csproj
 ```
-*Current test suite: **24 passed, 0 failed, 100% passing rate**.*
+*Current test suite: **41 passed, 0 failed, 100% passing rate** (including 100K-cell performance benchmarks).*
 
 ### Register Add-in in Excel
 ```powershell
@@ -87,6 +89,8 @@ powershell -ExecutionPolicy Bypass -File installer/diagnostics.ps1
 
 ## Documentation
 
+- [Production-Readiness Audit](docs/production-readiness-audit.md): Complete audit of data integrity, safeguards, COM lifecycle, benchmarks, and remediations.
+- [UI & Accessibility Audit](docs/ui-audit.md): Evaluation of Fluent design tokens, high-DPI scaling, modality, accessibility, and interactive previews.
 - [Reference Audit](docs/reference-audit.md): Complete audit of installed Kutools reference files, metadata, and 359 cataloged features.
 - [UI Inventory & Design System](docs/ui-inventory.md): Ribbon layout, design tokens, color palette, and control specifications.
 - [Feature Catalog](docs/feature-catalog.md): Detailed specifications for each tool across all implementation phases.

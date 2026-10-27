@@ -3,7 +3,7 @@
   <ribbon>
     <tabs>
       <!-- Primary Tab: Excel Productivity -->
-      <tab id="tabExcelProductivity" label="Excel Productivity" insertBeforeMso="TabHome">
+      <tab id="tabExcelProductivity" label="Excel Productivity" keytip="P" insertBeforeMso="TabHome">
         
         <!-- Group: Suite & Launcher -->
         <group id="grpLauncher" label="Productivity Suite">
@@ -12,7 +12,8 @@
                   size="large"
                   imageMso="FindDialog"
                   screentip="Quick Tool Launcher"
-                  supertip="Instant search and launch for all Excel Productivity Suite tools (Shortcut: Ctrl+Shift+P)."
+                  supertip="Instant search and launch for all Excel Productivity Suite tools (KeyTip: TL)."
+                  keytip="TL"
                   onAction="OnRibbonButtonClicked" />
           <button id="btnAbout"
                   label="About Suite"
@@ -78,6 +79,20 @@
                   imageMso="FillDown"
                   screentip="Fill Blank Cells"
                   supertip="Fill blank cells with values from above, below, left, right, or fixed constants."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnCompareRanges"
+                  label="Compare Ranges"
+                  size="large"
+                  imageMso="CompareDocuments"
+                  screentip="Compare Ranges / Datasets"
+                  supertip="Identify cell differences, mismatches, or missing items between two ranges or sheets."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnSelectSpecial"
+                  label="Select Special"
+                  size="normal"
+                  imageMso="SelectCell"
+                  screentip="Select Special Cells"
+                  supertip="Locate and inspect cells matching criteria such as blank, errors, formulas, or max/min values."
                   onAction="OnRibbonButtonClicked" />
         </group>
 

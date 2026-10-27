@@ -132,6 +132,36 @@ namespace ExcelProductivitySuite.AddIn.Startup
                 officeIconName: "FillDown"
             ));
 
+            // 8b. Compare Ranges / Sheets (Phase 2)
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_RANGE_COMPARE",
+                title: "Compare Ranges",
+                description: "Identify cell differences, mismatches, or missing items between two ranges or sheets.",
+                category: CommandCategory.RangeAndCells,
+                executeAction: ctx =>
+                {
+                    var dlg = new CompareRangesDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "compare", "diff", "reconcile", "mismatch", "missing values" },
+                officeIconName: "CompareDocuments"
+            ));
+
+            // 8c. Select Special Cells (Phase 2)
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_SELECT_SPECIAL",
+                title: "Select Special Cells",
+                description: "Filter and locate cells matching specific attributes (blank, error, formulas, max/min).",
+                category: CommandCategory.RangeAndCells,
+                executeAction: ctx =>
+                {
+                    var dlg = new SelectSpecialDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "select special", "find blanks", "find errors", "max cell", "min cell" },
+                officeIconName: "SelectCell"
+            ));
+
             // 9. Remove Duplicates
             registry.RegisterCommand(new SuiteCommand(
                 id: "CMD_DATA_REMOVE_DUPLICATES",
@@ -155,6 +185,23 @@ namespace ExcelProductivitySuite.AddIn.Startup
                 category: CommandCategory.DataCleaning,
                 executeAction: ctx =>
                 {
+                    if (ctx.IsCurrentSheetProtected)
+                    {
+                        ctx.ShowMessage("The active worksheet is protected. Please unprotect the sheet before converting formulas.", "Sheet Protected", isError: true);
+                        return;
+                    }
+
+                    if (ctx.SelectedCellCount == 0)
+                    {
+                        ctx.ShowMessage("Please select a range of cells to convert.", "Formulas to Values", isError: true);
+                        return;
+                    }
+
+                    bool proceed = ctx.Confirm(
+                        "Are you sure you want to permanently convert formulas in the selected cells into static values?\n\nThis action replaces formulas with their current calculated values and cannot be automatically undone.",
+                        "Confirm Formula Conversion");
+                    if (!proceed) return;
+
                     int affected = ctx.ConvertSelectionFormulasToValues();
                     ctx.ShowMessage($"Converted {affected} cells from formulas to static values.", "Formulas to Values");
                 },

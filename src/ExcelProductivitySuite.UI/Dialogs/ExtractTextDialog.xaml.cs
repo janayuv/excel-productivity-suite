@@ -76,6 +76,18 @@ namespace ExcelProductivitySuite.UI.Dialogs
 
         private void ApplyButton_Click(object sender, RoutedEventArgs e)
         {
+            if (_context.IsCurrentSheetProtected)
+            {
+                _context.ShowMessage("The active worksheet is protected. Please unprotect the sheet before extracting text.", "Sheet Protected", isError: true);
+                return;
+            }
+
+            if (_context.IsMultiAreaSelection)
+            {
+                _context.ShowMessage("Please select a single contiguous range of cells for text extraction.", "Extract Text", isError: true);
+                return;
+            }
+
             var matrix = _context.GetSelectedValues();
             if (matrix == null)
             {
@@ -107,7 +119,27 @@ namespace ExcelProductivitySuite.UI.Dialogs
                 }
             }
 
-            _context.SetSelectedValues(updated);
+            bool overwrite = OverwriteCheckBox.IsChecked == true;
+            if (overwrite)
+            {
+                _context.SetSelectedValues(updated);
+            }
+            else
+            {
+                int targetStartRow = _context.SelectionStartRow;
+                int targetStartCol = _context.SelectionStartColumn + _context.SelectionColumnCount;
+                int rowCount = updated.GetLength(0);
+                int colCount = updated.GetLength(1);
+
+                if (_context.CheckRangeHasData(targetStartRow, targetStartCol, rowCount, colCount))
+                {
+                    bool proceed = _context.Confirm("The adjacent destination range already contains data. Writing extracted text will overwrite existing values. Do you wish to continue?", "Confirm Overwrite");
+                    if (!proceed) return;
+                }
+
+                _context.SetRangeValues(targetStartRow, targetStartCol, updated);
+            }
+
             _context.ShowMessage($"Extracted text successfully across {affected} cells.", "Extract Text");
             DialogResult = true;
             Close();

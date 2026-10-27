@@ -99,13 +99,40 @@ Contains workbook-wide management utilities:
 - **Steps:**
   1. Select the data table or range.
   2. Click **Remove Duplicates**.
-  3. Choose whether to **Keep First occurrence** or **Keep Last occurrence**.
-  4. Check **Clear duplicate cell contents** to preserve table row alignment.
-  5. Click **Process Duplicates**. A summary dialog confirms how many duplicate rows were removed.
+  3. Check **My data has headers** if your table has a header row (preserves headers).
+  4. Select which specific columns to evaluate in the **Columns to Compare** checklist, or click **Select All**.
+  5. Choose whether to **Keep First occurrence** or **Keep Last occurrence**.
+  6. Review the live duplicate row count in the **Preview Box**.
+  7. Click **Clear Duplicates**. A confirmation prompt ensures intentional execution.
 
 ---
 
-### 3.6 Batch Rename Worksheets
+### 3.6 Compare Ranges / Datasets (Phase 2)
+- **When to Use:** When reconciling two sheets, comparing budget vs. actuals, or auditing changes between two versions of a data table.
+- **Steps:**
+  1. Select the primary source range in Excel.
+  2. Click **Compare Ranges** on the Ribbon.
+  3. Enter the target range address (e.g. `B1:B20` or `Sheet2!A1:D10`).
+  4. Choose your comparison mode:
+     - `Cell-by-cell (Side-by-side)`: Directly compares cells at identical relative coordinates.
+     - `Values in Source Not in Target`: Finds values missing from the target range.
+     - `Common Values`: Finds intersecting matching records.
+  5. Inspect the discrepancy table showing cell coordinates, source and target values, and discrepancy types.
+
+---
+
+### 3.7 Select Special Cells (Phase 2)
+- **When to Use:** When you need to quickly locate, audit, or jump to specific cells in a large table.
+- **Steps:**
+  1. Select the range to inspect.
+  2. Click **Select Special** on the Ribbon.
+  3. Choose your filter criteria (`Blank Cells`, `Error Cells`, `Formula Cells`, `Numeric`, `Text`, `Maximum`, or `Minimum`).
+  4. The dialog displays all matched cells with their addresses and values.
+  5. Click **Select First Matching** to jump directly to the target cell in Excel.
+
+---
+
+### 3.8 Batch Rename Worksheets
 - **When to Use:** When organizing monthly or quarterly reports (e.g. renaming `Sheet1`, `Sheet2` to `Report_2026_01`, `Report_2026_02`).
 - **Steps:**
   1. Click **Rename Sheets** under the **Workbook & Sheets** tab.

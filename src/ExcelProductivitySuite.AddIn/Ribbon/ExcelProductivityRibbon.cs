@@ -73,6 +73,8 @@ namespace ExcelProductivitySuite.AddIn.Ribbon
                 case "btnChangeCase": return "CMD_TEXT_CHANGE_CASE";
                 case "btnAddText": return "CMD_TEXT_ADD_AFFIX";
                 case "btnFillBlanks": return "CMD_RANGE_FILL_BLANKS";
+                case "btnCompareRanges": return "CMD_RANGE_COMPARE";
+                case "btnSelectSpecial": return "CMD_SELECT_SPECIAL";
                 case "btnRemoveDuplicates": return "CMD_DATA_REMOVE_DUPLICATES";
                 case "btnFormulaToValue": return "CMD_FORMULA_TO_VALUE";
                 case "btnSheetVisibility": return "CMD_SHEET_VISIBILITY";
