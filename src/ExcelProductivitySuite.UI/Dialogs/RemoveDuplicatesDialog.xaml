@@ -1,0 +1,73 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.RemoveDuplicatesDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Remove Duplicates - Excel Productivity Suite"
+        Height="420" Width="520"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,14">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="👥" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Remove Duplicates" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Identify and clear duplicate rows in selected data" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Options -->
+        <GroupBox Grid.Row="1" Header="Duplicate Criteria" Style="{StaticResource ModernGroupBoxStyle}">
+            <StackPanel>
+                <TextBlock Text="Retention Strategy:" FontSize="12" Margin="0,0,0,4" Foreground="{StaticResource TextPrimaryBrush}" />
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                    <RadioButton x:Name="KeepFirstRadio" Content="Keep First occurrence" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,18,0" />
+                    <RadioButton x:Name="KeepLastRadio" Content="Keep Last occurrence" Style="{StaticResource ModernRadioButtonStyle}" />
+                </StackPanel>
+                <CheckBox x:Name="MatchCaseCheckBox" Content="Match case (case-sensitive text comparison)" Style="{StaticResource ModernCheckBoxStyle}" />
+                <CheckBox x:Name="ClearContentOnlyCheckBox" Content="Clear duplicate cell contents (keep row structure intact)" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" />
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Safe Info Box -->
+        <Border Grid.Row="2" Background="{StaticResource StatusSuccessLightBrush}" BorderBrush="{StaticResource BrandBorderBrush}" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,8,0,0">
+            <StackPanel>
+                <TextBlock Text="🛡️ Data Protection Guarantee" FontWeight="SemiBold" Foreground="{StaticResource BrandPrimaryBrush}" FontSize="12" />
+                <TextBlock Text="Excel Productivity Suite calculates duplicate rows in memory before applying changes. If no duplicates are found, your worksheet is left untouched." TextWrapping="Wrap" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" />
+            </StackPanel>
+        </Border>
+
+        <!-- Footer -->
+        <DockPanel Grid.Row="3" Margin="0,14,0,0">
+            <TextBlock Text="Evaluates active selection" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Cancel" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,8,0" Click="CancelButton_Click" IsCancel="True" />
+                <Button Content="Process Duplicates" Style="{StaticResource PrimaryButtonStyle}" Click="ApplyButton_Click" IsDefault="True" />
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<customUI xmlns="http://schemas.microsoft.com/office/2009/07/customui" onLoad="OnRibbonLoad">
+  <ribbon>
+    <tabs>
+      <!-- Primary Tab: Excel Productivity -->
+      <tab id="tabExcelProductivity" label="Excel Productivity" insertBeforeMso="TabHome">
+        
+        <!-- Group: Suite & Launcher -->
+        <group id="grpLauncher" label="Productivity Suite">
+          <button id="btnLauncher"
+                  label="Tool Launcher"
+                  size="large"
+                  imageMso="FindDialog"
+                  screentip="Quick Tool Launcher"
+                  supertip="Instant search and launch for all Excel Productivity Suite tools (Shortcut: Ctrl+Shift+P)."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnAbout"
+                  label="About Suite"
+                  size="normal"
+                  imageMso="Info"
+                  screentip="About Excel Productivity Suite"
+                  supertip="View version, diagnostics, and environment configuration."
+                  onAction="OnRibbonButtonClicked" />
+        </group>
+
+        <!-- Group: Text Operations -->
+        <group id="grpText" label="Text Operations">
+          <button id="btnExtractText"
+                  label="Extract Text"
+                  size="large"
+                  imageMso="Cut"
+                  screentip="Extract Text"
+                  supertip="Extract substrings before, after, or between delimiters into cells with live preview."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnSplitText"
+                  label="Split Cells"
+                  size="large"
+                  imageMso="TableSplitCells"
+                  screentip="Split Cells"
+                  supertip="Split cell contents across multiple adjacent columns or rows."
+                  onAction="OnRibbonButtonClicked" />
+          <separator id="sepText1" />
+          <button id="btnRemoveChars"
+                  label="Remove Characters"
+                  size="normal"
+                  imageMso="Delete"
+                  screentip="Remove Characters"
+                  supertip="Strip numeric, alphabetic, symbols, control codes, or custom character sets."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnTrimSpaces"
+                  label="Trim Spaces"
+                  size="normal"
+                  imageMso="ParagraphSpacingAfter"
+                  screentip="Trim &amp; Normalize Spaces"
+                  supertip="Clean excess whitespace, leading/trailing spaces, and non-breaking spaces."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnChangeCase"
+                  label="Change Case"
+                  size="normal"
+                  imageMso="ChangeCase"
+                  screentip="Change Text Case"
+                  supertip="Transform text into UPPERCASE, lowercase, Proper Case, or Sentence case."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnAddText"
+                  label="Add Text"
+                  size="normal"
+                  imageMso="AdpAddExisting"
+                  screentip="Add Text / Affixes"
+                  supertip="Prepend prefix, append suffix, or insert text at a specific character position."
+                  onAction="OnRibbonButtonClicked" />
+        </group>
+
+        <!-- Group: Range & Cells -->
+        <group id="grpRange" label="Range &amp; Cells">
+          <button id="btnFillBlanks"
+                  label="Fill Blank Cells"
+                  size="large"
+                  imageMso="FillDown"
+                  screentip="Fill Blank Cells"
+                  supertip="Fill blank cells with values from above, below, left, right, or fixed constants."
+                  onAction="OnRibbonButtonClicked" />
+        </group>
+
+        <!-- Group: Data Cleaning -->
+        <group id="grpCleaning" label="Data Cleaning">
+          <button id="btnRemoveDuplicates"
+                  label="Remove Duplicates"
+                  size="large"
+                  imageMso="TableDeleteRows"
+                  screentip="Remove Duplicates"
+                  supertip="Identify and clear duplicate rows in selected data with keep-first or keep-last options."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnFormulaToValue"
+                  label="Formulas to Values"
+                  size="large"
+                  imageMso="PasteValues"
+                  screentip="Convert Formulas to Values"
+                  supertip="Replace active formulas with static calculated values in-place instantly."
+                  onAction="OnRibbonButtonClicked" />
+        </group>
+
+      </tab>
+
+      <!-- Secondary Tab: Workbook & Sheets -->
+      <tab id="tabWorkbookAndSheets" label="Workbook &amp; Sheets">
+        
+        <group id="grpSheets" label="Worksheet Tools">
+          <button id="btnSheetVisibility"
+                  label="Sheet Visibility"
+                  size="large"
+                  imageMso="ViewNormalViewExcel"
+                  screentip="Worksheet Visibility Manager"
+                  supertip="Manage Visible, Hidden, and VeryHidden worksheet states in bulk."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnBatchRename"
+                  label="Rename Sheets"
+                  size="large"
+                  imageMso="SheetRename"
+                  screentip="Batch Rename Worksheets"
+                  supertip="Rename multiple sheets simultaneously with prefix, suffix, and sequence rules."
+                  onAction="OnRibbonButtonClicked" />
+        </group>
+
+      </tab>
+    </tabs>
+  </ribbon>
+</customUI>

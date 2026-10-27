@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>ExcelProductivitySuite.UI</RootNamespace>
+    <AssemblyName>ExcelProductivitySuite.UI</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ExcelProductivitySuite.Core\ExcelProductivitySuite.Core.csproj" />
+    <ProjectReference Include="..\ExcelProductivitySuite.Engine\ExcelProductivitySuite.Engine.csproj" />
+  </ItemGroup>
+</Project>

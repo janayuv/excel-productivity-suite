@@ -1,0 +1,98 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.ExtractTextDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Extract Text - Excel Productivity Suite"
+        Height="520" Width="620"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" /> <!-- Header -->
+            <RowDefinition Height="Auto" /> <!-- Mode Options -->
+            <RowDefinition Height="Auto" /> <!-- Delimiter Config -->
+            <RowDefinition Height="*" />    <!-- Live Preview -->
+            <RowDefinition Height="Auto" /> <!-- Footer Buttons -->
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,14">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="✂" Foreground="White" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Extract Text" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Extract substrings before, after, or between delimiters into cells" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+            <TextBlock x:Name="RangeInfoText" Text="Range: $A$1:$A$10" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+        </DockPanel>
+
+        <!-- Mode Selection -->
+        <GroupBox Grid.Row="1" Header="Extraction Mode" Style="{StaticResource ModernGroupBoxStyle}">
+            <StackPanel Orientation="Horizontal">
+                <RadioButton x:Name="ModeBefore" Content="Before Delimiter" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,18,0" Checked="OptionChanged" />
+                <RadioButton x:Name="ModeAfter" Content="After Delimiter" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,18,0" Checked="OptionChanged" />
+                <RadioButton x:Name="ModeBetween" Content="Between Delimiters" Style="{StaticResource ModernRadioButtonStyle}" Checked="OptionChanged" />
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Delimiter Config -->
+        <GroupBox Grid.Row="2" Header="Delimiter Settings" Style="{StaticResource ModernGroupBoxStyle}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,6">
+                    <TextBlock Text="Primary Delimiter:" FontSize="12" Margin="0,0,0,3" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBox x:Name="PrimaryDelimTextBox" Text="," Style="{StaticResource ModernTextBoxStyle}" TextChanged="OptionChanged" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,6">
+                    <TextBlock x:Name="SecondaryDelimLabel" Text="End Delimiter (Between mode):" FontSize="12" Margin="0,0,0,3" Foreground="{StaticResource TextSecondaryBrush}" />
+                    <TextBox x:Name="SecondaryDelimTextBox" Text="]" Style="{StaticResource ModernTextBoxStyle}" IsEnabled="False" TextChanged="OptionChanged" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,6,0,0">
+                    <CheckBox x:Name="CaseSensitiveCheckBox" Content="Case Sensitive matching" Style="{StaticResource ModernCheckBoxStyle}" Margin="0,0,16,0" Checked="OptionChanged" Unchecked="OptionChanged" />
+                    <CheckBox x:Name="OverwriteCheckBox" Content="Overwrite original cells (uncheck to output to adjacent column)" Style="{StaticResource ModernCheckBoxStyle}" IsChecked="True" />
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+
+        <!-- Live Preview -->
+        <DockPanel Grid.Row="3" Margin="0,8,0,0">
+            <TextBlock DockPanel.Dock="Top" Text="Live Preview (First 10 Selected Cells):" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,4" />
+            <controls:LivePreviewTable x:Name="PreviewTable" />
+        </DockPanel>
+
+        <!-- Footer -->
+        <DockPanel Grid.Row="4" Margin="0,14,0,0">
+            <TextBlock x:Name="StatusSummaryText" Text="Ready to extract text" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Cancel" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,8,0" Click="CancelButton_Click" IsCancel="True" />
+                <Button Content="Apply &amp; Extract" Style="{StaticResource PrimaryButtonStyle}" Click="ApplyButton_Click" IsDefault="True" />
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

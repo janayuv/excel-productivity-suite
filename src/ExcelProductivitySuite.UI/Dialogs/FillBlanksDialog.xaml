@@ -1,0 +1,74 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.FillBlanksDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Fill Blank Cells - Excel Productivity Suite"
+        Height="420" Width="520"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,14">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="⬚" Foreground="White" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Fill Blank Cells" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Populate empty cells with neighboring values or fixed constants" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Direction Options -->
+        <GroupBox Grid.Row="1" Header="Fill Strategy" Style="{StaticResource ModernGroupBoxStyle}">
+            <StackPanel>
+                <RadioButton x:Name="FillDownRadio" Content="Fill Down (Value from above)" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Checked="StrategyChanged" />
+                <RadioButton x:Name="FillUpRadio" Content="Fill Up (Value from below)" Style="{StaticResource ModernRadioButtonStyle}" Checked="StrategyChanged" />
+                <RadioButton x:Name="FillRightRadio" Content="Fill Right (Value from left)" Style="{StaticResource ModernRadioButtonStyle}" Checked="StrategyChanged" />
+                <RadioButton x:Name="FillLeftRadio" Content="Fill Left (Value from right)" Style="{StaticResource ModernRadioButtonStyle}" Checked="StrategyChanged" />
+                
+                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                    <RadioButton x:Name="FillFixedRadio" Content="Fill with Fixed Value:" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,8,0" Checked="StrategyChanged" />
+                    <TextBox x:Name="FixedValueTextBox" Width="140" Style="{StaticResource ModernTextBoxStyle}" Text="0" IsEnabled="False" />
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+
+        <Border Grid.Row="2" Background="{StaticResource StatusSuccessLightBrush}" BorderBrush="{StaticResource BrandBorderBrush}" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,8,0,0">
+            <StackPanel>
+                <TextBlock Text="💡 Productivity Tip" FontWeight="SemiBold" Foreground="{StaticResource BrandPrimaryBrush}" FontSize="12" />
+                <TextBlock Text="Fill Down is ideal for converting unmerged pivot tables or hierarchically grouped reports into tabular format ready for sorting and filtering." TextWrapping="Wrap" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" />
+            </StackPanel>
+        </Border>
+
+        <!-- Footer -->
+        <DockPanel Grid.Row="3" Margin="0,14,0,0">
+            <TextBlock Text="Active Selection" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Cancel" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,8,0" Click="CancelButton_Click" IsCancel="True" />
+                <Button Content="Fill Blank Cells" Style="{StaticResource PrimaryButtonStyle}" Click="ApplyButton_Click" IsDefault="True" />
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>
