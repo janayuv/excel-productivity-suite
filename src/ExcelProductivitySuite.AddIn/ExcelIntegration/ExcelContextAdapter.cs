@@ -8,11 +8,18 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
 {
     public class ExcelContextAdapter : IExcelContext
     {
-        private readonly Excel.Application _app;
+        private readonly Func<Excel.Application> _appAccessor;
+        private Excel.Application _app => _appAccessor() ?? throw new InvalidOperationException("Excel Application instance is not available.");
 
         public ExcelContextAdapter(Excel.Application app)
         {
-            _app = app ?? throw new ArgumentNullException(nameof(app));
+            if (app == null) throw new ArgumentNullException(nameof(app));
+            _appAccessor = () => app;
+        }
+
+        public ExcelContextAdapter(Func<Excel.Application> appAccessor)
+        {
+            _appAccessor = appAccessor ?? throw new ArgumentNullException(nameof(appAccessor));
         }
 
         public IntPtr MainWindowHandle

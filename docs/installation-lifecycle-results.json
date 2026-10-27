@@ -3,9 +3,9 @@
         "ScenarioId":  "S01",
         "Title":  "Extract Release ZIP to External Directory",
         "Expected":  "All files extracted cleanly outside repository",
-        "Actual":  "Extracted 13 files to C:\\Users\\Yogeswari\\AppData\\Local\\Programs\\ExcelProductivitySuite-ReleaseTest",
+        "Actual":  "Extracted 16 files to C:\\Users\\Yogeswari\\AppData\\Local\\Programs\\ExcelProductivitySuite-ReleaseTest",
         "Passed":  true,
-        "ElapsedMs":  109.33
+        "ElapsedMs":  120.3
     },
     {
         "ScenarioId":  "S02",
@@ -13,7 +13,7 @@
         "Expected":  "Manifest points to external location without dev path, LoadBehavior=3",
         "Actual":  "Manifest: file:///C:/Users/Yogeswari/AppData/Local/Programs/ExcelProductivitySuite-ReleaseTest/ExcelProductivitySuite.AddIn.vsto|vstolocal | LoadBehavior: 3",
         "Passed":  true,
-        "ElapsedMs":  1161.29
+        "ElapsedMs":  1541.81
     },
     {
         "ScenarioId":  "S03",
@@ -21,7 +21,7 @@
         "Expected":  "HEALTH CHECK PASSED and COEXISTENCE CONFIRMED",
         "Actual":  "Health check \u0026 coexistence confirmed from external install",
         "Passed":  true,
-        "ElapsedMs":  1377.42
+        "ElapsedMs":  1509.38
     },
     {
         "ScenarioId":  "S04",
@@ -29,7 +29,7 @@
         "Expected":  "Excel recognizes ExcelProductivitySuite COM add-in",
         "Actual":  "Found Addin in Excel.COMAddIns: True",
         "Passed":  true,
-        "ElapsedMs":  5344.75
+        "ElapsedMs":  5354.71
     },
     {
         "ScenarioId":  "S05",
@@ -37,7 +37,7 @@
         "Expected":  "Kutools directory and binaries remain untouched",
         "Actual":  "Kutools directory exists with 38 items",
         "Passed":  true,
-        "ElapsedMs":  2.44
+        "ElapsedMs":  2.24
     },
     {
         "ScenarioId":  "S06",
@@ -45,7 +45,7 @@
         "Expected":  "HKCU Addin key completely removed",
         "Actual":  "Registry key exists after uninstall: False",
         "Passed":  true,
-        "ElapsedMs":  1099.08
+        "ElapsedMs":  1211.4
     },
     {
         "ScenarioId":  "S07",
@@ -53,7 +53,7 @@
         "Expected":  "Addin is no longer loaded by Excel",
         "Actual":  "Addin present in Excel.COMAddIns: False",
         "Passed":  true,
-        "ElapsedMs":  4587.9
+        "ElapsedMs":  3367.37
     },
     {
         "ScenarioId":  "S08",
@@ -61,7 +61,7 @@
         "Expected":  "Manifest points to custom directory and LoadBehavior=3",
         "Actual":  "Manifest: file:///C:/Users/Yogeswari/AppData/Local/Programs/ExcelProductivitySuite-CustomDir/ExcelProductivitySuite.AddIn.vsto|vstolocal",
         "Passed":  true,
-        "ElapsedMs":  1179.68
+        "ElapsedMs":  1467.59
     },
     {
         "ScenarioId":  "S09",
@@ -69,7 +69,7 @@
         "Expected":  "Corrupt LoadBehavior=2 successfully reset to 3 (Load on Startup)",
         "Actual":  "Before: LoadBehavior=2 | After Reinstall: LoadBehavior=3",
         "Passed":  true,
-        "ElapsedMs":  1101.43
+        "ElapsedMs":  1348.26
     },
     {
         "ScenarioId":  "S10",
@@ -77,6 +77,6 @@
         "Expected":  "Installer halts with actionable error when manifest is missing",
         "Actual":  "Caught expected error: C:\\Users\\Yogeswari\\AppData\\Local\\Programs\\ExcelProductivitySuite-ReleaseTest\\install.ps1 : Specified",
         "Passed":  true,
-        "ElapsedMs":  1210.64
+        "ElapsedMs":  1295.92
     }
 ]

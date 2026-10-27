@@ -16,15 +16,24 @@ namespace ExcelProductivitySuite.AddIn
 
         protected override Office.IRibbonExtensibility CreateRibbonExtensibilityObject()
         {
-            _registry = new CommandRegistry();
-            _context = new ExcelContextAdapter(this.Application);
-            _ribbon = new ExcelProductivityRibbon(_registry, _context);
-            return _ribbon;
+            try
+            {
+                _registry = new CommandRegistry();
+                _context = new ExcelContextAdapter(() => this.Application);
+                _ribbon = new ExcelProductivityRibbon(_registry, _context);
+                ToolRegistrar.RegisterAllTools(_registry);
+                return _ribbon;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceError($"[ExcelProductivitySuite] CreateRibbonExtensibilityObject failed: {ex}");
+                throw;
+            }
         }
 
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
         {
-            if (_registry != null)
+            if (_registry != null && _registry.GetAllCommands().Count == 0)
             {
                 ToolRegistrar.RegisterAllTools(_registry);
             }
