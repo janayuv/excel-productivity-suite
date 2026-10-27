@@ -57,7 +57,8 @@ $artifactsToCopy = @(
     "ExcelProductivitySuite.Core.dll",
     "ExcelProductivitySuite.Engine.dll",
     "ExcelProductivitySuite.Infrastructure.dll",
-    "ExcelProductivitySuite.UI.dll"
+    "ExcelProductivitySuite.UI.dll",
+    "Microsoft.Office.Tools.Common.v4.0.Utilities.dll"
 )
 
 foreach ($file in $artifactsToCopy) {

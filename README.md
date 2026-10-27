@@ -1,7 +1,7 @@
 # Excel Productivity Suite
 
 [![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)]()
-[![Tests](https://img.shields.io/badge/Tests-78%20Passed%20(60%20Unit%20%2B%2018%20Real%20Excel)-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-88%20Passed%20(60%20Unit%20%2B%2018%20Real%20Excel%20%2B%2010%20Lifecycle)-brightgreen.svg)]()
 [![Target](https://img.shields.io/badge/Excel-2016%20%7C%202019%20%7C%202021%20%7C%20365-blue.svg)]()
 [![Architecture](https://img.shields.io/badge/Platform-Windows%20x64%20%7C%20x86-blue.svg)]()
 [![Framework](https://img.shields.io/badge/.NET-4.8%20%2B%20WPF-purple.svg)]()
@@ -87,6 +87,12 @@ dotnet test tests/ExcelProductivitySuite.UnitTests/ExcelProductivitySuite.UnitTe
 powershell -ExecutionPolicy Bypass -File tests/Run-ExcelIntegrationTests.ps1
 ```
 *Executes out-of-process against active Microsoft Excel 2016+: **18 passed, 0 failed, 100%** (validating real range read/writes, formulas-to-values, ListObjects, protection, multi-area checks, and 100K end-to-end performance).*
+
+### Run Release Installation Lifecycle Tests (10 Scenarios)
+```powershell
+powershell -ExecutionPolicy Bypass -File tests/Test-ReleaseInstallationLifecycle.ps1
+```
+*Validates standalone extraction from ZIP, installation outside repository, first Excel launch, Kutools coexistence, clean uninstall, reinstallation, and error recovery: **10 passed, 0 failed, 100%**.*
 
 ### Generate Release Distribution Package
 ```powershell

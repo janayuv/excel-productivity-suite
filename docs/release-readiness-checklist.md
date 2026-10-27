@@ -1,7 +1,7 @@
 # Excel Productivity Suite — Release Readiness Checklist
 
-**Document Version:** 4.0.0  
-**Target Build:** 4.0.0-GA  
+**Document Version:** 5.0.0  
+**Target Build:** 4.0.0-GA (Validated Release Bundle)  
 **Verification Date:** 2026-10-27  
 **Host Application Target:** Microsoft Excel 2016+ (64-bit / 32-bit Windows Desktop)  
 **Host OS:** Windows 11 Enterprise (64-bit)  
@@ -39,9 +39,10 @@
 | **Compare Workbooks** | Structural sheet mismatches, cell discrepancies, report matrix | 2 tests | **PASSED** |
 | **Performance Benchmarks** | 100,000 cells text extraction, blanks fill, duplicate find, compare, merge, split, filter | 4 tests | **PASSED (< 500 ms)** |
 | **Reliability & Leak Tests** | 1,000 iterations leak test, 100 iterations duplicate idempotency, boundary guards | 5 tests | **PASSED (0.00 MB delta)** |
-| **Subtotal Unit Tests** | **In-Memory Algorithmic & Regression Suite** | **60 tests** | **100% PASSING (786 ms)** |
+| **Subtotal Unit Tests** | **In-Memory Algorithmic & Regression Suite** | **60 tests** | **100% PASSING (823 ms)** |
 | **Real Excel Integration** | **Active Excel COM Automation Scenarios (T01 - T18)** | **18 tests** | **100% PASSING (1.8 s)** |
-| **Total Test Suite** | **Comprehensive Automated Verification** | **78 tests** | **100% PASSING** |
+| **Release Lifecycle** | **Extraction, Standalone Install, Diagnostics, Uninstall, Custom Dir, Error Recovery (S01 - S10)** | **10 tests** | **100% PASSING (18.1 s)** |
+| **Total Test Suite** | **Comprehensive Automated Verification** | **88 tests** | **100% PASSING** |
 
 ---
 
@@ -71,7 +72,7 @@
 | **STA Threading** | All UI interactions dispatched on host STA thread; no COM objects passed to background threads | **VERIFIED** |
 | **Process Cleanup** | `Marshal.FinalReleaseComObject` and GC guarantee zero orphaned Excel processes | **VERIFIED** |
 | **Memory Batching** | 2-hop COM boundary rule (`range.Value2` read once, written once) | **VERIFIED** |
-| **LocalServer32 Immunity** | Auto-healing registry configuration immunizes against unquoted `C:\Program` conflicts (`COM-03`) | **VERIFIED** |
+| **LocalServer32 Immunity** | Auto-healing registry configuration immunizes against unquoted `C:\Program` conflicts (`COM-03`) with ownership tracking | **VERIFIED** |
 
 ---
 
@@ -95,20 +96,23 @@
 | :--- | :--- | :--- |
 | `installer/package.ps1` | Creates release distribution archive and SHA256 checksums | **VERIFIED** |
 | `installer/install.ps1` | Registers VSTO Addin in `HKCU:\Software\Microsoft\Office\Excel\Addins` with portable target support | **VERIFIED** |
-| `installer/uninstall.ps1` | Removes registry keys and clean unregistration | **VERIFIED** |
+| `installer/uninstall.ps1` | Removes registry keys and cleans up owned `LocalServer32` override | **VERIFIED** |
 | `installer/diagnostics.ps1` | Validates .NET 4.8, VSTO runtime, Excel path, LoadBehavior (3), manifest, and LocalServer32 quotes | **PASSED (Health Check OK)** |
+| `tests/Test-ReleaseInstallationLifecycle.ps1` | Validates standalone extraction, fresh install, Excel load, uninstall, re-install, recovery | **PASSED (10/10 Scenarios)** |
 | **Kutools Coexistence** | Verifies `C:\Program Files (x86)\Kutools for Excel` remains intact and unaffected | **VERIFIED (Coexistence Confirmed)** |
 
 ---
 
 ## 7. Sign-Off Summary & Release Gate Verdict
 
-The **Excel Productivity Suite Phase 4** satisfies all production-readiness criteria, data integrity safeguards, architectural constraints, real-host Excel integration tests, and performance benchmarks.
+The **Excel Productivity Suite Phase 5** satisfies all production-readiness criteria, data integrity safeguards, architectural constraints, real-host Excel integration tests, standalone packaging validation, and installation lifecycle verifications.
 
-- **Automated Tests:** **78 / 78 Passing (100%)** — 60 managed engine unit & reliability tests + 18 real Excel COM integration tests.
-- **Performance:** 100,000 cells end-to-end processing completed in **1,283 ms** (503 ms managed transform).
-- **Leak Verification:** 1,000 iterations text extraction completed with **0.00 MB memory delta**; zero orphaned Excel processes.
-- **Distribution:** Standalone release archive generated at `dist/ExcelProductivitySuite-v4.0.0-win-x64.zip` with verified SHA256 checksums.
+- **Automated Tests:** **88 / 88 Passing (100%)** — 60 managed engine unit & reliability tests + 18 real Excel COM integration tests + 10 release installation lifecycle tests.
+- **Performance:** 100,000 cells end-to-end processing completed in **1,169 ms** (470 ms managed transform).
+- **Leak Verification:** 1,000 iterations text extraction completed with **0.00 MB memory delta**; zero orphaned Excel processes (`EXCEL.EXE` cleanly exits).
+- **Standalone Distribution:** Validated archive at `dist/ExcelProductivitySuite-v4.0.0-win-x64.zip` (121,717 bytes) with verified SHA256 checksums in `dist/SHA256SUMS.txt`.
+- **Repository Independence:** Extracted package installs, launches in Excel, and uninstalls cleanly outside the source repository.
 - **Coexistence:** Clean side-by-side execution with reference Kutools at `C:\Program Files (x86)\Kutools for Excel`.
+- **Code Signing:** Manifests signed with internal test certificate; commercial enterprise signing steps and signtool commands documented.
 
-**Release Gate Verdict:** **READY FOR RELEASE**
+**Release Gate Verdict:** **READY FOR COMMERCIAL RELEASE**

@@ -252,3 +252,46 @@ The automated packaging script (`installer/package.ps1`) builds a clean Release 
 # Generate release distribution archive
 powershell -ExecutionPolicy Bypass -File installer/package.ps1
 ```
+
+---
+
+## 7. Phase 5 Release Package Validation & Code Signing Guide
+
+### 7.1 Automated Installation Lifecycle Test Suite (`Test-ReleaseInstallationLifecycle.ps1`)
+To ensure that production distributions run completely free of the development repository, `tests/Test-ReleaseInstallationLifecycle.ps1` runs 10 end-to-end installation scenarios:
+1. **Extraction:** Extracts `ExcelProductivitySuite-v4.0.0-win-x64.zip` into an external location outside `d:\Kutools-New` (`%LOCALAPPDATA%\Programs\ExcelProductivitySuite-ReleaseTest`).
+2. **Fresh Installation:** Executes `install.ps1` and validates that the registered manifest URL points directly to the external directory with `|vstolocal` and `LoadBehavior = 3`.
+3. **Diagnostics:** Runs `diagnostics.ps1` from the external directory and asserts healthy registration.
+4. **Excel Host Load:** Launches real Microsoft Excel via COM and confirms `ExcelProductivitySuite` is enumerated in `Application.COMAddIns`.
+5. **Kutools Coexistence:** Confirms all 38 files in `C:\Program Files (x86)\Kutools for Excel` remain undisturbed.
+6. **Clean Uninstall:** Runs `uninstall.ps1` and validates complete removal of HKCU registration keys.
+7. **Excel Post-Uninstall Launch:** Confirms Excel starts cleanly and no longer loads the suite.
+8. **Custom Target Directory:** Tests `-TargetDir` parameter to install into an arbitrary target path.
+9. **Corrupt Registration Recovery:** Simulates crash disablement (`LoadBehavior = 2`) and verifies the installer auto-heals it to `3`.
+10. **Missing Manifest Guard:** Asserts that providing a missing or invalid `-TargetDir` produces a clean, actionable error rather than a corrupt registry entry.
+
+```powershell
+# Run release package installation lifecycle tests
+powershell -ExecutionPolicy Bypass -File tests/Test-ReleaseInstallationLifecycle.ps1
+```
+
+### 7.2 Enterprise Code Signing Procedure
+The release package manifests are signed with an internal developer test certificate (`Subject: CN=ExcelProductivitySuite`, `Thumbprint: 74F1C194A7C449209F1795774588A5D07C4375D6`). For production enterprise rollout where Group Policy requires trusted Authenticode signatures:
+
+1. **Obtain Authenticode Certificate:** Obtain an EV or OV Code Signing certificate from a recognized commercial CA (e.g. DigiCert, Sectigo, GlobalSign) or internal Enterprise Root PKI.
+2. **Sign Assemblies:**
+   ```powershell
+   & "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\signtool.exe" sign /fd SHA256 /a /tr http://timestamp.digicert.com /td SHA256 /sha1 <CertThumbprint> ExcelProductivitySuite.*.dll
+   ```
+3. **Sign Application Manifest:**
+   ```powershell
+   & "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools\mage.exe" -Sign ExcelProductivitySuite.AddIn.dll.manifest -CertHash <CertThumbprint> -TimestampUrl http://timestamp.digicert.com
+   ```
+4. **Update and Sign Deployment Manifest:**
+   ```powershell
+   & "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools\mage.exe" -Update ExcelProductivitySuite.AddIn.vsto -AppManifest ExcelProductivitySuite.AddIn.dll.manifest -CertHash <CertThumbprint> -TimestampUrl http://timestamp.digicert.com
+   ```
+5. **Re-generate Package & Checksums:**
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File installer/package.ps1
+   ```

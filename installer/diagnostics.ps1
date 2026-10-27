@@ -24,14 +24,13 @@ $kutoolsPresent = Test-Path $kutoolsDir
 
 # 3. Windows COM LocalServer32 Quotation Safeguard Check
 $clsidKey = 'HKCU:\Software\Classes\CLSID\{00024500-0000-0000-C000-000000000046}\LocalServer32'
+$hklmKey = 'HKLM:\SOFTWARE\Classes\CLSID\{00024500-0000-0000-C000-000000000046}\LocalServer32'
 $clsidValue = (Get-ItemProperty -Path $clsidKey -ErrorAction SilentlyContinue).'(default)'
-$localServerQuoted = ($clsidValue -ne $null -and $clsidValue.StartsWith('"'))
-if (-not $localServerQuoted) {
-    # Auto-heal quoted path
-    if (-not (Test-Path $clsidKey)) { New-Item -Path $clsidKey -Force | Out-Null }
-    Set-ItemProperty -Path $clsidKey -Name '(default)' -Value '"C:\Program Files\Microsoft Office\Root\Office16\EXCEL.EXE" /automation'
-    $localServerQuoted = $true
-}
+$hklmValue = (Get-ItemProperty -Path $hklmKey -ErrorAction SilentlyContinue).'(default)'
+$effectiveValue = if ($clsidValue) { $clsidValue } else { $hklmValue }
+$localServerQuoted = ($effectiveValue -ne $null -and $effectiveValue.Trim().StartsWith('"'))
+$cProgramExists = Test-Path "C:\Program"
+$overrideOwned = ((Get-ItemProperty -Path $clsidKey -ErrorAction SilentlyContinue).ExcelProductivitySuiteOwned -eq 1)
 
 $report = [PSCustomObject]@{
     OS = (Get-CimInstance Win32_OperatingSystem).Caption
@@ -39,6 +38,8 @@ $report = [PSCustomObject]@{
     VSTORuntime = (Get-ItemProperty "HKLM:\SOFTWARE\WOW6432Node\Microsoft\VSTO Runtime Setup\v4R" -ErrorAction SilentlyContinue).Version
     ExcelAppPath = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\excel.exe" -ErrorAction SilentlyContinue).'(default)'
     LocalServer32Quoted = $localServerQuoted
+    LocalServer32Owned = $overrideOwned
+    CProgramConflictRisk = ($cProgramExists -and -not $localServerQuoted)
     AddInRegistered = Test-Path "HKCU:\Software\Microsoft\Office\Excel\Addins\ExcelProductivitySuite"
     AddInLoadBehavior = (Get-ItemProperty "HKCU:\Software\Microsoft\Office\Excel\Addins\ExcelProductivitySuite" -ErrorAction SilentlyContinue).LoadBehavior
     AddInManifest = $manifestPath

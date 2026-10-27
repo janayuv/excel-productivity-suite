@@ -1,0 +1,82 @@
+[
+    {
+        "ScenarioId":  "S01",
+        "Title":  "Extract Release ZIP to External Directory",
+        "Expected":  "All files extracted cleanly outside repository",
+        "Actual":  "Extracted 13 files to C:\\Users\\Yogeswari\\AppData\\Local\\Programs\\ExcelProductivitySuite-ReleaseTest",
+        "Passed":  true,
+        "ElapsedMs":  109.33
+    },
+    {
+        "ScenarioId":  "S02",
+        "Title":  "Fresh Installation from External Directory",
+        "Expected":  "Manifest points to external location without dev path, LoadBehavior=3",
+        "Actual":  "Manifest: file:///C:/Users/Yogeswari/AppData/Local/Programs/ExcelProductivitySuite-ReleaseTest/ExcelProductivitySuite.AddIn.vsto|vstolocal | LoadBehavior: 3",
+        "Passed":  true,
+        "ElapsedMs":  1161.29
+    },
+    {
+        "ScenarioId":  "S03",
+        "Title":  "External Diagnostic Health Check",
+        "Expected":  "HEALTH CHECK PASSED and COEXISTENCE CONFIRMED",
+        "Actual":  "Health check \u0026 coexistence confirmed from external install",
+        "Passed":  true,
+        "ElapsedMs":  1377.42
+    },
+    {
+        "ScenarioId":  "S04",
+        "Title":  "First Excel Startup \u0026 COM AddIn Registration",
+        "Expected":  "Excel recognizes ExcelProductivitySuite COM add-in",
+        "Actual":  "Found Addin in Excel.COMAddIns: True",
+        "Passed":  true,
+        "ElapsedMs":  5344.75
+    },
+    {
+        "ScenarioId":  "S05",
+        "Title":  "Reference Kutools Coexistence Integrity",
+        "Expected":  "Kutools directory and binaries remain untouched",
+        "Actual":  "Kutools directory exists with 38 items",
+        "Passed":  true,
+        "ElapsedMs":  2.44
+    },
+    {
+        "ScenarioId":  "S06",
+        "Title":  "Clean Uninstallation from External Directory",
+        "Expected":  "HKCU Addin key completely removed",
+        "Actual":  "Registry key exists after uninstall: False",
+        "Passed":  true,
+        "ElapsedMs":  1099.08
+    },
+    {
+        "ScenarioId":  "S07",
+        "Title":  "Excel Startup Verification After Uninstall",
+        "Expected":  "Addin is no longer loaded by Excel",
+        "Actual":  "Addin present in Excel.COMAddIns: False",
+        "Passed":  true,
+        "ElapsedMs":  4587.9
+    },
+    {
+        "ScenarioId":  "S08",
+        "Title":  "Installation into Custom Target Directory (-TargetDir)",
+        "Expected":  "Manifest points to custom directory and LoadBehavior=3",
+        "Actual":  "Manifest: file:///C:/Users/Yogeswari/AppData/Local/Programs/ExcelProductivitySuite-CustomDir/ExcelProductivitySuite.AddIn.vsto|vstolocal",
+        "Passed":  true,
+        "ElapsedMs":  1179.68
+    },
+    {
+        "ScenarioId":  "S09",
+        "Title":  "Recovery from Disabled/Corrupt Registration",
+        "Expected":  "Corrupt LoadBehavior=2 successfully reset to 3 (Load on Startup)",
+        "Actual":  "Before: LoadBehavior=2 | After Reinstall: LoadBehavior=3",
+        "Passed":  true,
+        "ElapsedMs":  1101.43
+    },
+    {
+        "ScenarioId":  "S10",
+        "Title":  "Missing Manifest Protective Error Guard",
+        "Expected":  "Installer halts with actionable error when manifest is missing",
+        "Actual":  "Caught expected error: C:\\Users\\Yogeswari\\AppData\\Local\\Programs\\ExcelProductivitySuite-ReleaseTest\\install.ps1 : Specified",
+        "Passed":  true,
+        "ElapsedMs":  1210.64
+    }
+]

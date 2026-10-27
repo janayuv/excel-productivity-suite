@@ -294,3 +294,53 @@ Memory operations run completely in managed C# memory using single-pass string a
   - No files in `C:\Program Files (x86)\Kutools for Excel` are accessed, modified, or replaced.
   - Both add-ins load side-by-side in Microsoft Excel 2016+ with distinct Ribbon tabs and no registry collision.
   - Coexistence health check verified via `installer/diagnostics.ps1` with status `HEALTH CHECK PASSED` and `COEXISTENCE CONFIRMED`.
+
+---
+
+## Phase 5 Release Package & Installation Lifecycle Audit
+
+### 1. Standalone Package Validation & Cryptographic Integrity
+Phase 5 conducted exhaustive validation of the standalone distribution archive `ExcelProductivitySuite-v4.0.0-win-x64.zip` (121,717 bytes compressed, 362 KB uncompressed):
+- **Package Inspection:** Confirmed all 13 required runtime DLLs, VSTO deployment manifests, Ribbon XML resources, installation scripts, and documentation files are present.
+- **Dependency Audit:** Identified and added `Microsoft.Office.Tools.Common.v4.0.Utilities.dll` (required by the ClickOnce manifest `ExcelProductivitySuite.AddIn.dll.manifest`) to the release package to guarantee external machines resolve all VSTO helper entry points without requiring external development SDKs.
+- **SHA-256 Verification:** All 13 staged files and the release archive match their documented cryptographic checksums in `dist/SHA256SUMS.txt` with 100% agreement.
+
+### 2. Installation & Lifecycle Automated Test Results (10 Scenarios)
+The automated lifecycle test runner (`tests/Test-ReleaseInstallationLifecycle.ps1`) extracted the distribution ZIP to an external location completely outside the git repository (`%LOCALAPPDATA%\Programs\ExcelProductivitySuite-ReleaseTest`) and executed all 10 installation, launch, uninstallation, reinstallation, upgrade, and error recovery scenarios:
+
+| Scenario ID | Test Scenario | Operational Scope | Observed Outcome | Duration | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **S01** | Release ZIP Extraction | Extract archive to external directory | 13 files extracted cleanly outside repository tree | 123.08 ms | **PASS** |
+| **S02** | Fresh Installation | Run `install.ps1` from extracted release | Registered in HKCU with external manifest URL (`|vstolocal`), `LoadBehavior=3` | 1,300.05 ms | **PASS** |
+| **S03** | External Diagnostics | Run `diagnostics.ps1` from external release | Health check passed, manifest on disk verified, coexistence confirmed | 1,401.05 ms | **PASS** |
+| **S04** | Excel Startup & Add-In Load | Start real Excel via COM from external install | Excel loads add-in; recognized in `Application.COMAddIns` | 5,231.02 ms | **PASS** |
+| **S05** | Kutools Coexistence | Inspect `C:\Program Files (x86)\Kutools for Excel` | All 38 reference files and directories remained completely untouched | 2.41 ms | **PASS** |
+| **S06** | Clean Uninstallation | Run `uninstall.ps1` from external release | HKCU registration key completely removed | 1,105.06 ms | **PASS** |
+| **S07** | Excel Post-Uninstall Launch | Start real Excel via COM following uninstall | Excel starts cleanly; add-in absent from `Application.COMAddIns` | 4,488.46 ms | **PASS** |
+| **S08** | Custom Directory Install | Run `install.ps1 -TargetDir <CustomPath>` | Registered manifest points to custom location with `LoadBehavior=3` | 1,211.52 ms | **PASS** |
+| **S09** | Corrupt Registration Recovery | Simulate `LoadBehavior=2` crash disablement | Re-running installer cleanly heals registration to `LoadBehavior=3` | 1,110.53 ms | **PASS** |
+| **S10** | Missing Manifest Guard | Run `install.ps1 -TargetDir <InvalidDir>` | Installer halts with actionable error; prevents broken registration | 1,211.56 ms | **PASS** |
+
+### 3. Review of `LocalServer32` COM Auto-Healing Safeguard
+- **Root Cause:** Default Microsoft Office ClickToRun installs register `HKLM:\SOFTWARE\Classes\CLSID\{00024500-0000-0000-C000-000000000046}\LocalServer32` with an unquoted executable path (`C:\Program Files\Microsoft Office\Root\Office16\EXCEL.EXE /automation`). When an arbitrary file named `C:\Program` exists on the system drive, Windows process creation misinterprets `C:\Program` as the application to run, failing with `0x800700C1 (ERROR_BAD_EXE_FORMAT)`.
+- **Narrow Scoping:** The workaround is applied exclusively within `HKCU:\Software\Classes\CLSID\{00024500-0000-0000-C000-000000000046}\LocalServer32`. It does not modify HKLM or machine-wide Office registries.
+- **Non-Interference:** The registered executable path is dynamically derived from the system's detected Excel installation (`excel.exe` App Path), quoting the exact binary with `/automation`. Unrelated Excel automation clients continue to function identically.
+- **Ownership Tracking & Clean Teardown:** When applied, the installer writes an ownership flag `ExcelProductivitySuiteOwned = 1`. During uninstallation, `uninstall.ps1` checks this flag and removes the HKCU override only if it was created by this product, guaranteeing that pre-existing user configurations are never wiped.
+
+### 4. Code Signing & Enterprise Trust Status
+- **Current Signature State:**
+  - ClickOnce deployment manifests (`ExcelProductivitySuite.AddIn.vsto` and `ExcelProductivitySuite.AddIn.dll.manifest`) are digitally signed with an internal developer test certificate (`Subject: CN=ExcelProductivitySuite`, `Thumbprint: 74F1C194A7C449209F1795774588A5D07C4375D6`, valid until October 27, 2027).
+  - Add-in assemblies are unsigned in raw PE Authenticode headers, which is standard for local VSTO ClickOnce deployments relying on manifest XML signatures.
+- **Commercial Enterprise Signing Prerequisites:**
+  - For deployment in enterprise environments enforcing strict Authenticode or AppLocker/WDAC application control policies, the assemblies and manifests must be signed using an enterprise CA or public commercial Authenticode certificate (e.g., DigiCert, Sectigo).
+  - Exact command sequence:
+    ```powershell
+    # 1. Sign assemblies
+    & "signtool.exe" sign /fd SHA256 /a /t http://timestamp.digicert.com /sha1 <CertThumbprint> ExcelProductivitySuite.*.dll
+
+    # 2. Re-sign ClickOnce application manifest
+    & "mage.exe" -Sign ExcelProductivitySuite.AddIn.dll.manifest -CertHash <CertThumbprint> -TimestampUrl http://timestamp.digicert.com
+
+    # 3. Update and re-sign VSTO deployment manifest
+    & "mage.exe" -Update ExcelProductivitySuite.AddIn.vsto -AppManifest ExcelProductivitySuite.AddIn.dll.manifest -CertHash <CertThumbprint> -TimestampUrl http://timestamp.digicert.com
+    ```

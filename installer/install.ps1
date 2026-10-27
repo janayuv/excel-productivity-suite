@@ -23,7 +23,11 @@ Write-Host "==========================================================" -Foregro
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 
 # Determine location of the VSTO deployment manifest
-if ($TargetDir -ne "" -and (Test-Path $TargetDir)) {
+if ($TargetDir -ne "") {
+    if (-not (Test-Path $TargetDir)) {
+        Write-Error "Specified -TargetDir does not exist on disk: $TargetDir"
+        exit 1
+    }
     $vstoPath = Join-Path $TargetDir "ExcelProductivitySuite.AddIn.vsto"
 } elseif (Test-Path (Join-Path $scriptDir "ExcelProductivitySuite.AddIn.vsto")) {
     # Installed from a release distribution directory
@@ -49,8 +53,19 @@ if (-not $excelReg) {
 
 # 2. Quotation Safeguard: Ensure Windows COM LocalServer32 is quoted to avoid C:\Program execution conflict
 $clsidKey = 'HKCU:\Software\Classes\CLSID\{00024500-0000-0000-C000-000000000046}\LocalServer32'
-if (-not (Test-Path $clsidKey)) { New-Item -Path $clsidKey -Force | Out-Null }
-Set-ItemProperty -Path $clsidKey -Name '(default)' -Value '"C:\Program Files\Microsoft Office\Root\Office16\EXCEL.EXE" /automation'
+$excelExe = if ($excelReg -and $excelReg.'(default)') { $excelReg.'(default)' } else { "C:\Program Files\Microsoft Office\Root\Office16\EXCEL.EXE" }
+$quotedServer = '"' + $excelExe.Trim('"') + '" /automation'
+
+# Apply narrowly scoped user-level override if not already quoted
+$currentVal = (Get-ItemProperty -Path $clsidKey -ErrorAction SilentlyContinue).'(default)'
+if (-not $currentVal -or -not $currentVal.StartsWith('"')) {
+    if (-not (Test-Path $clsidKey)) { New-Item -Path $clsidKey -Force | Out-Null }
+    Set-ItemProperty -Path $clsidKey -Name '(default)' -Value $quotedServer
+    Set-ItemProperty -Path $clsidKey -Name 'ExcelProductivitySuiteOwned' -Value 1 -Type DWord
+    Write-Host "COM Safeguard: Configured quoted LocalServer32 override in HKCU." -ForegroundColor Cyan
+} else {
+    Write-Host "COM Safeguard: LocalServer32 already properly quoted." -ForegroundColor Gray
+}
 
 # 3. Register in HKCU
 $addInKey = "HKCU:\Software\Microsoft\Office\Excel\Addins\ExcelProductivitySuite"
