@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -11,9 +12,14 @@ namespace ExcelProductivitySuite.UI.Dialogs
 {
     public partial class ToolLauncherWindow : BaseDialogWindow
     {
+        private static readonly List<string> RecentCommandIds = new List<string>();
+        private static readonly HashSet<string> FavoriteCommandIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
         private readonly ICommandRegistry _registry;
         private readonly IExcelContext _context;
         private CommandCategory? _selectedCategory = null;
+        private bool _filterRecent = false;
+        private bool _filterFavorites = false;
 
         public SuiteCommand? SelectedCommand { get; private set; }
 
@@ -30,6 +36,15 @@ namespace ExcelProductivitySuite.UI.Dialogs
         {
             string query = SearchTextBox.Text;
             var commands = _registry.SearchCommands(query, _selectedCategory);
+
+            if (_filterRecent)
+            {
+                commands = commands.Where(c => RecentCommandIds.Contains(c.Id)).ToList();
+            }
+            else if (_filterFavorites)
+            {
+                commands = commands.Where(c => c.IsFavorite || FavoriteCommandIds.Contains(c.Id)).ToList();
+            }
 
             CommandsListBox.ItemsSource = commands;
             StatusCountText.Text = $"{commands.Count} tools available";
@@ -57,7 +72,13 @@ namespace ExcelProductivitySuite.UI.Dialogs
         {
             if (CatAll == null) return;
 
-            if (CatAll.IsChecked == true) _selectedCategory = null;
+            _filterRecent = false;
+            _filterFavorites = false;
+            _selectedCategory = null;
+
+            if (CatAll.IsChecked == true) { }
+            else if (CatRecent.IsChecked == true) _filterRecent = true;
+            else if (CatFavorites.IsChecked == true) _filterFavorites = true;
             else if (CatText.IsChecked == true) _selectedCategory = CommandCategory.Text;
             else if (CatRange.IsChecked == true) _selectedCategory = CommandCategory.RangeAndCells;
             else if (CatCleaning.IsChecked == true) _selectedCategory = CommandCategory.DataCleaning;
@@ -106,6 +127,10 @@ namespace ExcelProductivitySuite.UI.Dialogs
         {
             if (CommandsListBox.SelectedItem is SuiteCommand cmd)
             {
+                RecentCommandIds.Remove(cmd.Id);
+                RecentCommandIds.Insert(0, cmd.Id);
+                if (RecentCommandIds.Count > 10) RecentCommandIds.RemoveAt(10);
+
                 SelectedCommand = cmd;
                 DialogResult = true;
                 Close();

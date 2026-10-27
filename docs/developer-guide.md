@@ -19,15 +19,15 @@ ExcelProductivitySuite.sln
 │   │
 │   ├── ExcelProductivitySuite.Engine/
 │   │   ├── Text/         (TextExtractor, TextSplitter, CharacterRemover, CaseConverter, WhitespaceNormalizer, AffixAppender)
-│   │   ├── Ranges/       (RangeFill)
-│   │   ├── DataCleaning/ (DuplicateFinder)
-│   │   └── Worksheets/   (WorksheetNameValidator)
+│   │   ├── Ranges/       (RangeFill, RangeMerger)
+│   │   ├── DataCleaning/ (DuplicateFinder, RangeRecordComparer, AdvancedFilter)
+│   │   └── Worksheets/   (WorksheetNameValidator, DataSplitter, WorkbookComparer)
 │   │
 │   ├── ExcelProductivitySuite.UI/
 │   │   ├── Themes/       (Brushes.xaml, Typography.xaml, Controls.xaml)
 │   │   ├── Controls/     (BaseDialogWindow, LivePreviewTable)
 │   │   ├── Models/       (PreviewItem)
-│   │   └── Dialogs/      (ToolLauncherWindow, ExtractTextDialog, SplitTextDialog, RemoveCharactersDialog, etc.)
+│   │   └── Dialogs/      (ToolLauncherWindow, ExtractTextDialog, SplitTextDialog, FindMissingRecordsDialog, MergeRangesDialog, SplitDataToSheetsDialog, AdvancedFilterDialog, CompareWorkbooksDialog, etc.)
 │   │
 │   ├── ExcelProductivitySuite.Infrastructure/
 │   │   └── (Settings, Logging, JSON Serialization)
@@ -42,6 +42,12 @@ ExcelProductivitySuite.sln
     └── ExcelProductivitySuite.UnitTests/
         ├── TextOperationsTests.cs
         ├── RangeAndSheetTests.cs
+        ├── RecordComparerTests.cs
+        ├── RangeMergerTests.cs
+        ├── DataSplitterTests.cs
+        ├── AdvancedFilterTests.cs
+        ├── WorkbookComparerTests.cs
+        ├── PerformanceBenchmarkTests.cs
         └── EndToEndIntegrationTests.cs
 ```
 
@@ -158,3 +164,30 @@ The tool will automatically appear in the **Quick Tool Launcher** (`Ctrl+Shift+P
    ```
 3. **STA Thread Rule:** WPF dialogs and COM operations must run on the primary Excel STA UI thread.
 4. **Dialog Ownership:** Every modal window must call `ShowModal(IExcelContext context)` to set `WindowInteropHelper.Owner = context.MainWindowHandle`.
+
+---
+
+## 5. Phase 3 Architecture: Data Engines & Abstraction Extensions
+
+### 5.1 Extended `IExcelContext` Abstractions
+Phase 3 extended `IExcelContext` to support cross-workbook querying and safe worksheet generation:
+```csharp
+public interface IExcelContext
+{
+    // ... Phase 1 & 2 properties ...
+
+    // Phase 3 Extensions
+    bool CreateWorksheetWithData(string sheetName, object[,] data);
+    IReadOnlyList<string> GetOpenWorkbookNames();
+    IReadOnlyList<string> GetWorkbookSheetNames(string workbookName);
+    object[,] GetWorkbookRangeValues(string workbookName, string sheetName, string rangeAddress);
+}
+```
+
+### 5.2 Pure Computational Engines
+All Phase 3 data tools are decoupled from Office COM Interop and operate purely on managed 2D matrices:
+- `RangeRecordComparer`: Key column indexing, multi-column record composite keys, `SourceOnly`, `TargetOnly`, `Matching`, and `Duplicate` partition matrices.
+- `RangeMerger`: Matrix concatenation in `AppendRows` (with optional header deduplication and column alignment) or `SideBySide` dimensions.
+- `DataSplitter`: Categorical partitioning with string sanitization (`\ / ? * : [ ]`), Excel 31-character truncation, collision deduplication (`Dept_1`, `Dept_2`), and header repetition.
+- `AdvancedFilter`: Multi-rule boolean evaluation (`RuleConnector.And` / `RuleConnector.Or`), supporting `Equals`, `Contains`, `StartsWith`, `EndsWith`, `GreaterThan`, `LessThan`, `IsEmpty`, `IsNotEmpty`, and regex matching.
+- `WorkbookComparer`: Cross-workbook structural and cell-level difference engine that leaves source workbooks 100% read-only and outputs a summary matrix.

@@ -21,7 +21,7 @@
     <ProjectTypeGuids>{BAA0C2D2-18E2-41B9-852F-F413020CAA33};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{fb1eb67a-58a2-474a-8c91-6dbd0b054aec}</ProjectGuid>
+    <ProjectGuid>{FB1EB67A-58A2-474A-8C91-6DBD0B054AEC}</ProjectGuid>
     <OutputType>Library</OutputType>
     <NoStandardLibraries>false</NoStandardLibraries>
     <RootNamespace>ExcelProductivitySuite.AddIn</RootNamespace>
@@ -242,46 +242,9 @@
   <ProjectExtensions>
     <VisualStudio>
       <FlavorProperties GUID="{BAA0C2D2-18E2-41B9-852F-F413020CAA33}">
-        <!--
-          The "ProjectProperties" element describes VSTO properties that apply to the project as a whole.
-
-          ApplicationType
-            A string identifier used for dynamic templates. Not used for add-ins.
-          DebugInfoCommandLine
-            A command line to pass to the executable when debugging is started.
-          DebugInfoExeName
-            The path to the executable to start when debugging is started.
-          DebugInfoWorkingDir
-            The working directory of the application to start when debugging is started.
-          HostName
-            The name of the host as a string.
-          HostPackage
-            The GUID of the project client. Do not modify.
-          IconImageList
-            A path to a bitmap or .dll resource that defines the list of icons for the host.
-          OfficeVersion
-            The version of Microsoft Office.
-          TemplatesPath
-            A path to new item templates for host objects. Not used for add-ins.
-          VstxVersion
-            The version of VSTO or VSTA.
-        -->
-        <ProjectProperties HostName="Excel" HostPackage="{29A7B9D7-A7F1-4328-8EF0-6B2D1A56B2C1}" ProjectCreationSetting="1" OfficeVersion="15.0" VstxVersion="4.0" ApplicationType="Excel" Language="cs" TemplatesPath="" AddItemTemplatesGuid="{51063C3A-E220-4D12-8922-BDA915ACD783}" DebugInfoExeName="#Software\Microsoft\Office\15.0\Excel\InstallRoot\Path#excel.exe" DebugInfoCommandLine="/x" DebugInfoWorkingDir="" IconImageList="" />
-        <!--
-          This section defines properties that apply to host items.
-
-          GeneratedNamespace
-            Namespace of code files contained in the folder node. Used when blueprints
-            are converted to code files.
-          Host
-            Properties of the folder node in the project.
-          IconIndex
-            Zero-based index in the IconImageList of the icon for this node.
-          Name
-            The display name of the folder node.
-        -->
+        <ProjectProperties HostName="Excel" HostPackage="{29A7B9D7-A7F1-4328-8EF0-6B2D1A56B2C1}" OfficeVersion="15.0" VstxVersion="4.0" ApplicationType="Excel" Language="cs" TemplatesPath="" DebugInfoExeName="#Software\Microsoft\Office\16.0\Excel\InstallRoot\Path#excel.exe" DebugInfoCommandLine="/x" AddItemTemplatesGuid="{51063C3A-E220-4D12-8922-BDA915ACD783}" />
         <Host Name="Excel" GeneratedCodeNamespace="ExcelProductivitySuite.AddIn" IconIndex="0">
-          <HostItem Name="ThisAddIn" Code="ThisAddIn.cs" CanonicalName="ThisAddIn" Blueprint="ThisAddIn.Designer.xml" GeneratedCode="ThisAddIn.Designer.cs" IconIndex="1" />
+          <HostItem Name="ThisAddIn" Code="ThisAddIn.cs" CanonicalName="AddIn" CanActivate="false" IconIndex="1" Blueprint="ThisAddIn.Designer.xml" GeneratedCode="ThisAddIn.Designer.cs" />
         </Host>
       </FlavorProperties>
     </VisualStudio>

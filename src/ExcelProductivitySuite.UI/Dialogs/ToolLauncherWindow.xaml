@@ -60,11 +60,13 @@
 
         <!-- Category Filters -->
         <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,10">
-            <RadioButton x:Name="CatAll" Content="All Tools" IsChecked="True" Checked="CategoryFilter_Checked" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,12,0" FontWeight="SemiBold" />
-            <RadioButton x:Name="CatText" Content="Text" Checked="CategoryFilter_Checked" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,12,0" />
-            <RadioButton x:Name="CatRange" Content="Range &amp; Cells" Checked="CategoryFilter_Checked" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,12,0" />
-            <RadioButton x:Name="CatCleaning" Content="Data Cleaning" Checked="CategoryFilter_Checked" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,12,0" />
-            <RadioButton x:Name="CatSheets" Content="Worksheets" Checked="CategoryFilter_Checked" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,12,0" />
+            <RadioButton x:Name="CatAll" Content="All Tools" IsChecked="True" Checked="CategoryFilter_Checked" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,10,0" FontWeight="SemiBold" />
+            <RadioButton x:Name="CatRecent" Content="Recent" Checked="CategoryFilter_Checked" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,10,0" />
+            <RadioButton x:Name="CatFavorites" Content="★ Favorites" Checked="CategoryFilter_Checked" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,10,0" />
+            <RadioButton x:Name="CatText" Content="Text" Checked="CategoryFilter_Checked" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,10,0" />
+            <RadioButton x:Name="CatRange" Content="Range &amp; Cells" Checked="CategoryFilter_Checked" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,10,0" />
+            <RadioButton x:Name="CatCleaning" Content="Data Cleaning" Checked="CategoryFilter_Checked" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,10,0" />
+            <RadioButton x:Name="CatSheets" Content="Worksheets" Checked="CategoryFilter_Checked" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,10,0" />
             <RadioButton x:Name="CatFormulas" Content="Formulas" Checked="CategoryFilter_Checked" Style="{StaticResource ModernRadioButtonStyle}" />
         </StackPanel>
 

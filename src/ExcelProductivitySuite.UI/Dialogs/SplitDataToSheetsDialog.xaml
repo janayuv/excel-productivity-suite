@@ -1,0 +1,89 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.SplitDataToSheetsDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Split Data into Worksheets - Excel Productivity Suite"
+        Height="500" Width="580"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" /> <!-- Header -->
+            <RowDefinition Height="Auto" /> <!-- Column Selector -->
+            <RowDefinition Height="Auto" /> <!-- Naming & Options -->
+            <RowDefinition Height="*" />    <!-- Distinct Groups Preview Box -->
+            <RowDefinition Height="Auto" /> <!-- Footer -->
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="📂" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Split Data into Worksheets" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Distribute records across new worksheets based on unique values in a key column" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+            <TextBlock x:Name="RangeInfoText" Text="Range: $A$1:$E$100" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+        </DockPanel>
+
+        <!-- Column Selector -->
+        <GroupBox Grid.Row="1" Header="Split Criteria" Style="{StaticResource ModernGroupBoxStyle}">
+            <StackPanel>
+                <TextBlock Text="Select Column to Split By:" FontSize="12" Margin="0,0,0,4" Foreground="{StaticResource TextPrimaryBrush}" />
+                <ComboBox x:Name="ColumnSelectorComboBox" Height="30" Margin="0,0,0,8" SelectionChanged="ColumnSelectionChanged" />
+                <CheckBox x:Name="HasHeadersCheckBox" Content="First row contains column headers (repeat on each new sheet)" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" Checked="HeadersChanged" Unchecked="HeadersChanged" />
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Naming & Options -->
+        <GroupBox Grid.Row="2" Header="Worksheet Naming" Style="{StaticResource ModernGroupBoxStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                    <TextBlock Text="Optional Sheet Name Prefix:" FontSize="12" Margin="0,0,0,3" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBox x:Name="PrefixTextBox" Style="{StaticResource ModernTextBoxStyle}" TextChanged="PrefixChanged" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                    <TextBlock Text="Name Restrictions:" FontSize="12" Margin="0,0,0,3" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Automatically sanitized (max 31 chars, invalid chars replaced, unique names guaranteed)." FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" />
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+
+        <!-- Preview Box -->
+        <Border Grid.Row="3" Background="{StaticResource StatusSuccessLightBrush}" BorderBrush="{StaticResource BrandBorderBrush}" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,8,0,0">
+            <StackPanel>
+                <TextBlock Text="📊 Split Distribution Preview" FontWeight="SemiBold" Foreground="{StaticResource BrandPrimaryBrush}" FontSize="12" />
+                <TextBlock x:Name="PreviewSummaryText" Text="Select a column to preview distinct groups and new worksheets to be created." FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" TextWrapping="Wrap" />
+            </StackPanel>
+        </Border>
+
+        <!-- Footer -->
+        <DockPanel Grid.Row="4" Margin="0,12,0,0">
+            <TextBlock Text="Original source worksheet remains completely unmodified" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Cancel" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,8,0" Click="CancelButton_Click" IsCancel="True" />
+                <Button x:Name="SplitButton" Content="Split into Sheets" Style="{StaticResource PrimaryButtonStyle}" Click="SplitButton_Click" IsDefault="True" />
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

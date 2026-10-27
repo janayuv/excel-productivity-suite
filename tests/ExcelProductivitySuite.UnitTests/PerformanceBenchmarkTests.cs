@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using ExcelProductivitySuite.Engine.DataCleaning;
 using ExcelProductivitySuite.Engine.Ranges;
 using ExcelProductivitySuite.Engine.Text;
+using ExcelProductivitySuite.Engine.Worksheets;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ExcelProductivitySuite.UnitTests
@@ -149,6 +151,135 @@ namespace ExcelProductivitySuite.UnitTests
             Assert.AreEqual(100000, result.TotalCellsCompared);
             Assert.AreEqual(1000, result.TotalDifferences);
             Assert.IsTrue(sw.ElapsedMilliseconds < 1000, $"RangeComparer benchmark took {sw.ElapsedMilliseconds} ms, target is < 1000 ms");
+        }
+
+        [TestMethod]
+        public void Benchmark_RangeRecordComparer_100K_Cells_CompletesUnder1000ms()
+        {
+            int rows = 10000;
+            int cols = 10;
+            object?[,] source = new object?[rows, cols];
+            object?[,] target = new object?[rows, cols];
+
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    source[r, c] = (c == 0) ? $"ID_{r}" : $"Val_{r}_{c}";
+                    target[r, c] = (c == 0) ? (r % 2 == 0 ? $"ID_{r}" : $"ID_T_{r}") : $"TVal_{r}_{c}";
+                }
+            }
+
+            var options = new RecordCompareOptions
+            {
+                HasHeaders = true,
+                SourceKeyColumns = new[] { 0 },
+                TargetKeyColumns = new[] { 0 }
+            };
+
+            var sw = Stopwatch.StartNew();
+            var result = RangeRecordComparer.CompareRecords(source, target, options);
+            sw.Stop();
+
+            Assert.IsTrue(result.TotalSourceRows > 0);
+            Assert.IsTrue(sw.ElapsedMilliseconds < 1000, $"RecordComparer benchmark took {sw.ElapsedMilliseconds} ms, target is < 1000 ms");
+        }
+
+        [TestMethod]
+        public void Benchmark_RangeMerger_100K_Cells_CompletesUnder500ms()
+        {
+            int rows = 5000;
+            int cols = 10;
+            object?[,] r1 = new object?[rows, cols];
+            object?[,] r2 = new object?[rows, cols];
+
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    r1[r, c] = (r == 0) ? $"Col_{c}" : $"Val1_{r}_{c}";
+                    r2[r, c] = (r == 0) ? $"Col_{c}" : $"Val2_{r}_{c}";
+                }
+            }
+
+            var options = new RangeMergeOptions
+            {
+                Mode = MergeMode.AppendRows,
+                HasHeaders = true,
+                AlignByHeaderNames = true,
+                IncludeHeadersOnce = true
+            };
+
+            var sw = Stopwatch.StartNew();
+            var result = RangeMerger.Merge(r1, r2, options);
+            sw.Stop();
+
+            Assert.AreEqual(9999, result.TotalRows); // 1 header + 4999 data + 4999 data
+            Assert.IsTrue(sw.ElapsedMilliseconds < 500, $"RangeMerger benchmark took {sw.ElapsedMilliseconds} ms, target is < 500 ms");
+        }
+
+        [TestMethod]
+        public void Benchmark_DataSplitter_100K_Cells_CompletesUnder500ms()
+        {
+            int rows = 10000;
+            int cols = 10;
+            object?[,] matrix = new object?[rows, cols];
+
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    // 10 distinct departments
+                    matrix[r, c] = (c == 0) ? $"Dept_{r % 10}" : $"Val_{r}_{c}";
+                }
+            }
+
+            var options = new DataSplitOptions
+            {
+                SplitColumnIndex = 0,
+                HasHeaders = true
+            };
+
+            var sw = Stopwatch.StartNew();
+            var result = DataSplitter.Split(matrix, options);
+            sw.Stop();
+
+            Assert.AreEqual(10, result.DistinctGroupsCount);
+            Assert.IsTrue(sw.ElapsedMilliseconds < 500, $"DataSplitter benchmark took {sw.ElapsedMilliseconds} ms, target is < 500 ms");
+        }
+
+        [TestMethod]
+        public void Benchmark_AdvancedFilter_100K_Cells_CompletesUnder500ms()
+        {
+            int rows = 10000;
+            int cols = 10;
+            object?[,] matrix = new object?[rows, cols];
+
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    matrix[r, c] = (c == 0) ? $"Region_{r % 5}" : (r * 10);
+                }
+            }
+
+            var options = new AdvancedFilterOptions
+            {
+                Conjunction = FilterConjunction.And,
+                HasHeaders = true,
+                Conditions = new List<FilterCondition>
+                {
+                    new FilterCondition { ColumnIndex = 0, Operator = FilterOperator.Equals, ComparisonValue = "Region_1" },
+                    new FilterCondition { ColumnIndex = 1, Operator = FilterOperator.GreaterThan, ComparisonValue = "1000" }
+                }
+            };
+
+            var sw = Stopwatch.StartNew();
+            var result = AdvancedFilter.Execute(matrix, options);
+            sw.Stop();
+
+            Assert.IsTrue(result.MatchCount > 0);
+            Assert.IsTrue(sw.ElapsedMilliseconds < 500, $"AdvancedFilter benchmark took {sw.ElapsedMilliseconds} ms, target is < 500 ms");
         }
     }
 }

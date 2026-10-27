@@ -1,0 +1,113 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.AdvancedFilterDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Advanced Filter &amp; Select - Excel Productivity Suite"
+        Height="580" Width="680"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" /> <!-- Header -->
+            <RowDefinition Height="Auto" /> <!-- Conjunction & Options -->
+            <RowDefinition Height="Auto" /> <!-- Condition Builder -->
+            <RowDefinition Height="*" />    <!-- Matching Records Grid -->
+            <RowDefinition Height="Auto" /> <!-- Action Mode & Footer -->
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="⚡" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Advanced Filter &amp; Select" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Filter dataset with multi-condition rules (AND/OR); export or select matching rows" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+            <TextBlock x:Name="RangeInfoText" Text="Range: $A$1:$E$100" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+        </DockPanel>
+
+        <!-- Conjunction & Options -->
+        <GroupBox Grid.Row="1" Header="Filter Logic" Style="{StaticResource ModernGroupBoxStyle}">
+            <DockPanel>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Match Rules:" FontSize="12" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,12,0" VerticalAlignment="Center" />
+                    <RadioButton x:Name="ConjunctionAndRadio" Content="Match ALL conditions (AND)" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,18,0" Checked="FilterCriteriaChanged" />
+                    <RadioButton x:Name="ConjunctionOrRadio" Content="Match ANY condition (OR)" Style="{StaticResource ModernRadioButtonStyle}" Checked="FilterCriteriaChanged" />
+                </StackPanel>
+                <CheckBox x:Name="HasHeadersCheckBox" Content="Data has headers" IsChecked="True" HorizontalAlignment="Right" VerticalAlignment="Center" Style="{StaticResource ModernCheckBoxStyle}" Checked="HeadersChanged" Unchecked="HeadersChanged" />
+            </DockPanel>
+        </GroupBox>
+
+        <!-- Condition Builder -->
+        <GroupBox Grid.Row="2" Header="Primary Condition" Style="{StaticResource ModernGroupBoxStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="3*" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Margin="0,0,6,0">
+                    <TextBlock Text="Column:" FontSize="12" Margin="0,0,0,3" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <ComboBox x:Name="ColumnComboBox" Height="28" SelectionChanged="FilterCriteriaChanged" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Margin="6,0,6,0">
+                    <TextBlock Text="Operator:" FontSize="12" Margin="0,0,0,3" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <ComboBox x:Name="OperatorComboBox" Height="28" SelectionChanged="FilterCriteriaChanged" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Margin="6,0,0,0">
+                    <TextBlock Text="Comparison Value:" FontSize="12" Margin="0,0,0,3" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBox x:Name="ComparisonValueTextBox" Style="{StaticResource ModernTextBoxStyle}" TextChanged="FilterCriteriaChanged" />
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+
+        <!-- Preview Grid -->
+        <GroupBox Grid.Row="3" Header="Matching Records Preview" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,8,0,0">
+            <DataGrid x:Name="MatchingRecordsDataGrid"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      GridLinesVisibility="Horizontal"
+                      HorizontalGridLinesBrush="{StaticResource BrandBorderBrush}"
+                      BorderThickness="0"
+                      Background="White"
+                      RowHeaderWidth="0">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Row #" Binding="{Binding RowNumber}" Width="70" />
+                    <DataGridTextColumn Header="Matched Row Data" Binding="{Binding PreviewSummary}" Width="*" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </GroupBox>
+
+        <!-- Action Mode & Footer -->
+        <DockPanel Grid.Row="4" Margin="0,12,0,0">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="Action:" FontSize="12" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,10,0" VerticalAlignment="Center" />
+                <RadioButton x:Name="ActionExportNewSheetRadio" Content="Export to New Sheet" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,14,0" />
+                <RadioButton x:Name="ActionSelectFirstRadio" Content="Select First Match" Style="{StaticResource ModernRadioButtonStyle}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Cancel" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,8,0" Click="CancelButton_Click" IsCancel="True" />
+                <Button x:Name="ApplyButton" Content="Execute Filter" Style="{StaticResource PrimaryButtonStyle}" Click="ApplyButton_Click" IsDefault="True" />
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

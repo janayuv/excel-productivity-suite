@@ -558,6 +558,161 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
             }
         }
 
+        public bool CreateWorksheetWithData(string sheetName, object?[,] data, bool activate = true)
+        {
+            if (IsWorkbookProtected)
+            {
+                ShowMessage("The active workbook structure is protected. Cannot add new worksheets.", "Workbook Protected", isError: true);
+                return false;
+            }
+
+            try
+            {
+                if (_app.ActiveWorkbook == null) return false;
+
+                using (new ExcelStateScope(_app))
+                {
+                    // Uniquify sheet name against existing worksheets
+                    var existing = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    foreach (Excel.Worksheet w in _app.ActiveWorkbook.Worksheets)
+                    {
+                        existing.Add(w.Name);
+                    }
+
+                    string validName = sheetName;
+                    if (existing.Contains(validName) || validName.Length > 31)
+                    {
+                        string baseName = validName.Length > 25 ? validName.Substring(0, 25) : validName;
+                        int counter = 1;
+                        do
+                        {
+                            validName = $"{baseName}_{counter++}";
+                        } while (existing.Contains(validName));
+                    }
+
+                    Excel.Worksheet newSheet = (Excel.Worksheet)_app.ActiveWorkbook.Worksheets.Add();
+                    newSheet.Name = validName;
+
+                    if (data != null)
+                    {
+                        int rows = data.GetLength(0);
+                        int cols = data.GetLength(1);
+                        if (rows > 0 && cols > 0)
+                        {
+                            Excel.Range topLeft = newSheet.Cells[1, 1];
+                            Excel.Range bottomRight = newSheet.Cells[rows, cols];
+                            Excel.Range target = newSheet.Range[topLeft, bottomRight];
+                            target.Value2 = data;
+                        }
+                    }
+
+                    if (activate)
+                    {
+                        newSheet.Activate();
+                    }
+
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Error creating worksheet '{sheetName}': {ex.Message}", "Worksheet Error", isError: true);
+                return false;
+            }
+        }
+
+        public IReadOnlyList<string> GetOpenWorkbookNames()
+        {
+            var list = new List<string>();
+            try
+            {
+                foreach (Excel.Workbook wb in _app.Workbooks)
+                {
+                    list.Add(wb.Name);
+                }
+            }
+            catch { }
+            return list;
+        }
+
+        public IReadOnlyList<string> GetWorkbookSheetNames(string workbookName)
+        {
+            var list = new List<string>();
+            try
+            {
+                Excel.Workbook? wb = null;
+                foreach (Excel.Workbook b in _app.Workbooks)
+                {
+                    if (string.Equals(b.Name, workbookName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        wb = b;
+                        break;
+                    }
+                }
+
+                if (wb != null)
+                {
+                    foreach (Excel.Worksheet ws in wb.Worksheets)
+                    {
+                        list.Add(ws.Name);
+                    }
+                }
+            }
+            catch { }
+            return list;
+        }
+
+        public object?[,]? GetWorkbookRangeValues(string workbookName, string sheetName, string? rangeAddress = null)
+        {
+            try
+            {
+                Excel.Workbook? wb = null;
+                foreach (Excel.Workbook b in _app.Workbooks)
+                {
+                    if (string.Equals(b.Name, workbookName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        wb = b;
+                        break;
+                    }
+                }
+
+                if (wb == null) return null;
+
+                Excel.Worksheet? ws = null;
+                foreach (Excel.Worksheet s in wb.Worksheets)
+                {
+                    if (string.Equals(s.Name, sheetName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        ws = s;
+                        break;
+                    }
+                }
+
+                if (ws == null) return null;
+
+                Excel.Range target = !string.IsNullOrWhiteSpace(rangeAddress) 
+                    ? ws.Range[rangeAddress] 
+                    : ws.UsedRange;
+
+                if (target == null) return null;
+
+                object raw = target.Value2;
+                if (raw is object[,] matrix)
+                {
+                    return (object?[,])matrix;
+                }
+
+                object?[,] single = new object?[1, 1];
+                single[0, 0] = raw;
+                return single;
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Unable to read range from '{workbookName} - {sheetName}': {ex.Message}", "Read Error", isError: true);
+                return null;
+            }
+        }
+
         public void ShowMessage(string message, string title, bool isError = false)
         {
             MessageBox.Show(message, title, MessageBoxButton.OK, isError ? MessageBoxImage.Error : MessageBoxImage.Information);

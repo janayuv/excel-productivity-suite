@@ -94,6 +94,13 @@
                   screentip="Select Special Cells"
                   supertip="Locate and inspect cells matching criteria such as blank, errors, formulas, or max/min values."
                   onAction="OnRibbonButtonClicked" />
+          <button id="btnMergeRanges"
+                  label="Merge Ranges"
+                  size="normal"
+                  imageMso="TableMergeCells"
+                  screentip="Merge Compatible Ranges"
+                  supertip="Combine two ranges by appending rows or side-by-side with header alignment."
+                  onAction="OnRibbonButtonClicked" />
         </group>
 
         <!-- Group: Data Cleaning -->
@@ -105,9 +112,23 @@
                   screentip="Remove Duplicates"
                   supertip="Identify and clear duplicate rows in selected data with keep-first or keep-last options."
                   onAction="OnRibbonButtonClicked" />
+          <button id="btnFindMissing"
+                  label="Find Missing"
+                  size="large"
+                  imageMso="FindDialog"
+                  screentip="Find Missing &amp; Matching Records"
+                  supertip="Reconcile two lists by key columns and isolate source-only, target-only, or matching items."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnAdvancedFilter"
+                  label="Advanced Filter"
+                  size="normal"
+                  imageMso="Filter"
+                  screentip="Advanced Multi-Condition Filter"
+                  supertip="Filter rows with multiple AND/OR conditions and export or select matches."
+                  onAction="OnRibbonButtonClicked" />
           <button id="btnFormulaToValue"
                   label="Formulas to Values"
-                  size="large"
+                  size="normal"
                   imageMso="PasteValues"
                   screentip="Convert Formulas to Values"
                   supertip="Replace active formulas with static calculated values in-place instantly."
@@ -133,6 +154,20 @@
                   imageMso="SheetRename"
                   screentip="Batch Rename Worksheets"
                   supertip="Rename multiple sheets simultaneously with prefix, suffix, and sequence rules."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnSplitDataToSheets"
+                  label="Split to Sheets"
+                  size="normal"
+                  imageMso="TableSplitCells"
+                  screentip="Split Data to Worksheets"
+                  supertip="Distribute records across separate worksheets based on unique column values."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnCompareWorkbooks"
+                  label="Compare Workbooks"
+                  size="normal"
+                  imageMso="ViewSideBySide"
+                  screentip="Compare Two Workbooks"
+                  supertip="Audit differences in worksheet names, dimensions, and cell values across workbooks."
                   onAction="OnRibbonButtonClicked" />
         </group>
 

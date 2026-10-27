@@ -1,0 +1,103 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.MergeRangesDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Merge Ranges - Excel Productivity Suite"
+        Height="540" Width="640"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" /> <!-- Header -->
+            <RowDefinition Height="Auto" /> <!-- Range Inputs -->
+            <RowDefinition Height="Auto" /> <!-- Merge Mode & Header Options -->
+            <RowDefinition Height="Auto" /> <!-- Destination -->
+            <RowDefinition Height="*" />    <!-- Status / Warning Box -->
+            <RowDefinition Height="Auto" /> <!-- Footer -->
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="📑" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Merge Ranges" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Combine two compatible ranges either by stacking rows vertically or side-by-side" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Range Inputs -->
+        <GroupBox Grid.Row="1" Header="Ranges to Merge" Style="{StaticResource ModernGroupBoxStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                    <TextBlock Text="Primary Range 1 (Active Selection):" FontSize="12" Margin="0,0,0,3" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBox x:Name="Range1TextBox" Style="{StaticResource ModernTextBoxStyle}" IsReadOnly="True" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                    <TextBlock Text="Secondary Range 2 Address (e.g. Sheet2!A1:D30):" FontSize="12" Margin="0,0,0,3" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBox x:Name="Range2TextBox" Style="{StaticResource ModernTextBoxStyle}" />
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+
+        <!-- Mode & Headers -->
+        <GroupBox Grid.Row="2" Header="Merge Strategy" Style="{StaticResource ModernGroupBoxStyle}">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                    <RadioButton x:Name="ModeAppendRadio" Content="Append Rows (Stack vertically)" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,18,0" />
+                    <RadioButton x:Name="ModeSideBySideRadio" Content="Side-by-Side (Join horizontally)" Style="{StaticResource ModernRadioButtonStyle}" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="HasHeadersCheckBox" Content="Ranges have header rows" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" Margin="0,0,16,0" />
+                    <CheckBox x:Name="AlignHeadersCheckBox" Content="Align columns by header name" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" Margin="0,0,16,0" />
+                    <CheckBox x:Name="IncludeHeadersOnceCheckBox" Content="Include header row once" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" />
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Destination -->
+        <GroupBox Grid.Row="3" Header="Destination" Style="{StaticResource ModernGroupBoxStyle}">
+            <StackPanel Orientation="Horizontal">
+                <RadioButton x:Name="DestNewSheetRadio" Content="Create in New Worksheet (Recommended)" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,18,0" />
+                <RadioButton x:Name="DestAdjacentRadio" Content="Place adjacent to primary selection" Style="{StaticResource ModernRadioButtonStyle}" />
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Warning / Status Info Box -->
+        <Border Grid.Row="4" Background="{StaticResource StatusSuccessLightBrush}" BorderBrush="{StaticResource BrandBorderBrush}" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,8,0,0">
+            <StackPanel>
+                <TextBlock Text="🛡️ Safe Merge Assurance" FontWeight="SemiBold" Foreground="{StaticResource BrandPrimaryBrush}" FontSize="12" />
+                <TextBlock x:Name="StatusMessageText" Text="Merged output is combined in managed memory before writeback. Creating in a new worksheet preserves original ranges intact." TextWrapping="Wrap" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" />
+            </StackPanel>
+        </Border>
+
+        <!-- Footer -->
+        <DockPanel Grid.Row="5" Margin="0,12,0,0">
+            <TextBlock Text="Batch COM writeback under scoped state" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Cancel" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,8,0" Click="CancelButton_Click" IsCancel="True" />
+                <Button x:Name="MergeButton" Content="Merge Ranges" Style="{StaticResource PrimaryButtonStyle}" Click="MergeButton_Click" IsDefault="True" />
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

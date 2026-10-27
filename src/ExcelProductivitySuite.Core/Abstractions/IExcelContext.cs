@@ -151,6 +151,27 @@ namespace ExcelProductivitySuite.Core.Abstractions
         void RenameWorksheets(IDictionary<string, string> renameMap);
 
         /// <summary>
+        /// Creates a new worksheet with the specified data in a single batch assignment.
+        /// Returns true if creation succeeded.
+        /// </summary>
+        bool CreateWorksheetWithData(string sheetName, object?[,] data, bool activate = true);
+
+        /// <summary>
+        /// Gets the names of all currently open workbooks in Excel.
+        /// </summary>
+        IReadOnlyList<string> GetOpenWorkbookNames();
+
+        /// <summary>
+        /// Gets the sheet names of a specific open workbook.
+        /// </summary>
+        IReadOnlyList<string> GetWorkbookSheetNames(string workbookName);
+
+        /// <summary>
+        /// Reads range or UsedRange values from a specific open workbook and sheet.
+        /// </summary>
+        object?[,]? GetWorkbookRangeValues(string workbookName, string sheetName, string? rangeAddress = null);
+
+        /// <summary>
         /// Shows an informational, warning, or error alert dialog in Excel.
         /// </summary>
         void ShowMessage(string message, string title, bool isError = false);

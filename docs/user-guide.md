@@ -1,6 +1,6 @@
 # Excel Productivity Suite — User Guide
 
-**Product Version:** 1.0.0  
+**Product Version:** 3.0.0  
 **Host Application:** Microsoft Excel 2016 / 2019 / 2021 / Office 365 (Windows Desktop)  
 
 ---
@@ -11,9 +11,10 @@
 
 ### Key Highlights
 - **Integrated Office Ribbon:** Beautifully organized tabs (`Excel Productivity` and `Workbook & Sheets`) placed naturally alongside standard Excel tabs.
-- **Quick Tool Launcher (SuperSearch):** Press `Ctrl + Shift + P` or click **Tool Launcher** to search, filter, and launch any tool instantly without menu diving.
+- **Quick Tool Launcher (SuperSearch):** Press `Ctrl + Shift + P` or click **Tool Launcher** to search, filter, and launch any tool instantly without menu diving, with instant filtering for Recents and Favorites.
 - **In-Memory Performance:** All range operations process data in managed 2D memory arrays, executing operations on tens of thousands of cells in milliseconds.
 - **Live Before-and-After Previews:** High-impact text and range dialogs feature real-time previews showing sample rows before committing changes.
+- **Non-Destructive Workflows:** Advanced reconciliation, filtering, and splitting tools output to newly generated worksheets, preserving your original source sheets completely intact.
 - **100% Local & Secure:** Zero cloud dependencies, zero data telemetry. All processing stays entirely on your local machine.
 
 ---
@@ -23,9 +24,9 @@
 The suite installs two primary Ribbon tabs:
 
 ### 2.1 Tab: `Excel Productivity`
-Contains daily data manipulation and formatting utilities:
+Contains daily data manipulation, formatting, and analysis utilities:
 - **Productivity Suite Group:**
-  - `Tool Launcher`: Open the searchable tool command palette.
+  - `Tool Launcher`: Open the searchable tool command palette (`Ctrl+Shift+P`).
   - `About Suite`: Inspect product version, architecture, and diagnostics.
 - **Text Operations Group:**
   - `Extract Text`: Extract substrings before, after, or between delimiters into adjacent columns or overwrite.
@@ -33,18 +34,25 @@ Contains daily data manipulation and formatting utilities:
   - `Remove Characters`: Strip numbers, letters, symbols, non-printable codes, or custom characters.
   - `Trim Spaces`: Collapse excess spaces, remove leading/trailing spaces, or clean non-breaking spaces.
   - `Change Case`: Convert to UPPERCASE, lowercase, Proper Case, or Sentence case.
-  - `Add Text`: Prepend prefixes or append suffixes with duplicate prevention.
+  - `Add Text`: Prepend prefixes, append suffixes, or insert text at exact character positions.
 - **Range & Cells Group:**
   - `Fill Blank Cells`: Populate empty cells using values from above, below, left, right, or constants.
+  - `Compare Ranges`: Reconcile two ranges, side-by-side cell comparison, and missing item detection.
+  - `Select Special`: Inspect and jump to blank, error, formula, or extremum cells.
+  - `Merge Ranges`: Combine multiple compatible ranges into a single consolidated destination.
 - **Data Cleaning Group:**
-  - `Remove Duplicates`: Identify and clear duplicate rows in selected data.
-  - `Formulas to Values`: Replace live calculated formulas with static values in-place instantly.
+  - `Remove Duplicates`: Identify and clear duplicate rows in selected data with header protection.
+  - `Find Missing Records`: Reconcile source and target tables using key columns, identifying matching and distinct records.
+  - `Advanced Filter`: Multi-condition rule filtering with boolean AND/OR logic and safe export.
+  - `Formulas to Values`: Replace live calculated formulas with static values in-place with user confirmation.
 
 ### 2.2 Tab: `Workbook & Sheets`
 Contains workbook-wide management utilities:
 - **Worksheet Tools Group:**
   - `Sheet Visibility`: Bulk manager to show, hide, or very-hide worksheets. Includes "Unhide All Hidden Sheets" and "Hide Inactive Sheets".
   - `Rename Sheets`: Bulk rename worksheets using prefix, suffix, find-and-replace, and sequential numbering rules.
+  - `Split Data to Sheets`: Split a dataset by a categorical column into individual worksheets with name sanitization.
+  - `Compare Workbooks`: Cross-workbook structural and cell-level difference analysis with executive audit reports.
 
 ---
 
@@ -140,6 +148,87 @@ Contains workbook-wide management utilities:
   3. Check **Append sequential numbers** if you want automatic numbering.
   4. Review the **Proposed Sheet Names Preview** to ensure all names conform to Excel rules.
   5. Click **Rename All Sheets**.
+
+---
+
+### 3.9 Find Missing Records
+- **When to Use:** When reconciling two lists or tables (e.g., comparing an active customer roster against this month's invoiced accounts to spot unbilled clients or new leads).
+- **Steps:**
+  1. Select the primary Source table in Excel and click **Find Missing Records** on the Ribbon.
+  2. Specify the Target Range address (e.g., `Sheet2!$A$1:$D$100`).
+  3. If your tables include headers, check **Data has headers**.
+  4. Select which column represents the primary comparison key (e.g., `Account ID`, `Email`, or `SKU`).
+  5. Configure matching options: **Case-sensitive comparison** and **Normalize whitespace**.
+  6. Choose your output mode:
+     - `Source Only (Missing in Target)`: Records in Table A not present in Table B.
+     - `Target Only (Missing in Source)`: Records in Table B not present in Table A.
+     - `Matching (In Both)`: Intersecting records present in both tables.
+     - `Duplicates in Source`: Records that repeat multiple times within Table A.
+  7. Check the **Results Preview** grid for match counts.
+  8. Click **Export to New Worksheet**. A clean, formatted worksheet is created with the exact filtered records, leaving source tables untouched.
+
+---
+
+### 3.10 Merge Ranges
+- **When to Use:** When combining multiple monthly or regional tables into a single consolidated master table.
+- **Steps:**
+  1. Select the first range in Excel and click **Merge Ranges**.
+  2. Enter the second range address in the **Second Range** box.
+  3. Choose the merge orientation:
+     - `Append Rows (Stack vertically)`: Stacks Range 2 below Range 1.
+     - `Side-by-Side (Juxtapose horizontally)`: Places Range 2 adjacent to Range 1.
+  4. If both ranges share table headers, check **Align headers by column name** to align columns matching identical header names.
+  5. Specify a destination top-left cell or click **Output to New Worksheet**.
+  6. Click **Merge Ranges**.
+
+---
+
+### 3.11 Split Data into Worksheets
+- **When to Use:** When segmenting a large master dataset into individual departmental, regional, or category worksheets (e.g., splitting a 5,000-row sales report by `Region` into `North`, `South`, `East`, and `West` tabs).
+- **Steps:**
+  1. Select the table to partition and click **Split Data to Sheets** under the **Workbook & Sheets** tab.
+  2. Check **Data has headers** to retain header rows across all generated sheets.
+  3. Select the **Split Column** from the dropdown list.
+  4. Check **Repeat header row on each generated sheet**.
+  5. Review the **Distinct Values Preview** to see how many sheets will be generated and their sanitized names (characters like `\ / ? * : [ ]` are automatically cleaned, and names exceeding 31 characters are truncated cleanly).
+  6. Click **Split Data**. Separate worksheets are generated instantly.
+
+---
+
+### 3.12 Advanced Filter and Select
+- **When to Use:** When standard Excel AutoFilter is too restrictive and you need to filter across multiple columns using complex combined criteria (e.g., `Status Equals 'Pending' AND Total > 500`).
+- **Steps:**
+  1. Select your table range and click **Advanced Filter** on the Ribbon.
+  2. Define Condition 1: Select Column, Operator (`Equals`, `Contains`, `StartsWith`, `EndsWith`, `GreaterThan`, `LessThan`, `IsEmpty`, `IsNotEmpty`, `MatchesRegex`), and Value.
+  3. Optionally click **Add Condition** and choose the condition connector (`AND` or `OR`).
+  4. Choose your filter action:
+     - `Export to New Worksheet`: Creates a standalone sheet containing all matching rows.
+     - `Select Matching Rows`: Highlights matching rows directly in the active worksheet.
+     - `Hide Non-Matching Rows`: Collapses non-matching rows.
+  5. Click **Apply Filter**.
+
+---
+
+### 3.13 Compare Workbooks
+- **When to Use:** When auditing differences between two revisions of a financial workbook or model (e.g., `Budget_v1.xlsx` vs. `Budget_v2.xlsx`).
+- **Steps:**
+  1. Ensure both workbooks are open in Microsoft Excel.
+  2. Click **Compare Workbooks** under the **Workbook & Sheets** tab.
+  3. Select **Workbook A (Baseline)** and **Workbook B (Revised)** from the dropdown menus.
+  4. Choose whether to compare `All Matching Sheets` or select a specific sheet pair.
+  5. Configure options: **Ignore formula differences (compare values only)** and **Case-sensitive comparison**.
+  6. Click **Compare Workbooks**.
+  7. A comprehensive **Comparison Summary Report** sheet is generated detailing missing sheets, structural dimension differences, and a cell-by-cell matrix of all changed coordinates with Old vs. New values.
+
+---
+
+### 3.14 Quick Tool Launcher Recent & Favorites Views
+- **When to Use:** When executing your most frequently used utilities with maximum speed.
+- **Steps:**
+  1. Press `Ctrl + Shift + P` anywhere in Excel.
+  2. Click the **Recent** filter pill at the top of the launcher to display the tools you have executed most recently in this session.
+  3. Click the **Favorites** filter pill to access high-productivity favorites (`Extract Text`, `Find Missing Records`, `Split Data to Sheets`, `Trim Spaces`, `Fill Blank Cells`).
+  4. Press `Enter` to run the highlighted tool immediately.
 
 ---
 

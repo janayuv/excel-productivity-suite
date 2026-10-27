@@ -162,6 +162,21 @@ namespace ExcelProductivitySuite.AddIn.Startup
                 officeIconName: "SelectCell"
             ));
 
+            // 8d. Merge Ranges (Phase 3)
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_MERGE_RANGES",
+                title: "Merge Ranges",
+                description: "Combine compatible ranges into one destination by appending rows or side-by-side.",
+                category: CommandCategory.RangeAndCells,
+                executeAction: ctx =>
+                {
+                    var dlg = new MergeRangesDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "merge", "combine ranges", "append rows", "consolidate", "stack" },
+                officeIconName: "TableMergeCells"
+            ));
+
             // 9. Remove Duplicates
             registry.RegisterCommand(new SuiteCommand(
                 id: "CMD_DATA_REMOVE_DUPLICATES",
@@ -175,6 +190,36 @@ namespace ExcelProductivitySuite.AddIn.Startup
                 },
                 keywords: new[] { "duplicate", "deduplicate", "unique", "distinct" },
                 officeIconName: "TableDeleteRows"
+            ));
+
+            // 9b. Find Missing Records (Phase 3)
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_FIND_MISSING_RECORDS",
+                title: "Find Missing Records",
+                description: "Compare two lists by key columns and identify source-only, target-only, or matching records.",
+                category: CommandCategory.DataCleaning,
+                executeAction: ctx =>
+                {
+                    var dlg = new FindMissingRecordsDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "missing records", "reconcile", "difference", "vlookup compare", "unmatched" },
+                officeIconName: "FindDialog"
+            ));
+
+            // 9c. Advanced Filter and Select (Phase 3)
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_ADVANCED_FILTER",
+                title: "Advanced Filter",
+                description: "Filter rows by configurable multi-condition rules (AND/OR) and export or select matches.",
+                category: CommandCategory.DataCleaning,
+                executeAction: ctx =>
+                {
+                    var dlg = new AdvancedFilterDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "advanced filter", "filter rows", "criteria", "multi condition", "select rows" },
+                officeIconName: "Filter"
             ));
 
             // 10. Convert Formulas to Values
@@ -237,6 +282,36 @@ namespace ExcelProductivitySuite.AddIn.Startup
                 },
                 keywords: new[] { "rename sheets", "bulk rename", "sequence sheets" },
                 officeIconName: "SheetRename"
+            ));
+
+            // 12b. Split Data to Sheets (Phase 3)
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_SPLIT_DATA_TO_SHEETS",
+                title: "Split to Sheets",
+                description: "Split dataset into separate worksheets based on distinct values in a key column.",
+                category: CommandCategory.Worksheet,
+                executeAction: ctx =>
+                {
+                    var dlg = new SplitDataToSheetsDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "split to sheets", "separate sheets", "distribute rows", "by column" },
+                officeIconName: "TableSplitCells"
+            ));
+
+            // 12c. Compare Workbooks (Phase 3)
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_COMPARE_WORKBOOKS",
+                title: "Compare Workbooks",
+                description: "Reconcile two open workbooks and generate a difference audit report.",
+                category: CommandCategory.Workbook,
+                executeAction: ctx =>
+                {
+                    var dlg = new CompareWorkbooksDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "compare workbooks", "workbook diff", "reconcile workbooks", "audit files" },
+                officeIconName: "ViewSideBySide"
             ));
 
             // 13. About Dialog

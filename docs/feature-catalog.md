@@ -252,18 +252,75 @@ To ensure stability, code quality, and maintainability, features are categorized
 
 ---
 
+### 2.18 Find Missing Records (Phase 3)
+- **ID:** `CMD_FIND_MISSING_RECORDS`
+- **Category:** Data Cleaning
+- **Description:** Compares two lists or tables by key columns and categorizes records into Source-Only, Target-Only, Matching, or Duplicates.
+- **Options:**
+  - Configurable source and target key column indices (single or composite key).
+  - Case-sensitivity and whitespace-normalization toggles.
+  - Safe export to a new worksheet without modifying source data.
+- **Status:** **Implemented (Phase 3)**
+
+---
+
+### 2.19 Merge Ranges (Phase 3)
+- **ID:** `CMD_MERGE_RANGES`
+- **Category:** Range & Cells
+- **Description:** Combines two compatible ranges either by stacking rows vertically (with header alignment) or side-by-side.
+- **Options:**
+  - Append Mode (with header name alignment and deduplication) vs. Side-by-Side Mode.
+  - Output to New Worksheet (safe default) or Adjacent Range (with overwrite check).
+- **Status:** **Implemented (Phase 3)**
+
+---
+
+### 2.20 Split Data into Worksheets (Phase 3)
+- **ID:** `CMD_SPLIT_DATA_TO_SHEETS`
+- **Category:** Worksheet Management
+- **Description:** Splits a dataset into separate worksheets based on distinct values in a chosen key column.
+- **Options:**
+  - Column selector with header recognition.
+  - Automatic sheet name sanitization (31-char limit, forbidden character replacement, reserved name handling, collision resolution).
+  - Repeats header row across all generated worksheets while protecting original source data.
+- **Status:** **Implemented (Phase 3)**
+
+---
+
+### 2.21 Advanced Filter and Select (Phase 3)
+- **ID:** `CMD_ADVANCED_FILTER`
+- **Category:** Data Cleaning
+- **Description:** Evaluates multi-condition filtering rules with clear AND / OR conjunction semantics across tabular ranges.
+- **Operators:** `Equals`, `NotEquals`, `Contains`, `DoesNotContain`, `StartsWith`, `EndsWith`, `GreaterThan`, `LessThan`, `GreaterThanOrEqual`, `LessThanOrEqual`, `IsBlank`, `IsNotBlank`.
+- **Actions:** Export matching rows to a new worksheet or select the first matching row in Excel.
+- **Status:** **Implemented (Phase 3)**
+
+---
+
+### 2.22 Compare Workbooks (Phase 3)
+- **ID:** `CMD_COMPARE_WORKBOOKS`
+- **Category:** Workbook Management
+- **Description:** Reconciles two open workbooks, auditing worksheet inventories, structural dimensions, and cell-level discrepancies.
+- **Output:** Generates a comprehensive difference audit report in a dedicated worksheet (`Workbook_Diff_Report`) without modifying source workbooks.
+- **Status:** **Implemented (Phase 3)**
+
+---
+
 ## 3. Phase 2 & 3 Catalog Overview (Roadmap)
 
 | Feature | Category | Target Phase | Status |
 | :--- | :--- | :--- | :--- |
 | **Compare Ranges & Datasets** | Range & Cells | Phase 2 | **Implemented** |
 | **Select Special Cells** | Range & Cells | Phase 2 | **Implemented** |
-| **Merge / Combine Worksheets** | Consolidation | Phase 3 | Backlog |
-| **Split Data by Key Column** | Worksheet | Phase 3 | Backlog |
-| **Swap Two Ranges** | Range & Cells | Phase 3 | Backlog |
-| **Transpose Table Dimensions** | Range & Cells | Phase 3 | Backlog |
-| **Exact Formula Copy** | Formulas | Phase 3 | Backlog |
-| **Convert Formula References (Abs/Rel)** | Formulas | Phase 3 | Backlog |
-| **Table of Contents (Index Sheet)** | Worksheet | Phase 3 | Backlog |
-| **Export Range to CSV / JSON / Image** | Import & Export | Phase 3 | Backlog |
-| **Sort Worksheets in Bulk** | Worksheet | Phase 3 | Backlog |
+| **Find Missing Records** | Data Cleaning | Phase 3 | **Implemented** |
+| **Merge Compatible Ranges** | Range & Cells | Phase 3 | **Implemented** |
+| **Split Data to Worksheets** | Worksheet | Phase 3 | **Implemented** |
+| **Advanced Multi-Condition Filter** | Data Cleaning | Phase 3 | **Implemented** |
+| **Compare Two Workbooks** | Workbook | Phase 3 | **Implemented** |
+| **Swap Two Ranges** | Range & Cells | Phase 4 | Backlog |
+| **Transpose Table Dimensions** | Range & Cells | Phase 4 | Backlog |
+| **Exact Formula Copy** | Formulas | Phase 4 | Backlog |
+| **Convert Formula References (Abs/Rel)** | Formulas | Phase 4 | Backlog |
+| **Table of Contents (Index Sheet)** | Worksheet | Phase 4 | Backlog |
+| **Export Range to CSV / JSON / Image** | Import & Export | Phase 4 | Backlog |
+| **Sort Worksheets in Bulk** | Worksheet | Phase 4 | Backlog |

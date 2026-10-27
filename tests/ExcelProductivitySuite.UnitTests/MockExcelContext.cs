@@ -116,6 +116,22 @@ namespace ExcelProductivitySuite.UnitTests
             }
         }
 
+        public Dictionary<string, object?[,]> CreatedSheets { get; } = new();
+        public List<string> OpenWorkbooks { get; } = new() { "Workbook1.xlsx", "Workbook2.xlsx" };
+
+        public bool CreateWorksheetWithData(string sheetName, object?[,] data, bool activate = true)
+        {
+            CreatedSheets[sheetName] = data;
+            Sheets.Add(sheetName);
+            return true;
+        }
+
+        public IReadOnlyList<string> GetOpenWorkbookNames() => OpenWorkbooks;
+
+        public IReadOnlyList<string> GetWorkbookSheetNames(string workbookName) => Sheets;
+
+        public object?[,]? GetWorkbookRangeValues(string workbookName, string sheetName, string? rangeAddress = null) => CurrentValues;
+
         public void ShowMessage(string message, string title, bool isError = false)
         {
             MessagesShown.Add($"[{title}] {message}");

@@ -1,0 +1,130 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.FindMissingRecordsDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Find Missing &amp; Matching Records - Excel Productivity Suite"
+        Height="600" Width="720"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" /> <!-- Header -->
+            <RowDefinition Height="Auto" /> <!-- Range Inputs -->
+            <RowDefinition Height="Auto" /> <!-- Key Columns & Options -->
+            <RowDefinition Height="*" />    <!-- Output Grid -->
+            <RowDefinition Height="Auto" /> <!-- Summary & Footer -->
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="🔍" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Find Missing &amp; Matching Records" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Compare two lists or tables by key columns; identify source-only, target-only, or matching records" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Range Inputs -->
+        <GroupBox Grid.Row="1" Header="Ranges to Reconcile" Style="{StaticResource ModernGroupBoxStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                    <TextBlock Text="Source Range (Active Selection):" FontSize="12" Margin="0,0,0,3" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBox x:Name="SourceRangeTextBox" Style="{StaticResource ModernTextBoxStyle}" IsReadOnly="True" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                    <TextBlock Text="Target Range Address (e.g. Sheet2!A1:C50):" FontSize="12" Margin="0,0,0,3" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBox x:Name="TargetRangeTextBox" Style="{StaticResource ModernTextBoxStyle}" />
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+
+        <!-- Keys & Options -->
+        <GroupBox Grid.Row="2" Header="Comparison Settings" Style="{StaticResource ModernGroupBoxStyle}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,6">
+                    <TextBlock Text="Source Key Column (1-based index or header):" FontSize="12" Margin="0,0,0,3" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBox x:Name="SourceKeyColTextBox" Text="1" Style="{StaticResource ModernTextBoxStyle}" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,6">
+                    <TextBlock Text="Target Key Column (1-based index or header):" FontSize="12" Margin="0,0,0,3" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBox x:Name="TargetKeyColTextBox" Text="1" Style="{StaticResource ModernTextBoxStyle}" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,4,0,0">
+                    <CheckBox x:Name="HasHeadersCheckBox" Content="Ranges have header rows" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" Margin="0,0,16,0" />
+                    <CheckBox x:Name="MatchCaseCheckBox" Content="Match case" Style="{StaticResource ModernCheckBoxStyle}" Margin="0,0,16,0" />
+                    <CheckBox x:Name="TrimSpacesCheckBox" Content="Trim whitespace" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" />
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+
+        <!-- Results Display -->
+        <GroupBox Grid.Row="3" Header="Comparison Results" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,8,0,0">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
+                    <RadioButton x:Name="CategorySourceOnlyRadio" Content="Source Only (Missing in Target)" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,14,0" Checked="CategoryChanged" />
+                    <RadioButton x:Name="CategoryTargetOnlyRadio" Content="Target Only (Missing in Source)" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,14,0" Checked="CategoryChanged" />
+                    <RadioButton x:Name="CategoryMatchingRadio" Content="Matching Records" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,14,0" Checked="CategoryChanged" />
+                    <RadioButton x:Name="CategoryDuplicatesRadio" Content="Duplicates" Style="{StaticResource ModernRadioButtonStyle}" Checked="CategoryChanged" />
+                </StackPanel>
+
+                <DataGrid x:Name="ResultsDataGrid"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          GridLinesVisibility="Horizontal"
+                          HorizontalGridLinesBrush="{StaticResource BrandBorderBrush}"
+                          BorderThickness="0"
+                          Background="White"
+                          RowHeaderWidth="0">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Row #" Binding="{Binding RowIndex}" Width="60" />
+                        <DataGridTextColumn Header="Key Value" Binding="{Binding CompositeKey}" Width="160" />
+                        <DataGridTextColumn Header="Status" Binding="{Binding Category}" Width="130" />
+                        <DataGridTextColumn Header="Preview Values" Binding="{Binding ValuesDisplay}" Width="*" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+        </GroupBox>
+
+        <!-- Summary & Footer -->
+        <DockPanel Grid.Row="4" Margin="0,12,0,0">
+            <TextBlock x:Name="SummaryText" Text="Specify target range and click 'Run Comparison'." VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Close" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,8,0" Click="CloseButton_Click" IsCancel="True" />
+                <Button x:Name="ExportButton" Content="Export View to New Sheet" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,8,0" Click="ExportButton_Click" IsEnabled="False" />
+                <Button x:Name="CompareButton" Content="Run Comparison" Style="{StaticResource PrimaryButtonStyle}" Click="CompareButton_Click" IsDefault="True" />
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

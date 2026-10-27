@@ -75,10 +75,15 @@ namespace ExcelProductivitySuite.AddIn.Ribbon
                 case "btnFillBlanks": return "CMD_RANGE_FILL_BLANKS";
                 case "btnCompareRanges": return "CMD_RANGE_COMPARE";
                 case "btnSelectSpecial": return "CMD_SELECT_SPECIAL";
+                case "btnMergeRanges": return "CMD_MERGE_RANGES";
                 case "btnRemoveDuplicates": return "CMD_DATA_REMOVE_DUPLICATES";
+                case "btnFindMissing": return "CMD_FIND_MISSING_RECORDS";
+                case "btnAdvancedFilter": return "CMD_ADVANCED_FILTER";
                 case "btnFormulaToValue": return "CMD_FORMULA_TO_VALUE";
                 case "btnSheetVisibility": return "CMD_SHEET_VISIBILITY";
                 case "btnBatchRename": return "CMD_SHEET_BATCH_RENAME";
+                case "btnSplitDataToSheets": return "CMD_SPLIT_DATA_TO_SHEETS";
+                case "btnCompareWorkbooks": return "CMD_COMPARE_WORKBOOKS";
                 case "btnAbout": return "CMD_ABOUT";
                 default: return controlId;
             }
