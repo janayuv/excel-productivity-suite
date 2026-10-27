@@ -42,10 +42,11 @@ Write-Host "Release build succeeded cleanly." -ForegroundColor Green
 
 # 2. Prepare staging directory
 Write-Host "`n[2/5] Creating staging layout at: $stageDir..." -ForegroundColor Yellow
-if (Test-Path $stageDir) {
-    Remove-Item -Path $stageDir -Recurse -Force
+if (-not (Test-Path $stageDir)) {
+    New-Item -Path $stageDir -ItemType Directory -Force | Out-Null
+} else {
+    Get-ChildItem -Path $stageDir | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
 }
-New-Item -Path $stageDir -ItemType Directory -Force | Out-Null
 
 $addInBin = Join-Path $solutionRoot "src\ExcelProductivitySuite.AddIn\bin\$Configuration"
 
@@ -91,6 +92,9 @@ if (Test-Path $srcRibbon) {
 Copy-Item -Path (Join-Path $scriptDir "install.ps1") -Destination $stageDir -Force
 Copy-Item -Path (Join-Path $scriptDir "uninstall.ps1") -Destination $stageDir -Force
 Copy-Item -Path (Join-Path $scriptDir "diagnostics.ps1") -Destination $stageDir -Force
+Copy-Item -Path (Join-Path $scriptDir "install.cmd") -Destination $stageDir -Force
+Copy-Item -Path (Join-Path $scriptDir "uninstall.cmd") -Destination $stageDir -Force
+Copy-Item -Path (Join-Path $scriptDir "diagnostics.cmd") -Destination $stageDir -Force
 
 # Create release notice
 $readmeContent = @"
@@ -101,19 +105,19 @@ Target Runtime   : .NET Framework 4.8 & Visual Studio Tools for Office
 ========================================================================
 
 QUICK INSTALLATION:
-1. Open PowerShell as normal user (no Administrator privileges required).
-2. Run:
-   powershell.exe -ExecutionPolicy Bypass -File .\install.ps1
-3. Launch Microsoft Excel. The 'Excel Productivity' and 'Workbook & Sheets'
-   tabs will appear automatically on the Office Ribbon.
+Option A (Double-Click):
+   Double-click 'install.cmd' in File Explorer.
+
+Option B (PowerShell):
+   Open PowerShell and run:
+   .\install.ps1
+   (or: powershell.exe -ExecutionPolicy Bypass -File .\install.ps1)
 
 VERIFY INSTALLATION:
-Run:
-   powershell.exe -ExecutionPolicy Bypass -File .\diagnostics.ps1
+Double-click 'diagnostics.cmd' or run '.\diagnostics.ps1'.
 
 UNINSTALL:
-Run:
-   powershell.exe -ExecutionPolicy Bypass -File .\uninstall.ps1
+Double-click 'uninstall.cmd' or run '.\uninstall.ps1'.
 
 CODE SIGNING NOTE:
 This release package is signed with the internal developer certificate
