@@ -1,6 +1,6 @@
 # Excel Productivity Suite — User Guide
 
-**Product Version:** 3.0.0  
+**Product Version:** 4.0.0  
 **Host Application:** Microsoft Excel 2016 / 2019 / 2021 / Office 365 (Windows Desktop)  
 
 ---
@@ -237,3 +237,51 @@ Contains workbook-wide management utilities:
 1. **Large Range Optimization:** For ranges exceeding 50,000 cells, the suite automatically suppresses Excel screen updating and calculation during processing and restores them immediately upon completion.
 2. **Formula Cells:** Destructive text tools skip cells containing formulas by default, safeguarding your calculation models against unintended text overwrites.
 3. **No Excel Freezing:** All dialogs run on the STA thread with Excel window ownership, ensuring dialogs stay properly centered and never trap keyboard focus.
+
+---
+
+## 5. Installation, Diagnostics & Maintenance
+
+### 5.1 System Requirements
+- **Operating System:** Windows 10 or Windows 11 (64-bit recommended)
+- **Host Application:** Microsoft Excel 2016, 2019, 2021, or Microsoft 365 (64-bit or 32-bit ClickToRun / MSI)
+- **Runtime:** .NET Framework 4.8 and Visual Studio 2010 Tools for Office Runtime (included in modern Office installations)
+
+### 5.2 Installing from the Standalone Release Package
+1. Obtain the distribution archive `ExcelProductivitySuite-v4.0.0-win-x64.zip` from your software portal or the `dist/` directory.
+2. Extract the archive into your preferred permanent installation folder (for example, `C:\Users\<User>\AppData\Local\Programs\ExcelProductivitySuite` or `%LOCALAPPDATA%\ExcelProductivitySuite`).
+3. Open PowerShell and execute the installer:
+   ```powershell
+   powershell.exe -ExecutionPolicy Bypass -File .\installer\install.ps1
+   ```
+4. To register from an external folder without moving files:
+   ```powershell
+   powershell.exe -ExecutionPolicy Bypass -File .\installer\install.ps1 -TargetDir "C:\Path\To\Suite"
+   ```
+5. Launch Microsoft Excel. You will see the **Excel Productivity** and **Workbook & Sheets** tabs in the Ribbon.
+
+### 5.3 Health Check & Diagnostics
+If the Ribbon does not appear or you wish to verify your installation:
+```powershell
+powershell.exe -ExecutionPolicy Bypass -File .\installer\diagnostics.ps1
+```
+The diagnostics tool validates:
+- .NET Framework 4.8 availability
+- Visual Studio Tools for Office (VSTO) runtime
+- Microsoft Excel path and architecture
+- Registry registration key (`HKCU:\Software\Microsoft\Office\Excel\Addins\ExcelProductivitySuite`)
+- `LoadBehavior` (value `3` indicates active auto-load)
+- Manifest file existence and accessibility
+- COM `LocalServer32` quotation health (preventing `C:\Program` conflicts)
+- Coexistence with reference applications (e.g. Kutools for Excel)
+
+### 5.4 Troubleshooting Common Issues
+- **Ribbon tab does not appear:** Run `installer/diagnostics.ps1`. If `LoadBehavior` is `2` (disabled), Excel may have experienced an unexpected crash during startup. Open Excel > **File** > **Options** > **Add-ins** > Manage: **COM Add-ins** > Go, check **ExcelProductivitySuite**, and click OK.
+- **COM Error `0x800700C1` or `BadImageFormatException`:** On some systems where an stray non-executable file named `C:\Program` exists, Windows encounters an unquoted path issue when launching Excel via COM. Running `installer/install.ps1` or `installer/diagnostics.ps1` automatically creates an immunized user override with properly quoted executable paths in `HKCU:\Software\Classes\CLSID\{00024500-0000-0000-C000-000000000046}\LocalServer32`.
+
+### 5.5 Uninstallation
+To completely remove the add-in registration from Microsoft Excel:
+```powershell
+powershell.exe -ExecutionPolicy Bypass -File .\installer\uninstall.ps1
+```
+This removes the `HKCU` registry entries cleanly without touching any Excel data files or other add-ins.

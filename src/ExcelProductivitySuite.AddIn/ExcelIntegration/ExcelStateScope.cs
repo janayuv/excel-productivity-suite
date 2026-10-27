@@ -47,29 +47,10 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
             _disposed = true;
 
             // Restore each property independently so a COM exception in one never prevents restoring the others
-            try
-            {
-                if (_app.ScreenUpdating != _priorScreenUpdating) _app.ScreenUpdating = _priorScreenUpdating;
-            }
-            catch { }
-
-            try
-            {
-                if (_app.DisplayAlerts != _priorDisplayAlerts) _app.DisplayAlerts = _priorDisplayAlerts;
-            }
-            catch { }
-
-            try
-            {
-                if (_app.EnableEvents != _priorEnableEvents) _app.EnableEvents = _priorEnableEvents;
-            }
-            catch { }
-
-            try
-            {
-                if (_app.Calculation != _priorCalculation) _app.Calculation = _priorCalculation;
-            }
-            catch { }
+            try { _app.ScreenUpdating = _priorScreenUpdating; } catch { }
+            try { _app.DisplayAlerts = _priorDisplayAlerts; } catch { }
+            try { _app.EnableEvents = _priorEnableEvents; } catch { }
+            try { _app.Calculation = _priorCalculation; } catch { }
         }
     }
 }

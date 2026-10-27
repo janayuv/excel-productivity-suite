@@ -191,3 +191,64 @@ All Phase 3 data tools are decoupled from Office COM Interop and operate purely 
 - `DataSplitter`: Categorical partitioning with string sanitization (`\ / ? * : [ ]`), Excel 31-character truncation, collision deduplication (`Dept_1`, `Dept_2`), and header repetition.
 - `AdvancedFilter`: Multi-rule boolean evaluation (`RuleConnector.And` / `RuleConnector.Or`), supporting `Equals`, `Contains`, `StartsWith`, `EndsWith`, `GreaterThan`, `LessThan`, `IsEmpty`, `IsNotEmpty`, and regex matching.
 - `WorkbookComparer`: Cross-workbook structural and cell-level difference engine that leaves source workbooks 100% read-only and outputs a summary matrix.
+
+---
+
+## 6. Phase 4 Architecture: Real Excel Testing, COM Hardening & Packaging
+
+### 6.1 Real Excel Automated Integration Test Runner (`Run-ExcelIntegrationTests.ps1`)
+The suite includes a fully automated integration test script (`tests/Run-ExcelIntegrationTests.ps1`) designed to run against active Microsoft Excel 2016+ desktop installations:
+- **Out-of-Process Automation:** Instantiates `Excel.Application` via COM, creates disposable workbooks, runs 18 realistic user scenarios, and checks cell-by-cell outcomes.
+- **Dynamic Array Marshalling:** Solves PowerShell COM dynamic parameter limitations on 2D object arrays by leveraging an embedded C# helper class (`ComInterop.SetValue2`) using C# `dynamic` late-binding dispatch.
+- **Guaranteed Cleanup:** Employs `Marshal.FinalReleaseComObject` across all worksheets, workbooks, and application references within a `finally` block, followed by two cycles of garbage collection to ensure zero orphaned background `EXCEL.EXE` processes.
+- **Automated Metric Capture:** Measures separate timings for data synthesis, COM reading, in-memory C# transformation, and COM writing, outputting results in JSON to `docs/real-excel-test-results.json`.
+
+```powershell
+# Run real Excel automated integration tests
+powershell -ExecutionPolicy Bypass -File tests/Run-ExcelIntegrationTests.ps1
+```
+
+### 6.2 Embedded Ribbon XML Architecture
+To eliminate all hard-coded development filesystem paths (e.g. `d:\Kutools-New\...`), `ExcelProductivityRibbon.xml` is embedded directly into the compiled `ExcelProductivitySuite.AddIn.dll` as an assembly manifest resource:
+```xml
+<!-- In ExcelProductivitySuite.AddIn.csproj -->
+<ItemGroup>
+  <EmbeddedResource Include="Ribbon\ExcelProductivityRibbon.xml" />
+</ItemGroup>
+```
+In `ExcelProductivityRibbon.cs`:
+```csharp
+public string GetCustomUI(string ribbonID)
+{
+    var assembly = Assembly.GetExecutingAssembly();
+    var resourceName = "ExcelProductivitySuite.AddIn.Ribbon.ExcelProductivityRibbon.xml";
+    using (var stream = assembly.GetManifestResourceStream(resourceName))
+    {
+        if (stream != null)
+        {
+            using (var reader = new StreamReader(stream))
+                return reader.ReadToEnd();
+        }
+    }
+    // Fallback to local file for development reload
+    ...
+}
+```
+
+### 6.3 Resilient COM State Management (`ExcelStateScope`)
+`ExcelStateScope.cs` encapsulates temporary suppression of `ScreenUpdating`, `DisplayAlerts`, `EnableEvents`, and `Calculation`. In Phase 4, the disposal pattern was hardened:
+- Redundant COM property getters (e.g. `_app.ScreenUpdating != _priorScreenUpdating`) were removed to avoid unnecessary inter-process queries.
+- Each property is restored inside its own isolated `try/catch` block, preventing an error on one property (e.g., during protected workbook state) from aborting the restoration of the remaining properties.
+
+### 6.4 Standalone Commercial Distribution Packaging (`package.ps1`)
+The automated packaging script (`installer/package.ps1`) builds a clean Release distribution artifact ready for enterprise deployment:
+1. Compiles the entire solution using Visual Studio MSBuild in `Release` configuration.
+2. Stages the add-in binaries, dependencies, VSTO manifest, and deployment scripts into `dist/ExcelProductivitySuite-v4.0.0-win-x64/`.
+3. Verifies binary integrity, ensures all 18 tool assemblies are present, and confirms zero debug symbols or temporary files.
+4. Generates a compressed distribution zip: `dist/ExcelProductivitySuite-v4.0.0-win-x64.zip`.
+5. Computes and generates cryptographic SHA-256 checksums in `dist/SHA256SUMS.txt`.
+
+```powershell
+# Generate release distribution archive
+powershell -ExecutionPolicy Bypass -File installer/package.ps1
+```

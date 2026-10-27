@@ -26,6 +26,8 @@ TestResults/
 *.msix
 *.appx
 _ReSharper*/
+dist/*.zip
+dist/*-win-x64/
 
 # ClickOnce / VSTO temporary publish
 publish/

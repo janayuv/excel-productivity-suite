@@ -1,10 +1,11 @@
 # Excel Productivity Suite
 
 [![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)]()
-[![Tests](https://img.shields.io/badge/Tests-55%20Passed-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-78%20Passed%20(60%20Unit%20%2B%2018%20Real%20Excel)-brightgreen.svg)]()
 [![Target](https://img.shields.io/badge/Excel-2016%20%7C%202019%20%7C%202021%20%7C%20365-blue.svg)]()
 [![Architecture](https://img.shields.io/badge/Platform-Windows%20x64%20%7C%20x86-blue.svg)]()
 [![Framework](https://img.shields.io/badge/.NET-4.8%20%2B%20WPF-purple.svg)]()
+[![Release](https://img.shields.io/badge/Release-v4.0.0--GA-green.svg)]()
 
 A Windows desktop Microsoft Excel add-in delivering an Excel productivity experience inspired by the breadth and polish of commercial tools. Built with a custom Office Ribbon, extensive data cleaning and text transformation utilities, WPF dialogs with live before-and-after previews, and high-performance in-memory batch operations.
 
@@ -75,11 +76,23 @@ dotnet restore ExcelProductivitySuite.sln
 & "C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Current\Bin\MSBuild.exe" ExcelProductivitySuite.sln /t:Build /p:Configuration=Debug
 ```
 
-### Run Automated Tests
+### Run Automated Unit Tests (60 Tests)
 ```powershell
 dotnet test tests/ExcelProductivitySuite.UnitTests/ExcelProductivitySuite.UnitTests.csproj
 ```
-*Current test suite: **55 passed, 0 failed, 100% passing rate** (including 100K-cell performance benchmarks).*
+*Current unit & regression suite: **60 passed, 0 failed, 100% passing rate** (including 100K-cell performance benchmarks, 1,000-iteration memory leak tests, and duplicate idempotency tests).*
+
+### Run Real Excel Integration Tests (18 Scenarios)
+```powershell
+powershell -ExecutionPolicy Bypass -File tests/Run-ExcelIntegrationTests.ps1
+```
+*Executes out-of-process against active Microsoft Excel 2016+: **18 passed, 0 failed, 100%** (validating real range read/writes, formulas-to-values, ListObjects, protection, multi-area checks, and 100K end-to-end performance).*
+
+### Generate Release Distribution Package
+```powershell
+powershell -ExecutionPolicy Bypass -File installer/package.ps1
+```
+*Produces standalone distribution archive `dist/ExcelProductivitySuite-v4.0.0-win-x64.zip` and cryptographic checksum manifest `dist/SHA256SUMS.txt`.*
 
 ### Register Add-in in Excel
 ```powershell

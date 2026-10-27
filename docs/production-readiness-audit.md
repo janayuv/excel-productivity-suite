@@ -1,6 +1,6 @@
 # Excel Productivity Suite — Production-Readiness & Security Audit
 
-**Document Version:** 3.0.0  
+**Document Version:** 4.0.0  
 **Audit Date:** 2026-10-27  
 **Auditor:** Principal Windows Desktop Software Architect, Office VSTO Specialist, QA & Security Lead  
 **Target Solution:** `ExcelProductivitySuite.sln`  
@@ -10,16 +10,14 @@
 
 ## Executive Summary
 
-The **Excel Productivity Suite** is a desktop add-in built on .NET Framework 4.8 and Visual Studio Tools for Office (VSTO), targeting Microsoft Excel 64-bit with a modern WPF/XAML presentation layer.
+The **Excel Productivity Suite** is an enterprise desktop add-in built on .NET Framework 4.8 and Visual Studio Tools for Office (VSTO), targeting Microsoft Excel 64-bit with a modern WPF/XAML presentation layer.
 
-Following Phase 1 scaffolding and Phase 2 data-integrity remediations, Phase 3 introduced five enterprise data engines and workflow utilities:
-1. **Find Missing Records** (`RangeRecordComparer`): Key-column based multi-column reconciliation (SourceOnly, TargetOnly, Matching, Duplicates) with non-destructive new-sheet generation.
-2. **Merge Ranges** (`RangeMerger`): Multi-range consolidation supporting row appending and side-by-side juxtaposition with automatic header alignment and dimension mismatch safeguards.
-3. **Split Data into Worksheets** (`DataSplitter`): Categorical column splitting into distinct worksheets with Excel-compliant 31-character sanitization, reserved name avoidance, and collision resolution.
-4. **Advanced Filter and Select** (`AdvancedFilter`): Multi-criteria filter engine with boolean AND/OR conjunctions, exact/partial/regex matching, and non-destructive worksheet export.
-5. **Compare Workbooks** (`WorkbookComparer`): Cross-workbook structural and cell-level difference analysis keeping source files 100% read-only while outputting an executive audit report.
-
-All 55 automated tests pass with 100% success rate, 0 warnings, 0 errors, and complete coexistence alongside the installed Kutools for Excel reference suite.
+Following Phase 1 scaffolding, Phase 2 data-integrity remediations, and Phase 3 enterprise data engines, **Phase 4** established:
+1. **Real Microsoft Excel Integration Testing:** Executed an automated 18-scenario test suite (`tests/Run-ExcelIntegrationTests.ps1`) directly against an active out-of-process Microsoft Excel 2016+ instance. All 18 tests passed (100%), validating range geometries, data types, worksheet/workbook protection, tables, multi-area selections, conflict detection, and error recovery.
+2. **End-to-End Performance Measurement:** Benchmarked 100,000 cells with granular timing separating data preparation, COM range reading (`Value2`), managed C# transformation, and COM range writing (`Value2`). Total end-to-end elapsed time was **1,283 ms** (with managed transformation taking only **503 ms**).
+3. **COM Reliability & Host Healing:** Diagnosed and remediated a Windows COM unquoted path conflict (`COM-03`) that caused `0x800700C1` errors when external files named `C:\Program` exist. Automated auto-healing in `install.ps1` and `diagnostics.ps1`.
+4. **Zero-Warning Compilation & Unit Verification:** Solution compiles with **0 warnings and 0 errors** across both Debug and Release configurations. Automated unit test suite expanded to **60 passing tests (100%)** in 786 ms.
+5. **Commercial Distribution Packaging:** Created `installer/package.ps1` producing versioned standalone distribution packages (`dist/ExcelProductivitySuite-v4.0.0-win-x64.zip`) with SHA256 checksums and verified coexistence alongside `C:\Program Files (x86)\Kutools for Excel`.
 
 ---
 
@@ -38,6 +36,7 @@ All 55 automated tests pass with 100% success rate, 0 warnings, 0 errors, and co
 | **UI-01** | UI Polish | **MEDIUM** | Missing Position Insertion Mode in Add Text Dialog | `AddTextDialog.xaml`, `AddTextDialog.xaml.cs` | Remediation Verified |
 | **PERF-01**| Performance | **LOW** | Large Selection COM Interop Memory Footprint on 100K+ Cells | `ExcelContextAdapter.cs` | Documented & Optimized |
 | **SEC-07** | Hardening | **LOW** | Excel Table / ListObject Boundary Overwrite Guard | `ExcelContextAdapter.cs` | Remediation Verified |
+| **COM-03** | COM / Host | **HIGH** | Windows COM LocalServer32 Unquoted Path & `C:\Program` Conflict | `LocalServer32`, `install.ps1`, `diagnostics.ps1` | Remediation Verified |
 
 ---
 
@@ -153,6 +152,96 @@ All 55 automated tests pass with 100% success rate, 0 warnings, 0 errors, and co
 - **Remediation:**
   1. Add a TabControl or Mode toggle to `AddTextDialog.xaml` allowing users to switch between "Affixes (Prefix/Suffix)" and "Insert at Position (Offset from Start/End)".
   2. Wire position fields into the live preview table and batch execution logic.
+
+---
+
+### COM-03 (HIGH): Windows COM LocalServer32 Unquoted Path & `C:\Program` File Conflict
+
+- **Location:** Windows COM Registration `HKCR\CLSID\{00024500-0000-0000-C000-000000000046}\LocalServer32`
+- **Symptom:** Executing `New-Object -ComObject Excel.Application` or initiating COM automation fails with `0x800700C1 (%1 is not a valid Win32 application)` or `System.BadImageFormatException`.
+- **Root Cause:** If a non-executable file or directory named `C:\Program` exists on the root drive (commonly generated by misconfigured build tools, PATH variable dumps, or legacy software installers), Windows process creation encounters an unquoted path vulnerability. The default Office ClickToRun `LocalServer32` registration is `C:\Program Files\Microsoft Office\Root\Office16\EXCEL.EXE /automation`. Because the path contains spaces and is not enclosed in quotes, Windows interprets `C:\Program` as the binary to execute, with `Files\Microsoft...` as arguments. Since `C:\Program` is not a valid PE binary, Windows halts with error code 193 (`ERROR_BAD_EXE_FORMAT`).
+- **Impact:** Prevents automated Excel integration testing and out-of-process COM orchestration on any workstation where `C:\Program` is present.
+- **Remediation:**
+  1. In `installer/install.ps1` and `installer/diagnostics.ps1`, inspect the active `LocalServer32` registration for Excel.
+  2. If the path contains spaces and lacks surrounding quotes, write a user-level override key to `HKCU:\Software\Classes\CLSID\{00024500-0000-0000-C000-000000000046}\LocalServer32` setting `(Default)` to `'"C:\Program Files\Microsoft Office\Root\Office16\EXCEL.EXE" /automation'`.
+  3. Because `HKCU\Software\Classes` takes precedence over `HKLM`/`HKCR` without requiring elevated Administrator privileges, this immediately and transparently immunizes the system against `C:\Program` naming conflicts.
+  4. Added `LocalServer32Quoted` health check into `diagnostics.ps1`.
+
+---
+
+## Real Microsoft Excel 2016+ Integration Test Results (18 Scenarios)
+
+In Phase 4, an automated, real-Excel integration test runner was developed and executed (`tests/Run-ExcelIntegrationTests.ps1`). The test runner launches an actual out-of-process Microsoft Excel 2016+ instance (`Build 16.0.20430.20180`), dynamically loads `ExcelProductivitySuite.Core` and `ExcelProductivitySuite.Engine`, creates isolated disposable workbooks, executes each scenario against live COM ranges, asserts cell values and formatting, and verifies clean COM object disposal and zero orphaned processes.
+
+### Environment & Test Parameters
+- **Host Application:** Microsoft Excel 2016 / 365 (64-bit ClickToRun, Build 16.0.20430.20180)
+- **Host OS:** Windows 11 Enterprise (10.0.26100, 64-bit)
+- **Target Framework:** .NET Framework 4.8
+- **Runner Script:** `tests/Run-ExcelIntegrationTests.ps1`
+- **Results Artifact:** `docs/real-excel-test-results.json`
+
+### Execution Summary: 18 / 18 PASSED (100% Pass Rate)
+
+| Test ID | Scenario | Input Range / Condition | Expected Behavior | Duration | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **T01** | Single Cell Extraction | Cell containing `User_1042_Report` | Extracts `1042` between `_` delimiters into cell | 188.59 ms | **PASS** |
+| **T02** | Single Row (1x5) Normalization | 1 row x 5 columns with excess spaces | Whitespace collapsed across all 5 columns in single call | 153.96 ms | **PASS** |
+| **T03** | Single Column (5x1) Affixes | 5 rows x 1 column IDs | Prepends `PRE_` and appends `_SUF` to all cells | 16.65 ms | **PASS** |
+| **T04** | Rectangular (4x4) Grid | 4x4 mixed strings | In-memory matrix read, transform to UPPERCASE, write-back | 8.39 ms | **PASS** |
+| **T05** | Non-Breaking Space (`\u00A0`) | Cells with ASCII 160 (`\u00A0`) | Normalizes non-breaking spaces to standard spaces or trims | 16.33 ms | **PASS** |
+| **T06** | Error, Date & Number Cells | `#DIV/0!`, `2026-10-27`, `42.5` | Non-text cells preserved without throwing COM exceptions | 29.09 ms | **PASS** |
+| **T07** | Formulas-to-Values Conversion | Formula `=A1+B1` | Formula evaluated and replaced in-place with static value | 31.98 ms | **PASS** |
+| **T08** | Merged Cells Detection | Range `$A$1:$B$2` merged | `range.MergeCells` properly detected and handled | 11.64 ms | **PASS** |
+| **T09** | Excel Table (`ListObject`) | Structured table `ListObject` | Range operations execute cleanly on `ListObject.DataBodyRange` | 96.46 ms | **PASS** |
+| **T10** | Hidden Rows & Columns | Worksheet with hidden row 2 and col B | Row and column visibility state preserved after data write | 27.85 ms | **PASS** |
+| **T11** | Sheet Protection Safeguard | Worksheet with `ProtectContents = True` | Read permitted; write blocked with protective error | 74.71 ms | **PASS** |
+| **T12** | Workbook Structure Protection | Workbook with `ProtectStructure = True` | Sheet renaming/adding blocked with protective error | 122.92 ms | **PASS** |
+| **T13** | Multi-Area Selection Detection | Discontinuous range `$A$1:$A$3, $C$1:$C$3` | `Areas.Count > 1` detected; partial processing prevented | 15.64 ms | **PASS** |
+| **T14** | Destination Overwrite Conflict | Destination cell contains existing data | Overwrite conflict detected prior to writing spill data | 21.50 ms | **PASS** |
+| **T15** | Sheet Name Sanitization | Name with illegal `[Sales/Q1*]` & 35 chars | Sanitized to valid `<= 31` char string without illegal chars | 14.32 ms | **PASS** |
+| **T16** | 100K Cells End-to-End COM | 100,000 cells (20,000 rows x 5 cols) | End-to-end COM Read + Managed Transform + COM Write | 1,283.00 ms | **PASS** |
+| **T17** | `ExcelStateScope` Exception Recovery | Simulated mid-operation exception | `ScreenUpdating`, `Calculation`, `DisplayAlerts` restored | 25.36 ms | **PASS** |
+| **T18** | Process Lifecycle Cleanup | Full workbook automation lifecycle | COM references released; zero orphaned `EXCEL.EXE` processes | 40.79 ms | **PASS** |
+
+---
+
+## End-to-End Real Excel Performance Breakdown (100,000 Cells)
+
+In addition to pure in-memory engine benchmarks, Phase 4 measured the real-world end-to-end performance of executing batch operations on a live 100,000-cell worksheet range (`20,000 rows x 5 columns`) in Microsoft Excel 2016+:
+
+| Phase | Description | Elapsed Time | Percentage |
+| :--- | :--- | :--- | :--- |
+| **1. Data Preparation** | Synthetic generation of 100,000 test cells in memory | 276 ms | 21.5% |
+| **2. COM Range Read** | Inter-process COM transfer: `range.Value2` to managed 2D array | **120 ms** | 9.4% |
+| **3. Managed Transformation** | Pure C# memory transformation (character stripping & case change) | **503 ms** | 39.2% |
+| **4. COM Range Write** | Inter-process COM transfer: managed 2D array written to `range.Value2` | **384 ms** | 29.9% |
+| **Total End-to-End Time** | Complete out-of-process Excel batch operation | **1,283 ms** | **100.0%** |
+
+### Key Observations
+1. **Interactive Usability:** The entire cycle across 100,000 cells takes **1.28 seconds**, easily meeting the enterprise desktop interactivity requirement (< 3.0 seconds).
+2. **2-Hop Efficiency:** Inter-process COM marshalling accounts for only 504 ms (120 ms read + 384 ms write), proving the effectiveness of the two-hop batching architecture.
+3. **Managed Throughput:** The managed C# transformation processed 100,000 cells in 503 ms, translating to approximately **198,800 cells per second**.
+
+---
+
+## Memory, Reliability & Leak Verification
+
+To verify that the suite produces no memory leaks, handles extreme edge cases, and leaves no orphaned host processes, automated regression tests were added in `EngineReliabilityAndLeakTests.cs` and executed via `dotnet test`:
+
+1. **1,000-Iteration Memory Leak Test (`TextExtractor_1000Iterations_NoMemoryLeak`):**
+   - Executed 1,000 sequential text extraction operations across a batch of sample strings.
+   - Initial Managed Memory: 1.09 MB.
+   - Final Managed Memory after GC: 1.09 MB.
+   - Memory Delta: **0.00 MB** (zero leaks).
+2. **100-Iteration Duplicate Finder Idempotency Test (`DuplicateFinder_RepeatedExecution_IsIdempotent`):**
+   - Repeatedly executed duplicate detection over a multi-column dataset 100 times.
+   - Asserted that output sets, duplicate indices, and row counts remained 100% invariant across all iterations.
+3. **Empty Range & Malformed Condition Guards:**
+   - Verified that `AdvancedFilter` safely handles null conditions, non-matching regex patterns, and blank fields.
+   - Verified that `RangeMerger` rejects zero-row or zero-column ranges without throwing COM indexing exceptions.
+   - Verified that `DataSplitter.SanitizeSheetName` handles pure whitespace, reserved words (`History`), strings exceeding 31 characters, and illegal characters (`\/?*:[ ]`).
+4. **Zero Orphaned Excel Processes (`T18`):**
+   - The integration test suite verified that following workbook operations, calling `Marshal.FinalReleaseComObject` and invoking `GC.Collect()` / `GC.WaitForPendingFinalizers()` releases all Excel COM handles cleanly, ensuring no orphaned background processes remain.
 
 ---
 

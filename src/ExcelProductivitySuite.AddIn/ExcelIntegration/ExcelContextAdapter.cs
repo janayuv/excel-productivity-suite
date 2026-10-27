@@ -280,6 +280,12 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
                 return;
             }
 
+            if (IsMultiAreaSelection)
+            {
+                ShowMessage("This operation does not support non-contiguous multi-area selections. Please select a single contiguous range.", "Multi-Area Selection", isError: true);
+                return;
+            }
+
             using (new ExcelStateScope(_app))
             {
                 range.Value2 = values;
@@ -299,6 +305,7 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
 
             int rows = values.GetLength(0);
             int cols = values.GetLength(1);
+            if (rows <= 0 || cols <= 0) return;
 
             using (new ExcelStateScope(_app))
             {

@@ -259,6 +259,7 @@
     <ProjectReference Include="..\ExcelProductivitySuite.Infrastructure\ExcelProductivitySuite.Infrastructure.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Ribbon\ExcelProductivityRibbon.xml" />
     <None Include="Ribbon\ExcelProductivityRibbon.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

@@ -22,23 +22,40 @@ namespace ExcelProductivitySuite.AddIn.Ribbon
 
         public string GetCustomUI(string ribbonID)
         {
-            // Read Ribbon XML from assembly directory or embedded resource
+            // 1. First priority: Load from embedded assembly resource (portable across all deployments)
+            var asm = Assembly.GetExecutingAssembly();
+            using (var stream = asm.GetManifestResourceStream("ExcelProductivitySuite.AddIn.Ribbon.ExcelProductivityRibbon.xml"))
+            {
+                if (stream != null)
+                {
+                    using (var reader = new StreamReader(stream))
+                    {
+                        return reader.ReadToEnd();
+                    }
+                }
+            }
+
+            // 2. Second priority: Read Ribbon XML from deployment / assembly directory
             string baseDir = AppDomain.CurrentDomain.BaseDirectory;
             string xmlPath = Path.Combine(baseDir, "Ribbon", "ExcelProductivityRibbon.xml");
-
             if (File.Exists(xmlPath))
             {
                 return File.ReadAllText(xmlPath);
             }
 
-            // Fallback: check project relative path during dev
-            string devPath = @"d:\Kutools-New\src\ExcelProductivitySuite.AddIn\Ribbon\ExcelProductivityRibbon.xml";
-            if (File.Exists(devPath))
+            // 3. Fallback: check relative path from assembly location
+            string codeBase = Assembly.GetExecutingAssembly().Location;
+            if (!string.IsNullOrEmpty(codeBase))
             {
-                return File.ReadAllText(devPath);
+                string asmDir = Path.GetDirectoryName(codeBase) ?? "";
+                string asmXmlPath = Path.Combine(asmDir, "Ribbon", "ExcelProductivityRibbon.xml");
+                if (File.Exists(asmXmlPath))
+                {
+                    return File.ReadAllText(asmXmlPath);
+                }
             }
 
-            throw new FileNotFoundException($"Cannot locate Ribbon XML at {xmlPath} or {devPath}");
+            throw new FileNotFoundException($"Cannot locate Ribbon XML as embedded resource or on disk at '{xmlPath}'.");
         }
 
         public void OnRibbonLoad(Office.IRibbonUI ribbonUI)
