@@ -1,0 +1,32 @@
+## Visual Studio / .NET / VSTO .gitignore
+[Oo]bj/
+[Bb]in/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+TestResults/
+*.resharper
+*.dotCover
+
+# Office temporary files
+~$*.xlsx
+~$*.xlsm
+~$*.xls
+~$*.doc
+~$*.docx
+~$*.ppt
+~$*.pptx
+
+# Build outputs
+*.nupkg
+*.cab
+*.msi
+*.msix
+*.appx
+_ReSharper*/
+
+# ClickOnce / VSTO temporary publish
+publish/
+*.publishproj
