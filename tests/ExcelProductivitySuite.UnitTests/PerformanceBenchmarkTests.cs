@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using ExcelProductivitySuite.Engine.DataCleaning;
+using ExcelProductivitySuite.Engine.Files;
 using ExcelProductivitySuite.Engine.Formulas;
 using ExcelProductivitySuite.Engine.Ranges;
 using ExcelProductivitySuite.Engine.Text;
@@ -651,6 +652,50 @@ namespace ExcelProductivitySuite.UnitTests
 
             Assert.AreEqual(10000, modified);
             Assert.IsTrue(sw.ElapsedMilliseconds < 500, $"FormulaReferenceConverter benchmark took {sw.ElapsedMilliseconds} ms, target is < 500 ms");
+        }
+
+        [TestMethod]
+        public void Benchmark_CsvTextImporter_100K_Cells_CompletesUnder500ms()
+        {
+            var sb = new System.Text.StringBuilder();
+            for (int r = 0; r < 10000; r++)
+            {
+                sb.AppendLine($"User_{r},Company_{r},12345,99.95,\"Description with, comma\",2026-01-01,Active,Cat_{r % 10},Ref_{r},Standard");
+            }
+            string csvContent = sb.ToString();
+
+            var sw = Stopwatch.StartNew();
+            var matrix = CsvTextImporter.ParseText(csvContent);
+            sw.Stop();
+
+            Assert.AreEqual(10000, matrix.GetLength(0));
+            Assert.AreEqual(10, matrix.GetLength(1));
+            Assert.IsTrue(sw.ElapsedMilliseconds < 500, $"CsvTextImporter benchmark took {sw.ElapsedMilliseconds} ms, target is < 500 ms");
+        }
+
+        [TestMethod]
+        public void Benchmark_RangeExporter_100K_Cells_CompletesUnder500ms()
+        {
+            int rows = 10000;
+            int cols = 10;
+            object?[,] matrix = new object?[rows, cols];
+
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    matrix[r, c] = $"Cell_{r}_{c}";
+                }
+            }
+
+            var options = new RangeExportOptions { Format = ExportFileFormat.Csv, QuoteAllFields = false };
+
+            var sw = Stopwatch.StartNew();
+            string csv = RangeExporter.ExportToString(matrix, options);
+            sw.Stop();
+
+            Assert.IsTrue(csv.Length > 100000);
+            Assert.IsTrue(sw.ElapsedMilliseconds < 500, $"RangeExporter benchmark took {sw.ElapsedMilliseconds} ms, target is < 500 ms");
         }
     }
 }

@@ -239,52 +239,22 @@ namespace ExcelProductivitySuite.AddIn.Startup
                 new[] { "repeating headers", "print titles", "rows to repeat at top", "print header rows" }, "PrintTitles");
 
             // =========================================================================
-            // Module I: Import, Export, and File Utilities (Batch 8)
+            // Module I: Import, Export, and File Utilities (Remaining Future Roadmap)
             // =========================================================================
-            AddPlanned(registry, "CMD_FILE_IMPORT_CSV", "Import CSV / Text Files",
-                "Import delimited text and CSV files with custom encodings, delimiters, and column datatypes.",
-                CommandCategory.ImportExportAndFiles, "I", "Batch 8",
-                new[] { "import csv", "import text", "load delimited file", "read csv into sheet" }, "GetExternalDataFromText");
-
-            AddPlanned(registry, "CMD_FILE_EXPORT_RANGE_CSV", "Export Range to CSV",
-                "Export selected cells or active table to a standalone CSV, TSV, or JSON file.",
-                CommandCategory.ImportExportAndFiles, "I", "Batch 8",
-                new[] { "export csv", "save range as csv", "export selection", "export tsv" }, "SaveAsCsv");
-
-            AddPlanned(registry, "CMD_FILE_EXPORT_SHEETS_PDF", "Export Worksheets to PDF",
-                "Batch export selected worksheets or entire workbook to high-resolution PDF documents.",
-                CommandCategory.ImportExportAndFiles, "I", "Batch 8",
-                new[] { "export pdf", "save as pdf", "batch pdf export", "convert sheets to pdf" }, "FileSaveAsPdfOrXps");
-
-            AddPlanned(registry, "CMD_FILE_BATCH_CONVERT", "Batch Convert Workbook Formats",
-                "Convert folders of legacy .xls files to modern .xlsx or export workbooks to CSV.",
-                CommandCategory.ImportExportAndFiles, "I", "Batch 8",
-                new[] { "batch convert workbooks", "convert xls to xlsx", "bulk format conversion" }, "FileSaveAs");
-
-            AddPlanned(registry, "CMD_FILE_FOLDER_LISTING", "Generate File & Folder Inventory",
-                "Scan a directory on disk and output a comprehensive file inventory table with file sizes and dates.",
-                CommandCategory.ImportExportAndFiles, "I", "Batch 8",
-                new[] { "folder listing", "file inventory", "list files in folder", "directory scan" }, "FileOpen");
-
             AddPlanned(registry, "CMD_FILE_IMPORT_PICTURES", "Import Pictures into Cells",
                 "Batch import image files into cells with automated sizing and cell locking.",
-                CommandCategory.ImportExportAndFiles, "I", "Batch 8",
+                CommandCategory.ImportExportAndFiles, "I", "Batch 8+",
                 new[] { "import pictures", "insert images in cells", "batch photos", "fit image to cell" }, "PictureInsertFromFile");
 
             AddPlanned(registry, "CMD_FILE_MATCH_PICTURES", "Match Pictures by Key",
                 "Match image file names against product codes or employee IDs in cells and insert pictures.",
-                CommandCategory.ImportExportAndFiles, "I", "Batch 8",
+                CommandCategory.ImportExportAndFiles, "I", "Batch 8+",
                 new[] { "match pictures", "lookup images", "insert pictures by name", "product photos" }, "PictureInsertFromFile");
 
             AddPlanned(registry, "CMD_FILE_EXPORT_CHARTS", "Export Charts to Images",
                 "Export all embedded charts and shapes in the workbook as PNG, JPEG, or SVG files.",
-                CommandCategory.ImportExportAndFiles, "I", "Batch 8",
+                CommandCategory.ImportExportAndFiles, "I", "Batch 8+",
                 new[] { "export charts", "save chart as image", "chart picture export", "png charts" }, "ChartTypePieInsertGallery");
-
-            AddPlanned(registry, "CMD_FILE_INSERT_TEXT_FILE", "Insert Text File Content",
-                "Insert raw content from an external text file at the current active cell cursor.",
-                CommandCategory.ImportExportAndFiles, "I", "Batch 8",
-                new[] { "insert text file", "append file text", "read text into cell" }, "FileOpen");
 
             // =========================================================================
             // Module J: Protection and Recovery (Batch 9)

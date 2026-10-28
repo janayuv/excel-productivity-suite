@@ -140,6 +140,12 @@ namespace ExcelProductivitySuite.AddIn.Ribbon
                 case "btnRangeMath": return "CMD_RANGE_MATH_OPERATIONS";
                 case "btnCopyPageSetup": return "CMD_FORMAT_PAGE_SETUP_COPY";
                 case "btnFreezePanesMulti": return "CMD_FORMAT_FREEZE_PANES";
+                case "btnImportCsv": return "CMD_FILE_IMPORT_CSV";
+                case "btnExportRange": return "CMD_FILE_EXPORT_RANGE_CSV";
+                case "btnExportPdf": return "CMD_FILE_EXPORT_SHEETS_PDF";
+                case "btnFolderListing": return "CMD_FILE_FOLDER_LISTING";
+                case "btnInsertTextFile": return "CMD_FILE_INSERT_TEXT_FILE";
+                case "btnBatchConvert": return "CMD_FILE_BATCH_CONVERT";
                 case "btnAbout": return "CMD_ABOUT";
                 default: return controlId;
             }

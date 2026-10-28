@@ -1,0 +1,97 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.ExportSheetsPdfDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Export to PDF - Excel Productivity Suite"
+        Height="500" Width="480"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="📕" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Export to PDF" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Publish worksheets or entire active workbook as high-resolution PDF documents" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Export Scope -->
+        <GroupBox Grid.Row="1" Header="Export Scope" Style="{StaticResource ModernGroupBoxStyle}">
+            <StackPanel Margin="4">
+                <RadioButton x:Name="ActiveSheetRadio" Content="Active Worksheet Only" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,0,6" Checked="Scope_Changed" />
+                <RadioButton x:Name="EntireWorkbookRadio" Content="Entire Active Workbook" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,0,6" Checked="Scope_Changed" />
+                <RadioButton x:Name="SelectedSheetsRadio" Content="Selected Worksheets..." Style="{StaticResource ModernRadioButtonStyle}" Checked="Scope_Changed" />
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Worksheets List (Visible when SelectedSheetsRadio is checked) -->
+        <GroupBox x:Name="SheetsBox" Grid.Row="2" Header="Select Worksheets" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,10,0,10" Visibility="Collapsed">
+            <Grid Margin="4">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <DockPanel Grid.Row="0" Margin="0,0,0,6">
+                    <TextBlock Text="Worksheets to include:" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Select All" Width="70" Margin="0,0,6,0" Style="{StaticResource ModernSecondaryButtonStyle}" Click="SelectAll_Click" />
+                        <Button Content="Deselect All" Width="80" Style="{StaticResource ModernSecondaryButtonStyle}" Click="DeselectAll_Click" />
+                    </StackPanel>
+                </DockPanel>
+                <ListBox x:Name="SheetsList" Grid.Row="1" BorderBrush="#DEE2E6" BorderThickness="1" Background="White" MaxHeight="120">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <CheckBox Content="{Binding Name}" IsChecked="{Binding IsSelected}" Style="{StaticResource ModernCheckBoxStyle}" Margin="2" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+        </GroupBox>
+
+        <!-- Output File & Options -->
+        <GroupBox Grid.Row="3" Header="Destination PDF &amp; Options" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,0,0,12">
+            <StackPanel Margin="4">
+                <DockPanel Margin="0,0,0,8">
+                    <Button Content="Browse..." Width="80" DockPanel.Dock="Right" Style="{StaticResource ModernSecondaryButtonStyle}" Click="Browse_Click" />
+                    <TextBox x:Name="DestinationPathText" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,8,0" />
+                </DockPanel>
+                <CheckBox x:Name="OpenAfterExportCheck" Content="Open PDF document after publishing" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" />
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Footer / Action Buttons -->
+        <DockPanel Grid.Row="4">
+            <TextBlock x:Name="StatusLabel" Text="Ready" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Publish PDF" Width="100" Margin="0,0,8,0" Style="{StaticResource ModernPrimaryButtonStyle}" Click="Export_Click" />
+                <Button Content="Close" Width="75" Style="{StaticResource ModernSecondaryButtonStyle}" Click="Close_Click" />
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

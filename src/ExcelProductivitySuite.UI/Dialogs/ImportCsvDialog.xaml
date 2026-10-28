@@ -1,0 +1,94 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.ImportCsvDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Import CSV / Text File - Excel Productivity Suite"
+        Height="540" Width="600"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="📥" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Import CSV / Text File" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Parse delimited text and CSV data with automatic formatting and schema preview" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- File Selection -->
+        <GroupBox Grid.Row="1" Header="Source File" Style="{StaticResource ModernGroupBoxStyle}">
+            <DockPanel Margin="4">
+                <Button Content="Browse..." Width="80" DockPanel.Dock="Right" Style="{StaticResource ModernSecondaryButtonStyle}" Click="Browse_Click" />
+                <TextBox x:Name="FilePathText" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,8,0" TextChanged="FilePath_TextChanged" />
+            </DockPanel>
+        </GroupBox>
+
+        <!-- Delimiter & Import Settings -->
+        <GroupBox Grid.Row="2" Header="Delimiter &amp; Destination" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,10,0,10">
+            <StackPanel Margin="4">
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                    <TextBlock Text="Delimiter:" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="11" />
+                    <ComboBox x:Name="DelimiterCombo" Width="130" Style="{StaticResource ModernComboBoxStyle}" Margin="0,0,16,0" SelectionChanged="Setting_Changed" />
+
+                    <TextBlock Text="Encoding:" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="11" />
+                    <ComboBox x:Name="EncodingCombo" Width="140" Style="{StaticResource ModernComboBoxStyle}" SelectionChanged="Setting_Changed" />
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                    <CheckBox x:Name="ParseNumbersCheck" Content="Convert numbers to numeric cells" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" Margin="0,0,16,0" Checked="Setting_Changed" Unchecked="Setting_Changed" />
+                    <CheckBox x:Name="TrimWhitespaceCheck" Content="Trim cell whitespace" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" Checked="Setting_Changed" Unchecked="Setting_Changed" />
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Destination:" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="11" />
+                    <RadioButton x:Name="ActiveCellRadio" Content="Active Cell Position" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,16,0" />
+                    <RadioButton x:Name="NewSheetRadio" Content="New Worksheet" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,8,0" />
+                    <TextBox x:Name="NewSheetNameText" Text="Imported_Data" Width="130" Style="{StaticResource ModernTextBoxStyle}" />
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Preview DataGrid -->
+        <GroupBox Grid.Row="3" Header="Data Preview (First 5 Rows)" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,0,0,12">
+            <DataGrid x:Name="PreviewGrid" AutoGenerateColumns="True" IsReadOnly="True"
+                      HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                      HorizontalGridLinesBrush="#E9ECEF" Background="White"
+                      BorderThickness="1" BorderBrush="#DEE2E6" />
+        </GroupBox>
+
+        <!-- Footer / Action Buttons -->
+        <DockPanel Grid.Row="4">
+            <TextBlock x:Name="StatusLabel" Text="Please select a CSV or text file to import." VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Import Data" Width="110" Margin="0,0,8,0" Style="{StaticResource ModernPrimaryButtonStyle}" Click="Import_Click" />
+                <Button Content="Cancel" Width="75" Style="{StaticResource ModernSecondaryButtonStyle}" Click="Cancel_Click" />
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

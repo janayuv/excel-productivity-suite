@@ -1,0 +1,90 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.BatchConvertWorkbooksDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Batch Convert Workbooks - Excel Productivity Suite"
+        Height="470" Width="500"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="🔄" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Batch Convert Workbooks" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Convert entire folders of workbook files to modern XLSX, PDF, CSV, or legacy XLS format" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Source Folder & Pattern -->
+        <GroupBox Grid.Row="1" Header="Source Files" Style="{StaticResource ModernGroupBoxStyle}">
+            <StackPanel Margin="4">
+                <TextBlock Text="Source Folder:" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,2" />
+                <DockPanel Margin="0,0,0,8">
+                    <Button Content="Browse..." Width="80" DockPanel.Dock="Right" Style="{StaticResource ModernSecondaryButtonStyle}" Click="BrowseSource_Click" />
+                    <TextBox x:Name="SourceFolderText" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,8,0" TextChanged="SourceFolder_TextChanged" />
+                </DockPanel>
+
+                <DockPanel>
+                    <TextBlock Text="File Filter:" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="11" />
+                    <ComboBox x:Name="SourcePatternCombo" Width="200" HorizontalAlignment="Left" Style="{StaticResource ModernComboBoxStyle}" SelectionChanged="Filter_Changed" />
+                </DockPanel>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Conversion Target -->
+        <GroupBox Grid.Row="2" Header="Target Format &amp; Output Directory" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,10,0,10">
+            <StackPanel Margin="4">
+                <DockPanel Margin="0,0,0,8">
+                    <TextBlock Text="Convert To:" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="11" />
+                    <ComboBox x:Name="TargetFormatCombo" Width="200" HorizontalAlignment="Left" Style="{StaticResource ModernComboBoxStyle}" />
+                </DockPanel>
+
+                <TextBlock Text="Output Directory:" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,2" />
+                <DockPanel>
+                    <Button Content="Browse..." Width="80" DockPanel.Dock="Right" Style="{StaticResource ModernSecondaryButtonStyle}" Click="BrowseOutput_Click" />
+                    <TextBox x:Name="OutputFolderText" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,8,0" />
+                </DockPanel>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Status / Detected Count -->
+        <GroupBox Grid.Row="3" Header="Status" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,0,0,12">
+            <TextBlock x:Name="FoundCountLabel" Text="0 matching file(s) found in source directory." FontSize="11" Margin="4" Foreground="{StaticResource TextPrimaryBrush}" />
+        </GroupBox>
+
+        <!-- Footer / Action Buttons -->
+        <DockPanel Grid.Row="4">
+            <TextBlock x:Name="StatusLabel" Text="Ready" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Convert Files" Width="110" Margin="0,0,8,0" Style="{StaticResource ModernPrimaryButtonStyle}" Click="Convert_Click" />
+                <Button Content="Close" Width="75" Style="{StaticResource ModernSecondaryButtonStyle}" Click="Cancel_Click" />
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

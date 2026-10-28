@@ -4,7 +4,7 @@
 **Host Application:** Microsoft Excel 2016 / 2019 / 2021 / Microsoft 365 (32-bit & 64-bit Windows Desktop)  
 **Framework:** .NET Framework 4.8 & Visual Studio Tools for Office (VSTO)  
 **UI Subsystem:** Windows Presentation Foundation (WPF) / Modern Fluent Office Palette  
-**Version:** 4.7.0 (Batch 7 Formatting, Formulas & Printing Milestone)  
+**Version:** 4.8.0 (Batch 8 Import, Export & File Utilities Milestone)  
 **Last Audit Date:** 2026-10-28  
 
 ---
@@ -15,8 +15,8 @@ Following the mandatory codebase audit, the **Excel Productivity Suite** feature
 
 The current implementation comprises:
 - **Total Cataloged Capabilities:** 200+ features planned across 12 modules
-- **Active & Verified Tools:** 59 commands (57 core productivity utilities + 2 suite navigation/information utilities)
-- **Unit Test Coverage:** 176 passing automated unit & performance tests (100% pass rate in 1.0s)
+- **Active & Verified Tools:** 65 commands (63 core productivity utilities + 2 suite navigation/information utilities)
+- **Unit Test Coverage:** 186 passing automated unit & performance tests (100% pass rate in 2.0s)
 - **Real Excel COM Integration Tests:** 18 passing out-of-process Excel 2016+ scenarios (100% pass rate in 1.25s)
 - **Searchable Quick Tool Launcher (SuperSearch):** Integrated multi-category search, active/roadmap status filtering, module badges, and keyword scoring (`Ctrl+Shift+P` / KeyTip: `TL`)
 
@@ -46,7 +46,7 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 
 ---
 
-## 4. Complete Active Feature Inventory (59 Implemented & Verified Tools)
+## 4. Complete Active Feature Inventory (65 Implemented & Verified Tools)
 
 | ID | Title | Module | Category | Engine Class | UI Dialog / Action | Test Mapping | Status |
 | :--- | :--- | :---: | :--- | :--- | :--- | :--- | :--- |
@@ -109,6 +109,12 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 | `CMD_RANGE_MATH_OPERATIONS` | **Math Operations** | B | Range & Cells | `RangeMathOperations.cs` | `MathOperationsDialog.xaml` | `RangeAndSheetTests`, `Benchmark_RangeMathOperations` | Implemented and verified |
 | `CMD_FORMAT_PAGE_SETUP_COPY` | **Copy Page Setup** | H | Formatting & Design | `ExcelContextAdapter.cs` | `CopyPageSetupDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
 | `CMD_FORMAT_FREEZE_PANES` | **Freeze Panes Multi** | H | Formatting & Design | `ExcelContextAdapter.cs` | `FreezePanesMultiDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_FILE_IMPORT_CSV` | **Import CSV / Text** | I | Import, Export & Files | `CsvTextImporter.cs` | `ImportCsvDialog.xaml` | `RangeAndSheetTests`, `Benchmark_CsvTextImporter` | Implemented and verified |
+| `CMD_FILE_EXPORT_RANGE_CSV` | **Export Range** | I | Import, Export & Files | `RangeExporter.cs` | `ExportRangeDialog.xaml` | `RangeAndSheetTests`, `Benchmark_RangeExporter` | Implemented and verified |
+| `CMD_FILE_EXPORT_SHEETS_PDF` | **Export to PDF** | I | Import, Export & Files | `ExcelContextAdapter.cs` | `ExportSheetsPdfDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_FILE_FOLDER_LISTING` | **Folder File Listing** | I | Import, Export & Files | `FolderInventoryScanner.cs` | `FolderListingDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_FILE_INSERT_TEXT_FILE` | **Insert Text File** | I | Import, Export & Files | `TextFileReader.cs` | `InsertTextFileDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_FILE_BATCH_CONVERT` | **Batch Convert Files** | I | Import, Export & Files | `ExcelContextAdapter.cs` | `BatchConvertWorkbooksDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
 
 ---
 
@@ -235,15 +241,15 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 - [ ] `CMD_PRINT_REPEATING_HEADERS`: Configure rows and columns to repeat on every printed page. *(Planned - Batch 7+)*
 
 ### Module I: Import, Export, and File Utilities (Target: 14 Tools)
-- [ ] `CMD_FILE_IMPORT_CSV`: Import delimited text and CSV files with custom encodings. *(Planned - Batch 8)*
-- [ ] `CMD_FILE_EXPORT_RANGE_CSV`: Export selected range or active table to CSV or JSON file. *(Planned - Batch 8)*
-- [ ] `CMD_FILE_EXPORT_SHEETS_PDF`: Batch export selected sheets or workbook to PDF format. *(Planned - Batch 8)*
-- [ ] `CMD_FILE_BATCH_CONVERT`: Batch convert folders of .xls files to modern .xlsx format. *(Planned - Batch 8)*
-- [ ] `CMD_FILE_FOLDER_LISTING`: Generate file and folder directory inventory table in worksheet. *(Planned - Batch 8)*
-- [ ] `CMD_FILE_IMPORT_PICTURES`: Batch import picture files into cells with automated sizing. *(Planned - Batch 8)*
-- [ ] `CMD_FILE_MATCH_PICTURES`: Match picture filenames against cell keys (SKUs, IDs) and insert. *(Planned - Batch 8)*
-- [ ] `CMD_FILE_EXPORT_CHARTS`: Export embedded charts as high-resolution PNG, JPEG, or SVG images. *(Planned - Batch 8)*
-- [ ] `CMD_FILE_INSERT_TEXT_FILE`: Insert raw text from an external file into active cell cursor. *(Planned - Batch 8)*
+- [x] `CMD_FILE_IMPORT_CSV`: Import delimited text and CSV files with custom encodings. *(Active - Batch 8)*
+- [x] `CMD_FILE_EXPORT_RANGE_CSV`: Export selected range or active table to CSV or JSON file. *(Active - Batch 8)*
+- [x] `CMD_FILE_EXPORT_SHEETS_PDF`: Batch export selected sheets or workbook to PDF format. *(Active - Batch 8)*
+- [x] `CMD_FILE_BATCH_CONVERT`: Batch convert folders of .xls files to modern .xlsx format. *(Active - Batch 8)*
+- [x] `CMD_FILE_FOLDER_LISTING`: Generate file and folder directory inventory table in worksheet. *(Active - Batch 8)*
+- [x] `CMD_FILE_INSERT_TEXT_FILE`: Insert raw text from an external file into active cell cursor. *(Active - Batch 8)*
+- [ ] `CMD_FILE_IMPORT_PICTURES`: Batch import picture files into cells with automated sizing. *(Planned - Batch 8+)*
+- [ ] `CMD_FILE_MATCH_PICTURES`: Match picture filenames against cell keys (SKUs, IDs) and insert. *(Planned - Batch 8+)*
+- [ ] `CMD_FILE_EXPORT_CHARTS`: Export embedded charts as high-resolution PNG, JPEG, or SVG images. *(Planned - Batch 8+)*
 
 ### Module J: Protection and Recovery (Target: 10 Tools)
 - [ ] `CMD_SECURITY_BATCH_PROTECT`: Batch protect multiple worksheets with authorized password. *(Planned - Batch 9)*
@@ -286,8 +292,8 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 | **Batch 5** | **Worksheet & Workbook Management** | Combine Sheets, Combine Workbooks, Split Workbook to Files, Sort Tabs, Sheet Index TOC, Delete Blanks | **COMPLETED** |
 | **Batch 6** | **Filtering, Data Validation & Table Merge** | Advanced Multi-Sort, Color Filter/Count, Table Merge/Upsert, Dropdown Lists, Email/Phone Validation | **COMPLETED** |
 | **Batch 7** | **Formatting, Formulas & Printing** | Reference Conversion (Abs/Rel), Exact Copy, Locate Errors, Math Operations, Number/Date Formats, Page Setup | **COMPLETED** |
-| **Batch 8** | **Import, Export & Picture Utilities** | CSV Import/Export, PDF Export, Batch Format Convert, Folder Listing, Cell Pictures, Chart Image Export | **Next Up** |
-| **Batch 9** | **Protection, Recovery, Charts & Analysis** | Batch Protect/Unprotect, Workbook Snapshots, Gantt/Waterfall Charts, Quick Statistics Dashboard | Planned |
+| **Batch 8** | **Import, Export & Picture Utilities** | CSV Import/Export, PDF Export, Batch Format Convert, Folder Listing, Cell Pictures, Chart Image Export | **COMPLETED** |
+| **Batch 9** | **Protection, Recovery, Charts & Analysis** | Batch Protect/Unprotect, Workbook Snapshots, Gantt/Waterfall Charts, Quick Statistics Dashboard | **Next Up** |
 | **Batch 10** | **Navigation, UX Polish, Packaging & Release** | Navigation Pane, Grid-Focus Crosshair, Date Picker, Formula Editor, Release Installer Verification | Planned |
 
 ---

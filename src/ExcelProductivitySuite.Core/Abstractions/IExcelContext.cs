@@ -297,6 +297,17 @@ namespace ExcelProductivitySuite.Core.Abstractions
         int SynchronizeFreezePanes(IEnumerable<string> targetSheetNames, FreezePanesSyncMode mode, int splitRow = 1, int splitCol = 1);
 
         /// <summary>
+        /// Exports specified worksheets or the entire active workbook to a PDF document.
+        /// </summary>
+        bool ExportToPdf(string destinationPath, IEnumerable<string>? sheetNames = null, bool openAfterExport = false);
+
+        /// <summary>
+        /// Batch converts workbook files from one format to another (e.g. .xls to .xlsx).
+        /// Returns the number of files successfully converted.
+        /// </summary>
+        int BatchConvertWorkbooks(IEnumerable<string> filePaths, string outputDirectory, string targetExtension);
+
+        /// <summary>
         /// Shows an informational, warning, or error alert dialog in Excel.
         /// </summary>
         void ShowMessage(string message, string title, bool isError = false);

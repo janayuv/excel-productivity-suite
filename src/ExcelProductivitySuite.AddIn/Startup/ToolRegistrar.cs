@@ -906,6 +906,118 @@ namespace ExcelProductivitySuite.AddIn.Startup
                 roadmapBatch: "Batch 7"
             ));
 
+            // =========================================================================
+            // Module I: Import, Export, and File Utilities (Batch 8 Expansion)
+            // =========================================================================
+
+            // Import CSV / Text File
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_FILE_IMPORT_CSV",
+                title: "Import CSV / Text",
+                description: "Parse delimited text and CSV data with automatic formatting and schema preview.",
+                category: CommandCategory.ImportExportAndFiles,
+                executeAction: ctx =>
+                {
+                    var dlg = new ImportCsvDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "import csv", "import text", "load delimited file", "read csv into sheet" },
+                officeIconName: "GetExternalDataFromText",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "I",
+                roadmapBatch: "Batch 8"
+            ));
+
+            // Export Range to File
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_FILE_EXPORT_RANGE_CSV",
+                title: "Export Range to File",
+                description: "Export selected cells to CSV, TSV, custom-delimited text, or structured JSON.",
+                category: CommandCategory.ImportExportAndFiles,
+                executeAction: ctx =>
+                {
+                    var dlg = new ExportRangeDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "export csv", "save range as csv", "export selection", "export tsv", "export json" },
+                officeIconName: "SaveAsCsv",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "I",
+                roadmapBatch: "Batch 8"
+            ));
+
+            // Export Worksheets to PDF
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_FILE_EXPORT_SHEETS_PDF",
+                title: "Export to PDF",
+                description: "Publish worksheets or entire active workbook as high-resolution PDF documents.",
+                category: CommandCategory.ImportExportAndFiles,
+                executeAction: ctx =>
+                {
+                    var dlg = new ExportSheetsPdfDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "export pdf", "save as pdf", "batch pdf export", "convert sheets to pdf" },
+                officeIconName: "FileSaveAsPdfOrXps",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "I",
+                roadmapBatch: "Batch 8"
+            ));
+
+            // Folder File Inventory Listing
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_FILE_FOLDER_LISTING",
+                title: "Folder File Listing",
+                description: "Scan a folder directory and generate a structured inventory of files with hyperlinks.",
+                category: CommandCategory.ImportExportAndFiles,
+                executeAction: ctx =>
+                {
+                    var dlg = new FolderListingDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "folder listing", "file inventory", "list files in folder", "directory scan" },
+                officeIconName: "OpenFolder",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "I",
+                roadmapBatch: "Batch 8"
+            ));
+
+            // Insert Text File
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_FILE_INSERT_TEXT_FILE",
+                title: "Insert Text File",
+                description: "Insert raw plain text, log files, or code directly into the active cell or column.",
+                category: CommandCategory.ImportExportAndFiles,
+                executeAction: ctx =>
+                {
+                    var dlg = new InsertTextFileDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "insert text file", "append file text", "read text into cell", "load log file" },
+                officeIconName: "FileInsert",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "I",
+                roadmapBatch: "Batch 8"
+            ));
+
+            // Batch Convert Workbooks
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_FILE_BATCH_CONVERT",
+                title: "Batch Convert Files",
+                description: "Convert entire folders of workbook files to modern XLSX, PDF, CSV, or legacy XLS format.",
+                category: CommandCategory.ImportExportAndFiles,
+                executeAction: ctx =>
+                {
+                    var dlg = new BatchConvertWorkbooksDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "batch convert workbooks", "convert xls to xlsx", "bulk format conversion", "convert folder" },
+                officeIconName: "FileSaveAsExcelXlsx",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "I",
+                roadmapBatch: "Batch 8"
+            ));
+
             // 16. Manage Worksheet Visibility - Module D: Worksheet and Workbook Management
             registry.RegisterCommand(new SuiteCommand(
                 id: "CMD_SHEET_VISIBILITY",

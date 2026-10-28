@@ -275,6 +275,22 @@ namespace ExcelProductivitySuite.UnitTests
             return targets.Count;
         }
 
+        public List<(string dest, List<string>? sheets, bool open)> ExportedPdfs { get; } = new();
+        public List<(List<string> files, string outDir, string ext)> ConvertedWorkbooks { get; } = new();
+
+        public bool ExportToPdf(string destinationPath, IEnumerable<string>? sheetNames = null, bool openAfterExport = false)
+        {
+            ExportedPdfs.Add((destinationPath, sheetNames != null ? new List<string>(sheetNames) : null, openAfterExport));
+            return true;
+        }
+
+        public int BatchConvertWorkbooks(IEnumerable<string> filePaths, string outputDirectory, string targetExtension)
+        {
+            var files = new List<string>(filePaths);
+            ConvertedWorkbooks.Add((files, outputDirectory, targetExtension));
+            return files.Count;
+        }
+
         public void ShowMessage(string message, string title, bool isError = false)
         {
             MessagesShown.Add($"[{title}] {message}");

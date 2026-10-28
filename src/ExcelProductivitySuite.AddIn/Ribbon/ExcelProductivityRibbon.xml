@@ -468,6 +468,51 @@
                   onAction="OnRibbonButtonClicked" />
         </group>
 
+        <group id="grpImportExport" label="Import &amp; Export">
+          <button id="btnImportCsv"
+                  label="Import CSV"
+                  size="large"
+                  imageMso="GetExternalDataFromText"
+                  screentip="Import CSV / Delimited Text"
+                  supertip="Parse delimited text and CSV data with automatic formatting and schema preview."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnExportPdf"
+                  label="Export to PDF"
+                  size="large"
+                  imageMso="FileSaveAsPdfOrXps"
+                  screentip="Export to PDF"
+                  supertip="Publish worksheets or entire active workbook as high-resolution PDF documents."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnExportRange"
+                  label="Export Range"
+                  size="normal"
+                  imageMso="SaveAsCsv"
+                  screentip="Export Range to File"
+                  supertip="Export selected cells to CSV, TSV, custom-delimited text, or structured JSON."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnFolderListing"
+                  label="Folder Listing"
+                  size="normal"
+                  imageMso="OpenFolder"
+                  screentip="Folder File Listing"
+                  supertip="Scan a folder directory and generate a structured inventory of files with hyperlinks."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnInsertTextFile"
+                  label="Insert Text"
+                  size="normal"
+                  imageMso="FileInsert"
+                  screentip="Insert Text File"
+                  supertip="Insert raw plain text, log files, or code directly into the active cell or column."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnBatchConvert"
+                  label="Batch Convert"
+                  size="normal"
+                  imageMso="FileSaveAsExcelXlsx"
+                  screentip="Batch Convert Workbooks"
+                  supertip="Convert entire folders of workbook files to modern XLSX, PDF, CSV, or legacy XLS format."
+                  onAction="OnRibbonButtonClicked" />
+        </group>
+
       </tab>
     </tabs>
   </ribbon>

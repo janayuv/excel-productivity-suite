@@ -1805,6 +1805,127 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
             }
         }
 
+        public bool ExportToPdf(string destinationPath, IEnumerable<string>? sheetNames = null, bool openAfterExport = false)
+        {
+            if (string.IsNullOrWhiteSpace(destinationPath)) throw new ArgumentNullException(nameof(destinationPath));
+
+            try
+            {
+                if (!(_app.ActiveWorkbook is Excel.Workbook wb)) return false;
+
+                using (new ExcelStateScope(_app))
+                {
+                    var sheetList = sheetNames != null ? new List<string>(sheetNames) : new List<string>();
+
+                    if (sheetList.Count == 1)
+                    {
+                        string sName = sheetList[0];
+                        Excel.Worksheet? targetWs = null;
+                        foreach (Excel.Worksheet ws in wb.Worksheets)
+                        {
+                            if (string.Equals(ws.Name, sName, StringComparison.OrdinalIgnoreCase))
+                            {
+                                targetWs = ws;
+                                break;
+                            }
+                        }
+
+                        if (targetWs != null)
+                        {
+                            targetWs.ExportAsFixedFormat(
+                                Excel.XlFixedFormatType.xlTypePDF,
+                                destinationPath,
+                                Excel.XlFixedFormatQuality.xlQualityStandard,
+                                IncludeDocProperties: true,
+                                IgnorePrintAreas: false,
+                                OpenAfterPublish: openAfterExport);
+                            return true;
+                        }
+                    }
+
+                    // Export entire workbook
+                    wb.ExportAsFixedFormat(
+                        Excel.XlFixedFormatType.xlTypePDF,
+                        destinationPath,
+                        Excel.XlFixedFormatQuality.xlQualityStandard,
+                        IncludeDocProperties: true,
+                        IgnorePrintAreas: false,
+                        OpenAfterPublish: openAfterExport);
+
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Error exporting PDF: {ex.Message}", "PDF Export Error", isError: true);
+                return false;
+            }
+        }
+
+        public int BatchConvertWorkbooks(IEnumerable<string> filePaths, string outputDirectory, string targetExtension)
+        {
+            if (filePaths == null) throw new ArgumentNullException(nameof(filePaths));
+            if (string.IsNullOrWhiteSpace(outputDirectory)) throw new ArgumentNullException(nameof(outputDirectory));
+            if (string.IsNullOrWhiteSpace(targetExtension)) throw new ArgumentNullException(nameof(targetExtension));
+
+            if (!System.IO.Directory.Exists(outputDirectory))
+            {
+                System.IO.Directory.CreateDirectory(outputDirectory);
+            }
+
+            string cleanExt = targetExtension.TrimStart('.').ToLowerInvariant();
+            int count = 0;
+
+            using (new ExcelStateScope(_app))
+            {
+                foreach (string filePath in filePaths)
+                {
+                    if (!System.IO.File.Exists(filePath)) continue;
+
+                    Excel.Workbook? srcWb = null;
+                    try
+                    {
+                        srcWb = _app.Workbooks.Open(filePath, ReadOnly: true);
+                        string fileNameWithoutExt = System.IO.Path.GetFileNameWithoutExtension(filePath);
+                        string outPath = System.IO.Path.Combine(outputDirectory, $"{fileNameWithoutExt}.{cleanExt}");
+
+                        if (string.Equals(cleanExt, "pdf", StringComparison.OrdinalIgnoreCase))
+                        {
+                            srcWb.ExportAsFixedFormat(Excel.XlFixedFormatType.xlTypePDF, outPath);
+                        }
+                        else if (string.Equals(cleanExt, "csv", StringComparison.OrdinalIgnoreCase))
+                        {
+                            srcWb.SaveAs(outPath, Excel.XlFileFormat.xlCSV);
+                        }
+                        else if (string.Equals(cleanExt, "xls", StringComparison.OrdinalIgnoreCase))
+                        {
+                            srcWb.SaveAs(outPath, Excel.XlFileFormat.xlExcel8);
+                        }
+                        else
+                        {
+                            srcWb.SaveAs(outPath, Excel.XlFileFormat.xlOpenXMLWorkbook);
+                        }
+
+                        count++;
+                    }
+                    catch
+                    {
+                        // Continue processing remaining files
+                    }
+                    finally
+                    {
+                        if (srcWb != null)
+                        {
+                            try { srcWb.Close(SaveChanges: false); } catch { }
+                            try { System.Runtime.InteropServices.Marshal.ReleaseComObject(srcWb); } catch { }
+                        }
+                    }
+                }
+            }
+
+            return count;
+        }
+
         public void ShowMessage(string message, string title, bool isError = false)
         {
             MessageBox.Show(message, title, MessageBoxButton.OK, isError ? MessageBoxImage.Error : MessageBoxImage.Information);

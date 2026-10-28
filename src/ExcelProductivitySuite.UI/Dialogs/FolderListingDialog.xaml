@@ -1,0 +1,83 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.FolderListingDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Directory File Listing - Excel Productivity Suite"
+        Height="470" Width="500"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="📁" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Folder File Listing" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Scan a folder directory and generate a structured inventory of files with hyperlinks" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Directory Path -->
+        <GroupBox Grid.Row="1" Header="Target Folder" Style="{StaticResource ModernGroupBoxStyle}">
+            <DockPanel Margin="4">
+                <Button Content="Browse..." Width="80" DockPanel.Dock="Right" Style="{StaticResource ModernSecondaryButtonStyle}" Click="Browse_Click" />
+                <TextBox x:Name="FolderPathText" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,8,0" />
+            </DockPanel>
+        </GroupBox>
+
+        <!-- Scan Options -->
+        <GroupBox Grid.Row="2" Header="Scan Filter &amp; Options" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,10,0,10">
+            <StackPanel Margin="4">
+                <DockPanel Margin="0,0,0,8">
+                    <TextBlock Text="File Type Mask (e.g. *.* or *.xlsx;*.pdf):" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,8,0" />
+                    <TextBox x:Name="FilterPatternText" Text="*.*" Width="130" HorizontalAlignment="Right" Style="{StaticResource ModernTextBoxStyle}" />
+                </DockPanel>
+
+                <CheckBox x:Name="IncludeSubfoldersCheck" Content="Include subdirectories (recursive scan)" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" Margin="0,0,0,6" />
+                <CheckBox x:Name="HyperlinksCheck" Content="Create clickable Excel hyperlinks (=HYPERLINK)" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" />
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Destination -->
+        <GroupBox Grid.Row="3" Header="Output Destination" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" Margin="4">
+                <RadioButton x:Name="NewSheetRadio" Content="New Worksheet:" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,8,0" />
+                <TextBox x:Name="NewSheetNameText" Text="File_Listing" Width="120" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,16,0" />
+                <RadioButton x:Name="ActiveCellRadio" Content="Active Cell Position" Style="{StaticResource ModernRadioButtonStyle}" />
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Footer / Action Buttons -->
+        <DockPanel Grid.Row="4">
+            <TextBlock x:Name="StatusLabel" Text="Ready" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Generate Listing" Width="120" Margin="0,0,8,0" Style="{StaticResource ModernPrimaryButtonStyle}" Click="Generate_Click" />
+                <Button Content="Close" Width="75" Style="{StaticResource ModernSecondaryButtonStyle}" Click="Cancel_Click" />
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

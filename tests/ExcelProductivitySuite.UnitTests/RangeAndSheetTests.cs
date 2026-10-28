@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using ExcelProductivitySuite.Core.Abstractions;
 using ExcelProductivitySuite.Engine.DataCleaning;
+using ExcelProductivitySuite.Engine.Files;
 using ExcelProductivitySuite.Engine.Formulas;
 using ExcelProductivitySuite.Engine.Ranges;
 using ExcelProductivitySuite.Engine.Worksheets;
@@ -1421,6 +1423,145 @@ namespace ExcelProductivitySuite.UnitTests
             Assert.IsNotNull(ctx.LastSynchronizedFreezePanes);
             Assert.AreEqual(FreezePanesSyncMode.FreezeTopRow, ctx.LastSynchronizedFreezePanes.Value.mode);
         }
+
+        #region Batch 8: Import, Export & File Utilities Tests
+
+        [TestMethod]
+        public void CsvTextImporter_ParseText_ParsesStandardCsv()
+        {
+            string csv = "Name,Age,Score\r\nAlice,30,95.5\r\nBob,25,88.0";
+            var matrix = CsvTextImporter.ParseText(csv);
+
+            Assert.AreEqual(3, matrix.GetLength(0));
+            Assert.AreEqual(3, matrix.GetLength(1));
+            Assert.AreEqual("Name", matrix[0, 0]);
+            Assert.AreEqual("Alice", matrix[1, 0]);
+            Assert.AreEqual(30.0, matrix[1, 1]);
+            Assert.AreEqual(95.5, matrix[1, 2]);
+        }
+
+        [TestMethod]
+        public void CsvTextImporter_ParseText_HandlesQuotedFieldsAndEscapes()
+        {
+            string csv = "\"Item\",\"Description\",\"Price\"\r\n\"Widget A\",\"Contains \"\"special\"\" parts, and commas\",19.99\r\n\"Widget B\",\"Line 1\r\nLine 2\",29.5";
+            var matrix = CsvTextImporter.ParseText(csv);
+
+            Assert.AreEqual(3, matrix.GetLength(0));
+            Assert.AreEqual(3, matrix.GetLength(1));
+            Assert.AreEqual("Contains \"special\" parts, and commas", matrix[1, 1]);
+            Assert.AreEqual("Line 1\r\nLine 2", matrix[2, 1]);
+            Assert.AreEqual(19.99, matrix[1, 2]);
+        }
+
+        [TestMethod]
+        public void CsvTextImporter_ParseText_HandlesCustomDelimiters()
+        {
+            string pipeText = "SKU|Product|Qty\r\n1001|Keyboard|15\r\n1002|Mouse|30";
+            var options = new CsvImportOptions { Delimiter = "|" };
+            var matrix = CsvTextImporter.ParseText(pipeText, options);
+
+            Assert.AreEqual(3, matrix.GetLength(0));
+            Assert.AreEqual(3, matrix.GetLength(1));
+            Assert.AreEqual("Keyboard", matrix[1, 1]);
+            Assert.AreEqual(15.0, matrix[1, 2]);
+        }
+
+        [TestMethod]
+        public void RangeExporter_ExportToString_ExportsCsvAndTsv()
+        {
+            object?[,] matrix = new object?[2, 2]
+            {
+                { "Header1", "Header, 2" },
+                { "Hello \"World\"", 123.45 }
+            };
+
+            string csv = RangeExporter.ExportToString(matrix, new RangeExportOptions { Format = ExportFileFormat.Csv });
+            Assert.IsTrue(csv.Contains("\"Header, 2\""));
+            Assert.IsTrue(csv.Contains("\"Hello \"\"World\"\"\""));
+
+            string tsv = RangeExporter.ExportToString(matrix, new RangeExportOptions { Format = ExportFileFormat.Tsv });
+            Assert.IsTrue(tsv.Contains("Header1\t"));
+        }
+
+        [TestMethod]
+        public void RangeExporter_ExportToString_ExportsJson()
+        {
+            object?[,] matrix = new object?[3, 2]
+            {
+                { "Name", "Score" },
+                { "Alice", 95 },
+                { "Bob", 88.5 }
+            };
+
+            string json = RangeExporter.ExportToString(matrix, new RangeExportOptions { Format = ExportFileFormat.Json, HasHeaders = true });
+            Assert.IsTrue(json.Contains("\"Name\": \"Alice\""));
+            Assert.IsTrue(json.Contains("\"Score\": 95"));
+            Assert.IsTrue(json.Contains("\"Name\": \"Bob\""));
+        }
+
+        [TestMethod]
+        public void FolderInventoryScanner_ScanFolder_ScansAndBuildsTable()
+        {
+            string tempDir = Path.Combine(Path.GetTempPath(), "EPSTest_" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempDir);
+            try
+            {
+                File.WriteAllText(Path.Combine(tempDir, "test1.txt"), "Sample content 1");
+                File.WriteAllText(Path.Combine(tempDir, "test2.csv"), "a,b,c");
+
+                var res = FolderInventoryScanner.ScanFolder(tempDir);
+                Assert.AreEqual(2, res.FileCount);
+                Assert.AreEqual(3, res.TableData.GetLength(0)); // Header + 2 files
+                Assert.AreEqual("File Name", res.TableData[0, 0]);
+                Assert.AreEqual("Link", res.TableData[0, 7]);
+                Assert.IsTrue(res.TableData[1, 7]?.ToString()?.StartsWith("=HYPERLINK"));
+            }
+            finally
+            {
+                if (Directory.Exists(tempDir)) Directory.Delete(tempDir, true);
+            }
+        }
+
+        [TestMethod]
+        public void TextFileReader_ReadFileToMatrix_ReadsRowsAndSingleCell()
+        {
+            string tempFile = Path.GetTempFileName();
+            try
+            {
+                File.WriteAllLines(tempFile, new[] { "Line 1", "Line 2", "Line 3" });
+
+                var rowByRow = TextFileReader.ReadFileToMatrix(tempFile, TextFileInsertMode.RowByRow);
+                Assert.AreEqual(3, rowByRow.GetLength(0));
+                Assert.AreEqual("Line 2", rowByRow[1, 0]);
+
+                var singleCell = TextFileReader.ReadFileToMatrix(tempFile, TextFileInsertMode.SingleCell);
+                Assert.AreEqual(1, singleCell.GetLength(0));
+                Assert.AreEqual(1, singleCell.GetLength(1));
+                Assert.IsTrue(singleCell[0, 0]?.ToString()?.Contains("Line 3"));
+            }
+            finally
+            {
+                if (File.Exists(tempFile)) File.Delete(tempFile);
+            }
+        }
+
+        [TestMethod]
+        public void MockExcelContext_ExportPdfAndBatchConvert()
+        {
+            var ctx = new MockExcelContext();
+            bool exported = ctx.ExportToPdf("C:\\output.pdf", new[] { "Sheet1" }, true);
+            Assert.IsTrue(exported);
+            Assert.AreEqual(1, ctx.ExportedPdfs.Count);
+            Assert.AreEqual("C:\\output.pdf", ctx.ExportedPdfs[0].dest);
+            Assert.IsTrue(ctx.ExportedPdfs[0].open);
+
+            int converted = ctx.BatchConvertWorkbooks(new[] { "C:\\f1.xls", "C:\\f2.xls" }, "C:\\Out", ".xlsx");
+            Assert.AreEqual(2, converted);
+            Assert.AreEqual(1, ctx.ConvertedWorkbooks.Count);
+            Assert.AreEqual(".xlsx", ctx.ConvertedWorkbooks[0].ext);
+        }
+
+        #endregion
 
         #endregion
 
