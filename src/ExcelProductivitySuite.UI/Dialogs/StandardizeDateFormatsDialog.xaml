@@ -1,0 +1,96 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.StandardizeDateFormatsDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Standardize Date Formats - Excel Productivity Suite"
+        Height="540" Width="700"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="📅" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Standardize Date Formats" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Format date cells to ISO 8601, European, US, or enterprise standards in bulk" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Standards List -->
+        <GroupBox Grid.Row="1" Header="Standard Date Presets" Style="{StaticResource ModernGroupBoxStyle}">
+            <ListBox x:Name="StandardsList" BorderThickness="1" BorderBrush="#D1D5DB" Background="White"
+                     SelectionChanged="StandardsList_SelectionChanged">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="4,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="200" />
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{Binding Name}" FontWeight="SemiBold" FontSize="12" Foreground="{StaticResource TextPrimaryBrush}" />
+                            <TextBlock Grid.Column="1" Text="{Binding SampleOutput}" FontFamily="Consolas" FontSize="11" Foreground="{StaticResource BrandPrimaryBrush}" />
+                            <TextBlock Grid.Column="2" Text="{Binding Description}" FontSize="10" Foreground="{StaticResource TextSecondaryBrush}" />
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </GroupBox>
+
+        <!-- Options & Custom Format Box -->
+        <Border Grid.Row="2" Background="White" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="4" Padding="12" Margin="0,10,0,10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="140" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Excel Date Mask:" VerticalAlignment="Center" FontWeight="SemiBold" />
+                <TextBox x:Name="CustomMaskBox" Grid.Row="0" Grid.Column="1" Style="{StaticResource ModernTextBoxStyle}" FontFamily="Consolas" Text="yyyy-mm-dd" />
+
+                <CheckBox x:Name="ConvertTextDatesCheck" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,10,0,0"
+                          Content="Convert text dates to Excel numeric date serials where possible"
+                          IsChecked="True"
+                          ToolTip="Recognizes dates stored as strings and converts them into true Excel date values so formatting takes effect." />
+            </Grid>
+        </Border>
+
+        <!-- Status -->
+        <TextBlock x:Name="StatusText" Grid.Row="3" Margin="0,0,0,12" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Text="Select a date standard above and click Apply." />
+
+        <!-- Action Buttons -->
+        <DockPanel Grid.Row="4" LastChildFill="False">
+            <Button x:Name="CloseBtn" Content="Close" Style="{StaticResource ModernSecondaryButtonStyle}" DockPanel.Dock="Right" Width="80" Click="CloseBtn_Click" Margin="8,0,0,0" />
+            <Button x:Name="ApplyBtn" Content="Apply Date Format" Style="{StaticResource ModernPrimaryButtonStyle}" DockPanel.Dock="Right" Width="160" Click="ApplyBtn_Click" />
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

@@ -413,6 +413,36 @@ namespace ExcelProductivitySuite.Core.Abstractions
         /// Shows an informational, warning, or error alert dialog in Excel.
         /// </summary>
         void ShowMessage(string message, string title, bool isError = false);
+
+        /// <summary>
+        /// Retrieves all precedent cells contributing to the active cell formula.
+        /// </summary>
+        IReadOnlyList<CellReferenceInfo> GetActiveCellPrecedents(bool directOnly = true);
+
+        /// <summary>
+        /// Retrieves all cells dependent upon the active cell value.
+        /// </summary>
+        IReadOnlyList<CellReferenceInfo> GetActiveCellDependents(bool directOnly = true);
+
+        /// <summary>
+        /// Navigates and selects the specified cell address on a worksheet.
+        /// </summary>
+        bool SelectCellAddress(string sheetName, string cellAddress);
+
+        /// <summary>
+        /// Applies an Excel NumberFormat string across the active selection or worksheet.
+        /// </summary>
+        void ApplyNumberFormat(string formatString, bool selectionOnly = true);
+
+        /// <summary>
+        /// Gets the number format mask of the active cell.
+        /// </summary>
+        string? GetActiveCellNumberFormat();
+
+        /// <summary>
+        /// Inserts a formula expression directly into the active cell cursor.
+        /// </summary>
+        void InsertFormulaAtActiveCell(string formula);
     }
 
     public class FormulaErrorInfo
@@ -621,6 +651,26 @@ namespace ExcelProductivitySuite.Core.Abstractions
             Rows = rows;
             StartRow = startRow;
             StartCol = startCol;
+        }
+    }
+
+    public class CellReferenceInfo
+    {
+        public string SheetName { get; }
+        public string CellAddress { get; }
+        public string FullAddress => string.IsNullOrWhiteSpace(SheetName) ? CellAddress : $"'{SheetName}'!{CellAddress}";
+        public string ValueText { get; }
+        public string FormulaText { get; }
+        public bool IsFormula => !string.IsNullOrWhiteSpace(FormulaText) && FormulaText.StartsWith("=");
+        public bool IsDirect { get; }
+
+        public CellReferenceInfo(string sheetName, string cellAddress, string valueText, string formulaText, bool isDirect = true)
+        {
+            SheetName = sheetName ?? string.Empty;
+            CellAddress = cellAddress ?? string.Empty;
+            ValueText = valueText ?? string.Empty;
+            FormulaText = formulaText ?? string.Empty;
+            IsDirect = isDirect;
         }
     }
 }

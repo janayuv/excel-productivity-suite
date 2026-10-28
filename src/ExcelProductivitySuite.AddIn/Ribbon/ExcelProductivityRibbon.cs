@@ -137,6 +137,12 @@ namespace ExcelProductivitySuite.AddIn.Ribbon
                 case "btnFormulaConvertRef": return "CMD_FORMULA_CONVERT_REF";
                 case "btnFormulaExactCopy": return "CMD_FORMULA_EXACT_COPY";
                 case "btnFormulaLocateErrors": return "CMD_FORMULA_LOCATE_ERRORS";
+                case "btnFormulaAuditPrecedents": return "CMD_FORMULA_AUDIT_PRECEDENTS";
+                case "btnFormulaAuditDependents": return "CMD_FORMULA_AUDIT_DEPENDENTS";
+                case "btnFormulaReplaceRef": return "CMD_FORMULA_BATCH_REPLACE_REF";
+                case "btnFormulaTemplates": return "CMD_FORMULA_TEMPLATES";
+                case "btnBatchNumberFormats": return "CMD_FORMAT_BATCH_NUMBERS";
+                case "btnDateFormatStandards": return "CMD_FORMAT_DATE_STANDARDS";
                 case "btnRangeMath": return "CMD_RANGE_MATH_OPERATIONS";
                 case "btnCopyPageSetup": return "CMD_FORMAT_PAGE_SETUP_COPY";
                 case "btnFreezePanesMulti": return "CMD_FORMAT_FREEZE_PANES";

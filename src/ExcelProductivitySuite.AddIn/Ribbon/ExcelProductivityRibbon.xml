@@ -352,6 +352,14 @@
                   screentip="Convert Formula References"
                   supertip="Batch convert formula cell references between Absolute ($A$1), Row-Absolute (A$1), Col-Absolute ($A1), and Relative (A1)."
                   onAction="OnRibbonButtonClicked" />
+          <button id="btnFormulaTemplates"
+                  label="Templates"
+                  size="large"
+                  imageMso="FunctionsFinancialInsertGallery"
+                  screentip="Formula Templates Library"
+                  supertip="Insert production-tested formulas for financial models, lookups, math, and date calculations."
+                  onAction="OnRibbonButtonClicked" />
+          <separator id="sepFormulas1" />
           <button id="btnFormulaExactCopy"
                   label="Exact Copy"
                   size="normal"
@@ -365,6 +373,45 @@
                   imageMso="TraceError"
                   screentip="Locate Formula Errors"
                   supertip="Audit, navigate, and highlight formula calculation errors (#DIV/0!, #N/A, #VALUE!, etc.) across the worksheet."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnFormulaReplaceRef"
+                  label="Replace Refs"
+                  size="normal"
+                  imageMso="ReplaceDialog"
+                  screentip="Batch Replace Formula References"
+                  supertip="Search and substitute sheet references, ranges, or functions across formulas."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnFormulaAuditPrecedents"
+                  label="Precedents"
+                  size="normal"
+                  imageMso="TracePrecedents"
+                  screentip="Audit Formula Precedents"
+                  supertip="Inspect, audit, and navigate all precedent cells contributing to the active cell formula."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnFormulaAuditDependents"
+                  label="Dependents"
+                  size="normal"
+                  imageMso="TraceDependents"
+                  screentip="Audit Formula Dependents"
+                  supertip="Inspect, audit, and navigate all downstream cells that depend on the active cell value."
+                  onAction="OnRibbonButtonClicked" />
+        </group>
+
+        <!-- Group: Formatting & Design -->
+        <group id="grpFormatting" label="Number &amp; Date Formatting">
+          <button id="btnBatchNumberFormats"
+                  label="Number Formats"
+                  size="large"
+                  imageMso="FormatNumberCurrency"
+                  screentip="Batch Number &amp; Currency Formatting"
+                  supertip="Apply standardized financial, decimal, percentage, and currency masks across ranges."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnDateFormatStandards"
+                  label="Standardize Dates"
+                  size="large"
+                  imageMso="AppointmentColorDialog"
+                  screentip="Standardize Date Formats"
+                  supertip="Format date cells to ISO 8601, European, US, or enterprise standards in bulk."
                   onAction="OnRibbonButtonClicked" />
         </group>
 

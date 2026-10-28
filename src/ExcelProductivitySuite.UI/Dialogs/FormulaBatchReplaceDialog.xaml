@@ -1,0 +1,110 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.FormulaBatchReplaceDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Batch Replace Formula References - Excel Productivity Suite"
+        Height="560" Width="760"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="🔄" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Batch Replace Formula References" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Search and substitute sheet references, ranges, or functions across formulas" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Configuration Form -->
+        <Border Grid.Row="1" Background="White" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="4" Padding="12" Margin="0,0,0,10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="100" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Row 0: Find & Replace -->
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Find what:" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                <TextBox x:Name="FindBox" Grid.Row="0" Grid.Column="1" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,12,8" ToolTip="Sheet name, range address, or function name to locate (e.g. 'Sheet1'! or $A$1)" />
+
+                <TextBlock Grid.Row="0" Grid.Column="2" Text="Replace with:" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                <TextBox x:Name="ReplaceBox" Grid.Row="0" Grid.Column="3" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,0,8" ToolTip="Replacement string (e.g. '2026_Budget'! or $B$1)" />
+
+                <!-- Row 1: Scope & Options -->
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Scope:" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,12,0">
+                    <RadioButton x:Name="ScopeSelectionRadio" Content="Active Selection" IsChecked="True" Margin="0,0,12,0" />
+                    <RadioButton x:Name="ScopeSheetRadio" Content="Active Sheet" />
+                </StackPanel>
+
+                <TextBlock Grid.Row="1" Grid.Column="2" Text="Options:" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                <StackPanel Grid.Row="1" Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
+                    <CheckBox x:Name="MatchCaseCheck" Content="Match case" Margin="0,0,10,0" />
+                    <CheckBox x:Name="WholeWordCheck" Content="Whole word" Margin="0,0,10,0" />
+                    <CheckBox x:Name="IgnoreQuotesCheck" Content="Ignore strings" IsChecked="True" ToolTip="Do not replace text inside double-quoted string literals in formulas" />
+                </StackPanel>
+
+                <!-- Row 2: Preview Button -->
+                <DockPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" Margin="0,8,0,0" LastChildFill="False">
+                    <Button x:Name="PreviewBtn" Content="🔍 Preview Changes" Style="{StaticResource ModernSecondaryButtonStyle}" DockPanel.Dock="Right" Width="140" Click="PreviewBtn_Click" />
+                </DockPanel>
+            </Grid>
+        </Border>
+
+        <!-- Preview Grid -->
+        <GroupBox Grid.Row="2" Header="Affected Formulas Preview" Style="{StaticResource ModernGroupBoxStyle}">
+            <DataGrid x:Name="ChangesGrid" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True"
+                      SelectionMode="Single" SelectionUnit="FullRow"
+                      BorderThickness="1" BorderBrush="#D1D5DB" Background="White">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Cell" Binding="{Binding CellAddress}" Width="90" FontWeight="SemiBold" FontFamily="Consolas" />
+                    <DataGridTextColumn Header="Original Formula" Binding="{Binding OriginalFormula}" Width="*" FontFamily="Consolas" Foreground="#6B7280" />
+                    <DataGridTextColumn Header="Modified Formula" Binding="{Binding ModifiedFormula}" Width="*" FontFamily="Consolas" Foreground="#047857" FontWeight="SemiBold" />
+                    <DataGridTextColumn Header="Replacements" Binding="{Binding ReplacementsCount}" Width="90" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </GroupBox>
+
+        <!-- Status -->
+        <TextBlock x:Name="StatusText" Grid.Row="3" Margin="0,8,0,12" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Text="Enter find and replace patterns, then click Preview Changes." />
+
+        <!-- Action Buttons -->
+        <DockPanel Grid.Row="4" LastChildFill="False">
+            <Button x:Name="CloseBtn" Content="Close" Style="{StaticResource ModernSecondaryButtonStyle}" DockPanel.Dock="Right" Width="80" Click="CloseBtn_Click" Margin="8,0,0,0" />
+            <Button x:Name="ApplyBtn" Content="Replace All" Style="{StaticResource ModernPrimaryButtonStyle}" DockPanel.Dock="Right" Width="130" IsEnabled="False" Click="ApplyBtn_Click" />
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

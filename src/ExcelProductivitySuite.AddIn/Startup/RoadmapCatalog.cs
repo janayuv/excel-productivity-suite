@@ -165,44 +165,14 @@ namespace ExcelProductivitySuite.AddIn.Startup
             // =========================================================================
             // Module G: Formula and Calculation Utilities (Remaining Future Roadmap)
             // =========================================================================
-            AddPlanned(registry, "CMD_FORMULA_AUDIT_PRECEDENTS", "Audit Precedents Visually",
-                "Navigate and inspect all precedent cells contributing to the active cell formula.",
-                CommandCategory.FormulasAndCalculation, "G", "Batch 7",
-                new[] { "trace precedents", "audit formula", "precedent cells", "formula dependency" }, "TracePrecedents");
-
-            AddPlanned(registry, "CMD_FORMULA_AUDIT_DEPENDENTS", "Audit Dependents Visually",
-                "Navigate and inspect all cells dependent upon the active cell value.",
-                CommandCategory.FormulasAndCalculation, "G", "Batch 7",
-                new[] { "trace dependents", "dependent cells", "formula dependents", "what uses this cell" }, "TraceDependents");
-
-            AddPlanned(registry, "CMD_FORMULA_BATCH_REPLACE_REF", "Batch Replace Formula References",
-                "Substitute sheet names or range addresses within formulas across all selected cells.",
-                CommandCategory.FormulasAndCalculation, "G", "Batch 7+",
-                new[] { "replace references", "change formula sheet", "update formula ranges", "batch formula edit" }, "ReplaceDialog");
-
             AddPlanned(registry, "CMD_FORMULA_EXPLAIN", "Explain Formula Deterministically",
                 "Deconstruct and explain nested formulas in plain English using a local deterministic parser.",
-                CommandCategory.FormulasAndCalculation, "G", "Batch 7",
+                CommandCategory.FormulasAndCalculation, "G", "Batch 12+",
                 new[] { "explain formula", "formula parser", "deconstruct formula", "understand formula" }, "Info");
 
-            AddPlanned(registry, "CMD_FORMULA_TEMPLATES", "Common Formula Templates",
-                "Insert pre-built formulas for CAGR, working days, loan amortization, and standard metrics.",
-                CommandCategory.FormulasAndCalculation, "G", "Batch 7",
-                new[] { "formula templates", "financial formulas", "date formulas", "insert formula" }, "FunctionsFinancialInsertGallery");
-
             // =========================================================================
-            // Module H: Formatting and Design (Batch 7)
+            // Module H: Formatting and Design (Remaining Future Roadmap)
             // =========================================================================
-            AddPlanned(registry, "CMD_FORMAT_BATCH_NUMBERS", "Batch Number & Currency Formatting",
-                "Apply standardized financial, decimal, percentage, and currency masks across ranges.",
-                CommandCategory.FormattingAndDesign, "H", "Batch 7",
-                new[] { "number format", "currency format", "decimal places", "standardize formats", "accounting format" }, "FormatNumberCurrency");
-
-            AddPlanned(registry, "CMD_FORMAT_DATE_STANDARDS", "Standardize Date Formats",
-                "Format date cells to ISO 8601 (YYYY-MM-DD), Month Day Year, or local enterprise styles.",
-                CommandCategory.FormattingAndDesign, "H", "Batch 7",
-                new[] { "date format", "iso date", "standardize dates", "format date cells" }, "FormatDate");
-
             AddPlanned(registry, "CMD_FORMAT_HIGHLIGHT_CELL_TYPES", "Highlight Cell Types",
                 "Apply distinct background colors to formulas, constants, locked cells, errors, and text.",
                 CommandCategory.FormattingAndDesign, "H", "Batch 7",

@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using ExcelProductivitySuite.Core.Abstractions;
+using ExcelProductivitySuite.Core.Models;
+using ExcelProductivitySuite.Core.Services;
 using ExcelProductivitySuite.Engine.DataCleaning;
 using ExcelProductivitySuite.Engine.Analysis;
 using ExcelProductivitySuite.Engine.Files;
 using ExcelProductivitySuite.Engine.Formulas;
+using ExcelProductivitySuite.Engine.Formatting;
 using ExcelProductivitySuite.Engine.Navigation;
 using ExcelProductivitySuite.Engine.Ranges;
 using ExcelProductivitySuite.Engine.Recovery;
@@ -1883,6 +1886,299 @@ namespace ExcelProductivitySuite.UnitTests
             Assert.AreEqual(1, ctx.AppendedRowsHistory.Count);
             Assert.AreEqual(103, ctx.AppendedRowsHistory[0].row[0]);
         }
+
+        #region Batch 11: Formulas & Formatting Expansion Tests
+
+        [TestMethod]
+        public void FormulaBatchReplacer_ReplacesSheetReferences_PreservingStringLiterals()
+        {
+            var options = new FormulaReplaceOptions
+            {
+                FindText = "'OldSheet'!",
+                ReplaceWith = "'2026_Final'!",
+                MatchCase = false,
+                MatchWholeWord = false,
+                IgnoreStringLiterals = true
+            };
+
+            string formula = "=IF(A1=\"'OldSheet'!\", 'OldSheet'!B2 + 'OldSheet'!C2, 0)";
+            string result = FormulaBatchReplacer.ReplaceInFormula(formula, options, out int count);
+
+            Assert.AreEqual(2, count);
+            Assert.IsTrue(result.Contains("\"'OldSheet'!\"")); // Quoted literal unchanged
+            Assert.IsTrue(result.Contains("'2026_Final'!B2"));
+            Assert.IsTrue(result.Contains("'2026_Final'!C2"));
+        }
+
+        [TestMethod]
+        public void FormulaBatchReplacer_WholeWordOption_ProtectsPrefixWords()
+        {
+            var options = new FormulaReplaceOptions
+            {
+                FindText = "SUM",
+                ReplaceWith = "AVERAGE",
+                MatchCase = true,
+                MatchWholeWord = true,
+                IgnoreStringLiterals = true
+            };
+
+            string formula = "=SUM(A1:A10) + SUMPRODUCT(B1:B10, C1:C10)";
+            string result = FormulaBatchReplacer.ReplaceInFormula(formula, options, out int count);
+
+            Assert.AreEqual(1, count);
+            Assert.IsTrue(result.StartsWith("=AVERAGE("));
+            Assert.IsTrue(result.Contains("SUMPRODUCT(")); // Not changed
+        }
+
+        [TestMethod]
+        public void FormulaBatchReplacer_ProcessFormulasMatrix_TracksChangesAccurately()
+        {
+            object?[,] matrix = new object?[2, 2]
+            {
+                { "=Sheet1!A1*2", "Static Text" },
+                { 12345,          "=Sheet1!B10 + Sheet1!C10" }
+            };
+
+            var options = new FormulaReplaceOptions
+            {
+                FindText = "Sheet1!",
+                ReplaceWith = "Budget!",
+                MatchCase = false,
+                MatchWholeWord = false
+            };
+
+            var res = FormulaBatchReplacer.ProcessFormulas(matrix, options, startRow: 1, startCol: 1);
+
+            Assert.AreEqual(4, res.TotalCellsScanned);
+            Assert.AreEqual(2, res.FormulasFound);
+            Assert.AreEqual(2, res.FormulasModified);
+            Assert.AreEqual(3, res.TotalReplacements);
+            Assert.AreEqual(2, res.Changes.Count);
+
+            Assert.AreEqual("=Budget!A1*2", res.UpdatedFormulas[0, 0]);
+            Assert.AreEqual("Static Text", res.UpdatedFormulas[0, 1]);
+            Assert.AreEqual(12345, res.UpdatedFormulas[1, 0]);
+            Assert.AreEqual("=Budget!B10 + Budget!C10", res.UpdatedFormulas[1, 1]);
+        }
+
+        [TestMethod]
+        public void FormulaTemplateLibrary_TemplatesLoadAndRenderCorrectly()
+        {
+            var templates = FormulaTemplateLibrary.GetAllTemplates();
+            Assert.IsTrue(templates.Count >= 15);
+
+            var cagr = templates.FirstOrDefault(t => t.Id == "fin_cagr");
+            Assert.IsNotNull(cagr);
+            Assert.AreEqual(FormulaCategory.Financial, cagr.Category);
+
+            var customParams = new Dictionary<string, string>
+            {
+                { "EndValue", "D10" },
+                { "StartValue", "D2" },
+                { "Periods", "8" }
+            };
+
+            string rendered = cagr.RenderFormula(customParams);
+            Assert.AreEqual("=((D10/D2)^(1/8))-1", rendered);
+
+            var vlookup = templates.FirstOrDefault(t => t.Id == "lookup_vlookup_safe");
+            Assert.IsNotNull(vlookup);
+            string defRendered = vlookup.RenderFormula(null);
+            Assert.IsTrue(defRendered.StartsWith("=IFERROR(VLOOKUP("));
+
+            var searchResults = FormulaTemplateLibrary.Search("working days");
+            Assert.IsTrue(searchResults.Count >= 1);
+            Assert.AreEqual("date_workdays", searchResults[0].Id);
+        }
+
+        [TestMethod]
+        public void NumberFormatPresets_BuildFormat_And_Preview_BehaveCorrectly()
+        {
+            var presets = NumberFormatPresets.GetAllPresets();
+            Assert.IsTrue(presets.Count >= 10);
+
+            // 1. Currency with Red Negative
+            string currMask = NumberFormatPresets.BuildFormat(
+                NumberFormatCategory.Currency,
+                decimals: 2,
+                useThousandSeparator: true,
+                negativeStyle: NegativeNumberStyle.RedParentheses,
+                currencySymbol: "$");
+
+            Assert.AreEqual("$#,##0.00;[Red]($#,##0.00);$0.00", currMask);
+
+            // 2. Percentage with 1 decimal
+            string pctMask = NumberFormatPresets.BuildFormat(
+                NumberFormatCategory.Percentage,
+                decimals: 1,
+                useThousandSeparator: false,
+                negativeStyle: NegativeNumberStyle.StandardMinus);
+
+            Assert.AreEqual("0.0%;-0.0%;0.0%", pctMask);
+
+            // 3. Integer with commas and parentheses
+            string intMask = NumberFormatPresets.BuildFormat(
+                NumberFormatCategory.Integer,
+                decimals: 0,
+                useThousandSeparator: true,
+                negativeStyle: NegativeNumberStyle.Parentheses);
+
+            Assert.AreEqual("#,##0;(#,##0);0", intMask);
+
+            // 4. Preview formatter
+            string samplePos = NumberFormatPresets.FormatSamplePreview(1234.56, "$#,##0.00;($#,##0.00);$0.00");
+            Assert.IsTrue(samplePos.Contains("1,234.56") || samplePos.Contains("1234.56"));
+        }
+
+        [TestMethod]
+        public void DateFormatStandardizer_StandardizeRange_ParsesTextDates()
+        {
+            var standards = DateFormatStandardizer.GetStandards();
+            Assert.IsTrue(standards.Count >= 8);
+
+            object?[,] matrix = new object?[3, 2]
+            {
+                { "2026-10-28", "Not a date" },
+                { "15/04/2026", 45000.0 }, // Serial date
+                { "October 5, 2026", null }
+            };
+
+            var res = DateFormatStandardizer.StandardizeRange(matrix, "yyyy-mm-dd", convertTextDates: true);
+
+            Assert.AreEqual(6, res.TotalCells);
+            Assert.AreEqual(4, res.DateCellsFound);
+            Assert.AreEqual(3, res.TextDatesConverted);
+            Assert.AreEqual(2, res.UnchangedCells);
+
+            // Verify the first cell is now a double serial date
+            Assert.IsInstanceOfType(res.ProcessedValues[0, 0], typeof(double));
+            Assert.AreEqual("Not a date", res.ProcessedValues[0, 1]);
+        }
+
+        [TestMethod]
+        public void MockExcelContext_Batch11_PrecedentsDependentsAndFormatting()
+        {
+            var ctx = new MockExcelContext();
+
+            // 1. Precedents
+            var precs = ctx.GetActiveCellPrecedents(directOnly: true);
+            Assert.AreEqual(3, precs.Count);
+            Assert.AreEqual("Sheet1", precs[0].SheetName);
+            Assert.AreEqual("$A$1", precs[0].CellAddress);
+            Assert.AreEqual("'Sheet1'!$A$1", precs[0].FullAddress);
+
+            // 2. Dependents
+            var deps = ctx.GetActiveCellDependents(directOnly: true);
+            Assert.AreEqual(2, deps.Count);
+            Assert.AreEqual("$B$10", deps[0].CellAddress);
+            Assert.IsTrue(deps[0].IsFormula);
+
+            // 3. Navigation
+            bool nav = ctx.SelectCellAddress("Sheet2", "$C$10");
+            Assert.IsTrue(nav);
+            Assert.AreEqual(("Sheet2", "$C$10"), ctx.LastNavigatedCell);
+
+            // 4. Number Formatting
+            ctx.ApplyNumberFormat("$#,##0.00", selectionOnly: true);
+            Assert.AreEqual(1, ctx.AppliedNumberFormats.Count);
+            Assert.AreEqual("$#,##0.00", ctx.AppliedNumberFormats[0].formatString);
+            Assert.IsTrue(ctx.AppliedNumberFormats[0].selectionOnly);
+
+            // 5. Formula Insertion
+            ctx.InsertFormulaAtActiveCell("=SUM(A1:A10)");
+            Assert.AreEqual(1, ctx.InsertedFormulasHistory.Count);
+            Assert.AreEqual("=SUM(A1:A10)", ctx.InsertedFormulasHistory[0]);
+        }
+
+        [TestMethod]
+        public void Batch11_Commands_CanBeRegisteredAndExecuted()
+        {
+            var registry = new CommandRegistry();
+            var ctx = new MockExcelContext();
+
+            var cmd1 = new SuiteCommand(
+                id: "CMD_FORMULA_AUDIT_PRECEDENTS",
+                title: "Audit Precedents",
+                description: "desc",
+                category: CommandCategory.FormulasAndCalculation,
+                executeAction: c => c.ShowMessage("Precedents", "Audit"),
+                keywords: new[] { "precedents" },
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "G",
+                roadmapBatch: "Batch 11");
+
+            var cmd2 = new SuiteCommand(
+                id: "CMD_FORMULA_AUDIT_DEPENDENTS",
+                title: "Audit Dependents",
+                description: "desc",
+                category: CommandCategory.FormulasAndCalculation,
+                executeAction: c => c.ShowMessage("Dependents", "Audit"),
+                keywords: new[] { "dependents" },
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "G",
+                roadmapBatch: "Batch 11");
+
+            var cmd3 = new SuiteCommand(
+                id: "CMD_FORMULA_BATCH_REPLACE_REF",
+                title: "Replace Refs",
+                description: "desc",
+                category: CommandCategory.FormulasAndCalculation,
+                executeAction: c => c.ShowMessage("Replace", "Refs"),
+                keywords: new[] { "replace" },
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "G",
+                roadmapBatch: "Batch 11");
+
+            var cmd4 = new SuiteCommand(
+                id: "CMD_FORMULA_TEMPLATES",
+                title: "Templates",
+                description: "desc",
+                category: CommandCategory.FormulasAndCalculation,
+                executeAction: c => c.ShowMessage("Templates", "Lib"),
+                keywords: new[] { "templates" },
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "G",
+                roadmapBatch: "Batch 11");
+
+            var cmd5 = new SuiteCommand(
+                id: "CMD_FORMAT_BATCH_NUMBERS",
+                title: "Format Numbers",
+                description: "desc",
+                category: CommandCategory.FormattingAndDesign,
+                executeAction: c => c.ApplyNumberFormat("$#,##0.00"),
+                keywords: new[] { "numbers" },
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "H",
+                roadmapBatch: "Batch 11");
+
+            var cmd6 = new SuiteCommand(
+                id: "CMD_FORMAT_DATE_STANDARDS",
+                title: "Date Standards",
+                description: "desc",
+                category: CommandCategory.FormattingAndDesign,
+                executeAction: c => c.ApplyNumberFormat("yyyy-mm-dd"),
+                keywords: new[] { "dates" },
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "H",
+                roadmapBatch: "Batch 11");
+
+            registry.RegisterCommand(cmd1);
+            registry.RegisterCommand(cmd2);
+            registry.RegisterCommand(cmd3);
+            registry.RegisterCommand(cmd4);
+            registry.RegisterCommand(cmd5);
+            registry.RegisterCommand(cmd6);
+
+            Assert.AreEqual(6, registry.GetAllCommands().Count);
+            registry.Execute("CMD_FORMAT_BATCH_NUMBERS", ctx);
+            Assert.AreEqual(1, ctx.AppliedNumberFormats.Count);
+            Assert.AreEqual("$#,##0.00", ctx.AppliedNumberFormats[0].formatString);
+
+            registry.Execute("CMD_FORMULA_AUDIT_PRECEDENTS", ctx);
+            Assert.IsTrue(ctx.MessagesShown.Any(m => m.Contains("Precedents")));
+        }
+
+        #endregion
 
         #endregion
 

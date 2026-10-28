@@ -1246,6 +1246,118 @@ namespace ExcelProductivitySuite.AddIn.Startup
                 roadmapBatch: "Batch 10"
             ));
 
+            // =========================================================================
+            // Module G & H: Formulas & Formatting Expansion (Batch 11)
+            // =========================================================================
+
+            // Audit Formula Precedents
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_FORMULA_AUDIT_PRECEDENTS",
+                title: "Audit Formula Precedents",
+                description: "Inspect and navigate cell references feeding into the active formula.",
+                category: CommandCategory.FormulasAndCalculation,
+                executeAction: ctx =>
+                {
+                    var dlg = new FormulaAuditPrecedentsDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "audit precedents", "trace precedents", "precedent cells", "formula dependencies" },
+                officeIconName: "TracePrecedents",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "G",
+                roadmapBatch: "Batch 11"
+            ));
+
+            // Audit Formula Dependents
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_FORMULA_AUDIT_DEPENDENTS",
+                title: "Audit Formula Dependents",
+                description: "Inspect and navigate downstream cells that depend on the active cell value.",
+                category: CommandCategory.FormulasAndCalculation,
+                executeAction: ctx =>
+                {
+                    var dlg = new FormulaAuditDependentsDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "audit dependents", "trace dependents", "dependent cells", "downstream calculations" },
+                officeIconName: "TraceDependents",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "G",
+                roadmapBatch: "Batch 11"
+            ));
+
+            // Replace Formula References
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_FORMULA_BATCH_REPLACE_REF",
+                title: "Replace Formula References",
+                description: "Search and substitute sheet references, ranges, or functions across formulas.",
+                category: CommandCategory.FormulasAndCalculation,
+                executeAction: ctx =>
+                {
+                    var dlg = new FormulaBatchReplaceDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "replace references", "formula find replace", "rename sheet in formulas", "batch formula edit" },
+                officeIconName: "ReplaceDialog",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "G",
+                roadmapBatch: "Batch 11"
+            ));
+
+            // Formula Templates Library
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_FORMULA_TEMPLATES",
+                title: "Formula Templates Library",
+                description: "Insert production-tested formulas for financial models, lookups, math, and date calculations.",
+                category: CommandCategory.FormulasAndCalculation,
+                executeAction: ctx =>
+                {
+                    var dlg = new FormulaTemplatesDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "formula templates", "financial formulas", "cagr", "safe vlookup", "date difference", "two way lookup" },
+                officeIconName: "FunctionsFinancialInsertGallery",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "G",
+                roadmapBatch: "Batch 11"
+            ));
+
+            // Batch Number Formatting
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_FORMAT_BATCH_NUMBERS",
+                title: "Batch Number Formatting",
+                description: "Apply standardized financial, decimal, percentage, and currency masks across ranges.",
+                category: CommandCategory.FormattingAndDesign,
+                executeAction: ctx =>
+                {
+                    var dlg = new BatchNumberFormatDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "number format", "currency format", "accounting format", "decimal places", "percentage format" },
+                officeIconName: "FormatNumberCurrency",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "H",
+                roadmapBatch: "Batch 11"
+            ));
+
+            // Standardize Date Formats
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_FORMAT_DATE_STANDARDS",
+                title: "Standardize Date Formats",
+                description: "Format date cells to ISO 8601, European, US, or enterprise standards in bulk.",
+                category: CommandCategory.FormattingAndDesign,
+                executeAction: ctx =>
+                {
+                    var dlg = new StandardizeDateFormatsDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "date format", "iso 8601", "standardize dates", "convert text dates", "date masks" },
+                officeIconName: "AppointmentColorDialog",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "H",
+                roadmapBatch: "Batch 11"
+            ));
+
             // 16. Manage Worksheet Visibility - Module D: Worksheet and Workbook Management
             registry.RegisterCommand(new SuiteCommand(
                 id: "CMD_SHEET_VISIBILITY",

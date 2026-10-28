@@ -1,0 +1,136 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.FormulaTemplatesDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Formula Templates Library - Excel Productivity Suite"
+        Height="620" Width="840"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="📐" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Formula Templates Library" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Insert production-tested formulas for financial models, lookups, math, and date calculations" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Main 2-Column Splitter Area -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="280" />
+                <ColumnDefinition Width="12" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Left: Filter & Template List -->
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <ComboBox x:Name="CategoryCombo" Grid.Row="0" Style="{StaticResource ModernComboBoxStyle}" Margin="0,0,0,8" SelectionChanged="CategoryCombo_SelectionChanged" />
+                <TextBox x:Name="SearchBox" Grid.Row="1" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,0,8" TextChanged="SearchBox_TextChanged" ToolTip="Search templates by keyword" />
+
+                <ListBox x:Name="TemplatesList" Grid.Row="2" BorderThickness="1" BorderBrush="#D1D5DB" Background="White"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         SelectionChanged="TemplatesList_SelectionChanged">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="4,6">
+                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="12" Foreground="{StaticResource TextPrimaryBrush}" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding Category}" FontSize="10" Foreground="{StaticResource BrandPrimaryBrush}" Margin="0,2,0,0" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+
+            <!-- Right: Details, Parameters, and Preview -->
+            <Border Grid.Column="2" Background="White" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="4" Padding="14">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Title & Description -->
+                    <StackPanel Grid.Row="0" Margin="0,0,0,10">
+                        <TextBlock x:Name="TemplateTitleText" Text="Select a template" FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" />
+                        <TextBlock x:Name="TemplateDescText" Text="Browse categories on the left and choose a formula template to configure." FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" Margin="0,4,0,0" />
+                    </StackPanel>
+
+                    <!-- Pattern Display -->
+                    <Border Grid.Row="1" Background="#F1F5F9" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="4" Padding="8" Margin="0,0,0,10">
+                        <StackPanel>
+                            <TextBlock Text="Formula Pattern:" FontSize="10" FontWeight="SemiBold" Foreground="#64748B" />
+                            <TextBlock x:Name="TemplatePatternText" Text="=" FontFamily="Consolas" FontSize="11" Foreground="#0F172A" TextWrapping="Wrap" Margin="0,2,0,0" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Parameter Inputs (Scrollable) -->
+                    <GroupBox Grid.Row="2" Header="Configure Formula Parameters" Style="{StaticResource ModernGroupBoxStyle}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel x:Name="ParametersPanel" Margin="4">
+                                <TextBlock Text="No template selected." Foreground="{StaticResource TextSecondaryBrush}" FontStyle="Italic" />
+                            </StackPanel>
+                        </ScrollViewer>
+                    </GroupBox>
+
+                    <!-- Live Rendered Output -->
+                    <Border Grid.Row="3" Background="#F0FDF4" BorderBrush="#BBF7D0" BorderThickness="1" CornerRadius="4" Padding="10" Margin="0,10,0,0">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <DockPanel Grid.Row="0" LastChildFill="False">
+                                <TextBlock Text="Generated Formula Preview:" FontSize="10" FontWeight="Bold" Foreground="#166534" />
+                                <Button x:Name="CopyPreviewBtn" Content="📋 Copy" Style="{StaticResource ModernSecondaryButtonStyle}" DockPanel.Dock="Right" Height="22" Width="60" FontSize="10" Click="CopyPreviewBtn_Click" />
+                            </DockPanel>
+                            <TextBox x:Name="PreviewFormulaBox" Grid.Row="1" FontFamily="Consolas" FontSize="12" FontWeight="SemiBold" Foreground="#15803D" Background="Transparent" BorderThickness="0" IsReadOnly="True" TextWrapping="Wrap" Margin="0,4,0,0" Text="=" />
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Status -->
+        <TextBlock x:Name="StatusText" Grid.Row="2" Margin="0,8,0,12" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Text="Ready" />
+
+        <!-- Action Buttons -->
+        <DockPanel Grid.Row="3" LastChildFill="False">
+            <Button x:Name="CloseBtn" Content="Close" Style="{StaticResource ModernSecondaryButtonStyle}" DockPanel.Dock="Right" Width="80" Click="CloseBtn_Click" Margin="8,0,0,0" />
+            <Button x:Name="InsertBtn" Content="Insert into Active Cell" Style="{StaticResource ModernPrimaryButtonStyle}" DockPanel.Dock="Right" Width="170" IsEnabled="False" Click="InsertBtn_Click" />
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

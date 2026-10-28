@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Windows;
 using ExcelProductivitySuite.Core.Abstractions;
 using ExcelProductivitySuite.Engine.Formulas;
@@ -2460,6 +2462,221 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
         public void ShowMessage(string message, string title, bool isError = false)
         {
             MessageBox.Show(message, title, MessageBoxButton.OK, isError ? MessageBoxImage.Error : MessageBoxImage.Information);
+        }
+
+        public IReadOnlyList<CellReferenceInfo> GetActiveCellPrecedents(bool directOnly = true)
+        {
+            var list = new List<CellReferenceInfo>();
+            if (!HasActiveWorksheet) return list;
+
+            try
+            {
+                var cell = _app.ActiveCell;
+                if (cell == null) return list;
+
+                string activeSheetName = ((Excel.Worksheet)_app.ActiveSheet).Name;
+                Excel.Range? precRange = null;
+
+                try
+                {
+                    precRange = directOnly ? cell.DirectPrecedents : cell.Precedents;
+                }
+                catch (COMException)
+                {
+                    // 0x800A03EC thrown by Excel when no precedent cells exist
+                    precRange = null;
+                }
+
+                if (precRange != null)
+                {
+                    foreach (Excel.Range area in precRange.Areas)
+                    {
+                        int count = area.CountLarge > 200 ? 200 : area.Count;
+                        foreach (Excel.Range pCell in area)
+                        {
+                            string addr = pCell.get_Address();
+                            string sName = ((Excel.Worksheet)pCell.Worksheet).Name;
+                            string val = pCell.Value2?.ToString() ?? "";
+                            string formula = "";
+                            try { formula = pCell.Formula?.ToString() ?? ""; } catch { }
+
+                            list.Add(new CellReferenceInfo(sName, addr, val, formula, directOnly));
+                            if (list.Count >= 300) break;
+                        }
+                        if (list.Count >= 300) break;
+                    }
+                }
+
+                // If formula references other sheets (not supported by .Precedents COM property), scan formula string
+                string activeFormula = "";
+                try { activeFormula = cell.Formula?.ToString() ?? ""; } catch { }
+
+                if (!string.IsNullOrWhiteSpace(activeFormula) && activeFormula.Contains("!"))
+                {
+                    var regex = new Regex(@"(?<sheet>'(?:[^']|'')+'|[A-Za-z0-9_]+)!(?<ref>\$?[A-Za-z]{1,3}\$?[1-9][0-9]{0,6}(?::\$?[A-Za-z]{1,3}\$?[1-9][0-9]{0,6})?)");
+                    var matches = regex.Matches(activeFormula);
+                    var wb = _app.ActiveWorkbook;
+
+                    foreach (Match m in matches)
+                    {
+                        string targetSheet = m.Groups["sheet"].Value.Trim('\'');
+                        string targetRef = m.Groups["ref"].Value;
+
+                        if (!targetSheet.Equals(activeSheetName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            try
+                            {
+                                var ws = (Excel.Worksheet)wb.Worksheets[targetSheet];
+                                var extRange = ws.Range[targetRef];
+                                string val = extRange.Value2?.ToString() ?? "";
+                                string fText = "";
+                                try { fText = extRange.Formula?.ToString() ?? ""; } catch { }
+
+                                list.Add(new CellReferenceInfo(targetSheet, targetRef, val, fText, directOnly));
+                            }
+                            catch { }
+                        }
+                    }
+                }
+            }
+            catch { }
+
+            return list;
+        }
+
+        public IReadOnlyList<CellReferenceInfo> GetActiveCellDependents(bool directOnly = true)
+        {
+            var list = new List<CellReferenceInfo>();
+            if (!HasActiveWorksheet) return list;
+
+            try
+            {
+                var cell = _app.ActiveCell;
+                if (cell == null) return list;
+
+                Excel.Range? depRange = null;
+                try
+                {
+                    depRange = directOnly ? cell.DirectDependents : cell.Dependents;
+                }
+                catch (COMException)
+                {
+                    // 0x800A03EC thrown when no dependent cells exist
+                    depRange = null;
+                }
+
+                if (depRange != null)
+                {
+                    foreach (Excel.Range area in depRange.Areas)
+                    {
+                        int count = area.CountLarge > 200 ? 200 : area.Count;
+                        foreach (Excel.Range dCell in area)
+                        {
+                            string addr = dCell.get_Address();
+                            string sName = ((Excel.Worksheet)dCell.Worksheet).Name;
+                            string val = dCell.Value2?.ToString() ?? "";
+                            string formula = "";
+                            try { formula = dCell.Formula?.ToString() ?? ""; } catch { }
+
+                            list.Add(new CellReferenceInfo(sName, addr, val, formula, directOnly));
+                            if (list.Count >= 300) break;
+                        }
+                        if (list.Count >= 300) break;
+                    }
+                }
+            }
+            catch { }
+
+            return list;
+        }
+
+        public bool SelectCellAddress(string sheetName, string cellAddress)
+        {
+            if (!HasActiveWorkbook || string.IsNullOrWhiteSpace(cellAddress)) return false;
+
+            try
+            {
+                var wb = _app.ActiveWorkbook;
+                Excel.Worksheet ws;
+                if (!string.IsNullOrWhiteSpace(sheetName))
+                {
+                    try
+                    {
+                        ws = (Excel.Worksheet)wb.Worksheets[sheetName];
+                    }
+                    catch
+                    {
+                        ws = (Excel.Worksheet)_app.ActiveSheet;
+                    }
+                }
+                else
+                {
+                    ws = (Excel.Worksheet)_app.ActiveSheet;
+                }
+
+                ws.Activate();
+                Excel.Range target = ws.Range[cellAddress];
+                target.Select();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public void ApplyNumberFormat(string formatString, bool selectionOnly = true)
+        {
+            if (!HasActiveWorksheet || string.IsNullOrEmpty(formatString)) return;
+
+            try
+            {
+                using (new ExcelStateScope(_app))
+                {
+                    var ws = (Excel.Worksheet)_app.ActiveSheet;
+                    Excel.Range target = selectionOnly ? (_app.Selection as Excel.Range ?? ws.UsedRange) : ws.UsedRange;
+                    if (target != null)
+                    {
+                        target.NumberFormat = formatString;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Failed to apply number format: {ex.Message}", "Formatting Error", isError: true);
+            }
+        }
+
+        public string? GetActiveCellNumberFormat()
+        {
+            if (!HasActiveWorksheet) return null;
+            try
+            {
+                var cell = _app.ActiveCell;
+                return cell?.NumberFormat?.ToString();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public void InsertFormulaAtActiveCell(string formula)
+        {
+            if (!HasActiveWorksheet || string.IsNullOrWhiteSpace(formula)) return;
+
+            try
+            {
+                var cell = _app.ActiveCell;
+                if (cell != null)
+                {
+                    cell.Formula = formula;
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Failed to insert formula: {ex.Message}", "Formula Insertion Error", isError: true);
+            }
         }
     }
 }

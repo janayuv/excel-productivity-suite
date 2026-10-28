@@ -5,6 +5,7 @@ using ExcelProductivitySuite.Engine.Analysis;
 using ExcelProductivitySuite.Engine.DataCleaning;
 using ExcelProductivitySuite.Engine.Files;
 using ExcelProductivitySuite.Engine.Formulas;
+using ExcelProductivitySuite.Engine.Formatting;
 using ExcelProductivitySuite.Engine.Ranges;
 using ExcelProductivitySuite.Engine.Text;
 using ExcelProductivitySuite.Engine.Worksheets;
@@ -721,6 +722,64 @@ namespace ExcelProductivitySuite.UnitTests
             Assert.AreEqual(100000, stats.NumericCells);
             Assert.IsTrue(stats.Sum > 0);
             Assert.IsTrue(sw.ElapsedMilliseconds < 500, $"QuickStatisticsEngine benchmark took {sw.ElapsedMilliseconds} ms, target is < 500 ms");
+        }
+
+        [TestMethod]
+        public void Benchmark_FormulaBatchReplacer_10K_Formulas_CompletesUnder500ms()
+        {
+            int rows = 2000;
+            int cols = 5;
+            object?[,] matrix = new object?[rows, cols];
+
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    matrix[r, c] = $"=SUM(Sheet1!A{r + 1}:Sheet1!B{r + 1}) + Sheet1!C{r + 1}";
+                }
+            }
+
+            var options = new FormulaReplaceOptions
+            {
+                FindText = "Sheet1!",
+                ReplaceWith = "Budget2026!",
+                MatchCase = false,
+                MatchWholeWord = false,
+                IgnoreStringLiterals = true
+            };
+
+            var sw = Stopwatch.StartNew();
+            var res = FormulaBatchReplacer.ProcessFormulas(matrix, options);
+            sw.Stop();
+
+            Assert.AreEqual(10000, res.TotalCellsScanned);
+            Assert.AreEqual(10000, res.FormulasModified);
+            Assert.AreEqual(30000, res.TotalReplacements);
+            Assert.IsTrue(sw.ElapsedMilliseconds < 500, $"FormulaBatchReplacer benchmark took {sw.ElapsedMilliseconds} ms, target is < 500 ms");
+        }
+
+        [TestMethod]
+        public void Benchmark_DateFormatStandardizer_10K_Cells_CompletesUnder500ms()
+        {
+            int rows = 2000;
+            int cols = 5;
+            object?[,] matrix = new object?[rows, cols];
+
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    matrix[r, c] = $"2026-10-{(r % 28) + 1:D2}";
+                }
+            }
+
+            var sw = Stopwatch.StartNew();
+            var res = DateFormatStandardizer.StandardizeRange(matrix, "yyyy-mm-dd", convertTextDates: true);
+            sw.Stop();
+
+            Assert.AreEqual(10000, res.TotalCells);
+            Assert.AreEqual(10000, res.TextDatesConverted);
+            Assert.IsTrue(sw.ElapsedMilliseconds < 500, $"DateFormatStandardizer benchmark took {sw.ElapsedMilliseconds} ms, target is < 500 ms");
         }
     }
 }

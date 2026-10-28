@@ -441,5 +441,51 @@ namespace ExcelProductivitySuite.UnitTests
         {
             MessagesShown.Add($"[{title}] {message}");
         }
+
+        public List<CellReferenceInfo> MockPrecedents { get; } = new();
+        public List<CellReferenceInfo> MockDependents { get; } = new();
+        public (string sheetName, string cellAddress)? LastNavigatedCell { get; set; }
+        public List<(string formatString, bool selectionOnly)> AppliedNumberFormats { get; } = new();
+        public string? MockNumberFormat { get; set; } = "$#,##0.00";
+        public List<string> InsertedFormulasHistory { get; } = new();
+
+        public IReadOnlyList<CellReferenceInfo> GetActiveCellPrecedents(bool directOnly = true)
+        {
+            if (MockPrecedents.Count > 0) return MockPrecedents;
+            return new List<CellReferenceInfo>
+            {
+                new CellReferenceInfo("Sheet1", "$A$1", "100", "", directOnly),
+                new CellReferenceInfo("Sheet1", "$A$2", "200", "=B1*2", directOnly),
+                new CellReferenceInfo("Sheet2", "$C$10", "500", "", directOnly)
+            };
+        }
+
+        public IReadOnlyList<CellReferenceInfo> GetActiveCellDependents(bool directOnly = true)
+        {
+            if (MockDependents.Count > 0) return MockDependents;
+            return new List<CellReferenceInfo>
+            {
+                new CellReferenceInfo("Sheet1", "$B$10", "300", "=SUM(A1:A5)", directOnly),
+                new CellReferenceInfo("Sheet1", "$C$15", "600", "=B10*2", directOnly)
+            };
+        }
+
+        public bool SelectCellAddress(string sheetName, string cellAddress)
+        {
+            LastNavigatedCell = (sheetName, cellAddress);
+            return true;
+        }
+
+        public void ApplyNumberFormat(string formatString, bool selectionOnly = true)
+        {
+            AppliedNumberFormats.Add((formatString, selectionOnly));
+        }
+
+        public string? GetActiveCellNumberFormat() => MockNumberFormat;
+
+        public void InsertFormulaAtActiveCell(string formula)
+        {
+            InsertedFormulasHistory.Add(formula);
+        }
     }
 }

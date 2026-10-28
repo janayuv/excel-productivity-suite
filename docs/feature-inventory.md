@@ -4,7 +4,7 @@
 **Host Application:** Microsoft Excel 2016 / 2019 / 2021 / Microsoft 365 (32-bit & 64-bit Windows Desktop)  
 **Framework:** .NET Framework 4.8 & Visual Studio Tools for Office (VSTO)  
 **UI Subsystem:** Windows Presentation Foundation (WPF) / Modern Fluent Office Palette  
-**Version:** 5.0.0 (Batch 10 Navigation, UX Polish, Packaging & Release Milestone)  
+**Version:** 5.1.0 (Batch 11 Formulas & Formatting Expansion Milestone)  
 **Last Audit Date:** 2026-10-28  
 
 ---
@@ -15,9 +15,9 @@ Following the mandatory codebase audit, the **Excel Productivity Suite** feature
 
 The current implementation comprises:
 - **Total Cataloged Capabilities:** 200+ features planned across 12 modules
-- **Active & Verified Tools:** 77 commands (75 core productivity utilities + 2 suite navigation/information utilities)
-- **Unit Test Coverage:** 202 passing automated unit & performance tests (100% pass rate in 2.0s)
-- **Real Excel COM Integration Tests:** 18 passing out-of-process Excel 2016+ scenarios (100% pass rate in 1.23s)
+- **Active & Verified Tools:** 83 commands (81 core productivity utilities + 2 suite navigation/information utilities)
+- **Unit Test Coverage:** 212 passing automated unit & performance tests (100% pass rate in 2.0s)
+- **Real Excel COM Integration Tests:** 18 passing out-of-process Excel 2016+ scenarios (100% pass rate in 1.27s)
 - **Searchable Quick Tool Launcher (SuperSearch):** Integrated multi-category search, active/roadmap status filtering, module badges, and keyword scoring (`Ctrl+Shift+P` / KeyTip: `TL`)
 
 ---
@@ -46,7 +46,7 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 
 ---
 
-## 4. Complete Active Feature Inventory (77 Implemented & Verified Tools)
+## 4. Complete Active Feature Inventory (83 Implemented & Verified Tools)
 
 | ID | Title | Module | Category | Engine Class | UI Dialog / Action | Test Mapping | Status |
 | :--- | :--- | :---: | :--- | :--- | :--- | :--- | :--- |
@@ -127,6 +127,12 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 | `CMD_NAV_DATE_PICKER` | **Date Picker Insertion** | L | Navigation & Productivity | `DateFormatPresets.cs` | `DatePickerDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
 | `CMD_NAV_GRID_FOCUS` | **Reading Grid Focus** | L | Navigation & Productivity | `ExcelContextAdapter.cs` | `ReadingGridFocusDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
 | `CMD_NAV_DATA_ENTRY_FORM` | **Table Data Entry Form** | L | Navigation & Productivity | `ExcelContextAdapter.cs` | `DataEntryFormDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_FORMULA_AUDIT_PRECEDENTS` | **Audit Precedents** | G | Formulas & Calculation | `ExcelContextAdapter.cs` | `FormulaAuditPrecedentsDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_FORMULA_AUDIT_DEPENDENTS` | **Audit Dependents** | G | Formulas & Calculation | `ExcelContextAdapter.cs` | `FormulaAuditDependentsDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_FORMULA_BATCH_REPLACE_REF` | **Replace Formula References** | G | Formulas & Calculation | `FormulaBatchReplacer.cs` | `FormulaBatchReplaceDialog.xaml` | `RangeAndSheetTests`, `Benchmark_FormulaBatchReplacer` | Implemented and verified |
+| `CMD_FORMULA_TEMPLATES` | **Formula Templates Library** | G | Formulas & Calculation | `FormulaTemplateLibrary.cs` | `FormulaTemplatesDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_FORMAT_BATCH_NUMBERS` | **Batch Number Formatting** | H | Formatting & Design | `NumberFormatPresets.cs` | `BatchNumberFormatDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_FORMAT_DATE_STANDARDS` | **Standardize Date Formats** | H | Formatting & Design | `DateFormatStandardizer.cs` | `StandardizeDateFormatsDialog.xaml` | `RangeAndSheetTests`, `Benchmark_DateFormatStandardizer` | Implemented and verified |
 
 ---
 
@@ -233,17 +239,17 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 - [x] `CMD_FORMULA_CONVERT_REF`: Convert cell references between Absolute, Row-Absolute, Col-Absolute, Relative. *(Active - Batch 7)*
 - [x] `CMD_FORMULA_EXACT_COPY`: Copy formulas to new ranges without shifting relative cell references. *(Active - Batch 7)*
 - [x] `CMD_FORMULA_LOCATE_ERRORS`: Find, select, and navigate through formula errors (#N/A, #VALUE!, #REF!, #DIV/0!). *(Active - Batch 7)*
-- [ ] `CMD_FORMULA_AUDIT_PRECEDENTS`: Trace and visually navigate precedent cells contributing to formula. *(Planned - Batch 7+)*
-- [ ] `CMD_FORMULA_AUDIT_DEPENDENTS`: Trace and visually navigate all dependent cells of active cell. *(Planned - Batch 7+)*
-- [ ] `CMD_FORMULA_BATCH_REPLACE_REF`: Replace sheet names or range addresses within formulas in bulk. *(Planned - Batch 7+)*
-- [ ] `CMD_FORMULA_EXPLAIN`: Deconstruct and explain nested formulas with deterministic parser. *(Planned - Batch 7+)*
-- [ ] `CMD_FORMULA_TEMPLATES`: Insert pre-built financial, date, and math formula templates. *(Planned - Batch 7+)*
+- [x] `CMD_FORMULA_AUDIT_PRECEDENTS`: Trace and visually navigate precedent cells contributing to formula. *(Active - Batch 11)*
+- [x] `CMD_FORMULA_AUDIT_DEPENDENTS`: Trace and visually navigate all dependent cells of active cell. *(Active - Batch 11)*
+- [x] `CMD_FORMULA_BATCH_REPLACE_REF`: Replace sheet names or range addresses within formulas in bulk. *(Active - Batch 11)*
+- [ ] `CMD_FORMULA_EXPLAIN`: Deconstruct and explain nested formulas with deterministic parser. *(Planned - Batch 12+)*
+- [x] `CMD_FORMULA_TEMPLATES`: Insert pre-built financial, date, and math formula templates. *(Active - Batch 11)*
 
 ### Module H: Formatting and Design (Target: 14 Tools)
 - [x] `CMD_FORMAT_PAGE_SETUP_COPY`: Copy print orientation, margins, paper size, and repeating headers across worksheets. *(Active - Batch 7)*
 - [x] `CMD_FORMAT_FREEZE_PANES`: Synchronize freeze panes across all worksheets simultaneously. *(Active - Batch 7)*
-- [ ] `CMD_FORMAT_BATCH_NUMBERS`: Batch apply number, currency, decimal, and percent formats. *(Planned - Batch 7+)*
-- [ ] `CMD_FORMAT_DATE_STANDARDS`: Standardize date cells to ISO 8601 (YYYY-MM-DD) or custom formats. *(Planned - Batch 7+)*
+- [x] `CMD_FORMAT_BATCH_NUMBERS`: Batch apply number, currency, decimal, and percent formats. *(Active - Batch 11)*
+- [x] `CMD_FORMAT_DATE_STANDARDS`: Standardize date cells to ISO 8601 (YYYY-MM-DD) or custom formats. *(Active - Batch 11)*
 - [ ] `CMD_FORMAT_HIGHLIGHT_CELL_TYPES`: Color-code formulas, constants, locked cells, and errors. *(Planned - Batch 7+)*
 - [ ] `CMD_FORMAT_BORDERS`: Apply accounting borders, double bottom lines, and header styling. *(Planned - Batch 7+)*
 - [ ] `CMD_FORMAT_ROW_HEIGHT`: Set uniform row heights or smart auto-fit across multiple tables. *(Planned - Batch 7+)*
@@ -293,7 +299,7 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 
 ---
 
-## 6. Implementation Batch Plan (Batches 1 - 10)
+## 6. Implementation Batch Plan (Batches 1 - 11)
 
 | Batch | Scope & Focus | Milestone Deliverables | Status |
 | :---: | :--- | :--- | :---: |
@@ -307,6 +313,7 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 | **Batch 8** | **Import, Export & Picture Utilities** | CSV Import/Export, PDF Export, Batch Format Convert, Folder Listing, Cell Pictures, Chart Image Export | **COMPLETED** |
 | **Batch 9** | **Protection, Recovery, Charts & Analysis** | Batch Protect/Unprotect, Workbook Snapshots, Gantt/Waterfall Charts, Quick Statistics Dashboard | **COMPLETED** |
 | **Batch 10** | **Navigation, UX Polish, Packaging & Release** | Navigation Pane, Grid-Focus Crosshair, Date Picker, Formula Editor, Release Installer Verification | **COMPLETED** |
+| **Batch 11** | **Formulas & Formatting Expansion** | Audit Precedents/Dependents, Replace Formula Refs, Formula Templates Library, Batch Number Formatting, Standardize Dates | **COMPLETED** |
 
 ---
 
