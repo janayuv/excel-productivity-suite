@@ -1018,6 +1018,122 @@ namespace ExcelProductivitySuite.AddIn.Startup
                 roadmapBatch: "Batch 8"
             ));
 
+            // =========================================================================
+            // Module J: Protection and Recovery (Batch 9 Expansion)
+            // =========================================================================
+
+            // Batch Protect Worksheets
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_SECURITY_BATCH_PROTECT",
+                title: "Batch Protect Sheets",
+                description: "Protect multiple worksheets simultaneously with password and granular permissions.",
+                category: CommandCategory.ProtectionAndRecovery,
+                executeAction: ctx =>
+                {
+                    var dlg = new BatchProtectSheetsDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "batch protect", "protect multiple sheets", "lock worksheets", "sheet security" },
+                officeIconName: "ProtectSheet",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "J",
+                roadmapBatch: "Batch 9"
+            ));
+
+            // Batch Unprotect Worksheets
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_SECURITY_BATCH_UNPROTECT",
+                title: "Batch Unprotect Sheets",
+                description: "Remove worksheet protection across multiple sheets using authorized password.",
+                category: CommandCategory.ProtectionAndRecovery,
+                executeAction: ctx =>
+                {
+                    var dlg = new BatchUnprotectSheetsDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "batch unprotect", "unlock multiple sheets", "unprotect sheets", "remove password" },
+                officeIconName: "UnprotectSheet",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "J",
+                roadmapBatch: "Batch 9"
+            ));
+
+            // Create Workbook Snapshot
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_RECOVERY_CREATE_SNAPSHOT",
+                title: "Create Snapshot",
+                description: "Capture an instant non-disruptive recovery snapshot of the active workbook.",
+                category: CommandCategory.ProtectionAndRecovery,
+                executeAction: ctx =>
+                {
+                    var dlg = new CreateSnapshotDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "workbook snapshot", "take snapshot", "backup state", "undo checkpoint", "restore point" },
+                officeIconName: "FileSaveAs",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "J",
+                roadmapBatch: "Batch 9"
+            ));
+
+            // Restore Workbook Snapshot
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_RECOVERY_RESTORE_SNAPSHOT",
+                title: "Restore Snapshot",
+                description: "Roll back the active workbook to a previously captured safe recovery point.",
+                category: CommandCategory.ProtectionAndRecovery,
+                executeAction: ctx =>
+                {
+                    var dlg = new RestoreSnapshotDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "restore snapshot", "revert workbook", "undo to checkpoint", "restore state" },
+                officeIconName: "FileHistory",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "J",
+                roadmapBatch: "Batch 9"
+            ));
+
+            // =========================================================================
+            // Module K: Charts and Analysis (Batch 9 Expansion)
+            // =========================================================================
+
+            // Quick Statistics Dashboard
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_ANALYSIS_QUICK_STATS",
+                title: "Quick Statistics",
+                description: "Display instant audit summary with Count, Sum, Mean, Median, Min, Max, and StdDev.",
+                category: CommandCategory.ChartsAndAnalysis,
+                executeAction: ctx =>
+                {
+                    var dlg = new QuickStatisticsDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "quick stats", "summary statistics", "median mean", "descriptive statistics", "standard deviation" },
+                officeIconName: "AutoSum",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "K",
+                roadmapBatch: "Batch 9"
+            ));
+
+            // Target vs. Actual Chart
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_CHART_TARGET_VS_ACTUAL",
+                title: "Target vs. Actual Chart",
+                description: "Generate dual-series variance comparison chart (Clustered Column + Target Line).",
+                category: CommandCategory.ChartsAndAnalysis,
+                executeAction: ctx =>
+                {
+                    var dlg = new TargetVsActualChartDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "target vs actual", "variance chart", "kpi chart", "performance chart", "column line chart" },
+                officeIconName: "ChartInsert",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "K",
+                roadmapBatch: "Batch 9"
+            ));
+
             // 16. Manage Worksheet Visibility - Module D: Worksheet and Workbook Management
             registry.RegisterCommand(new SuiteCommand(
                 id: "CMD_SHEET_VISIBILITY",

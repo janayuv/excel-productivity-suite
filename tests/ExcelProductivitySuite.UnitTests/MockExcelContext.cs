@@ -9,6 +9,8 @@ namespace ExcelProductivitySuite.UnitTests
         public IntPtr MainWindowHandle => IntPtr.Zero;
         public bool HasActiveWorkbook => true;
         public bool HasActiveWorksheet => true;
+        public string? ActiveWorkbookPath { get; set; } = @"C:\Test\SalesData.xlsx";
+        public string? ActiveWorkbookName { get; set; } = "SalesData.xlsx";
         public string? ActiveWorksheetName { get; set; } = "Sheet1";
         public string? SelectionAddress { get; set; } = "$A$1:$B$10";
         public int SelectedCellCount => 20;
@@ -289,6 +291,56 @@ namespace ExcelProductivitySuite.UnitTests
             var files = new List<string>(filePaths);
             ConvertedWorkbooks.Add((files, outputDirectory, targetExtension));
             return files.Count;
+        }
+
+        public List<SheetProtectionStatus> MockProtectionStatuses { get; } = new();
+        public List<(List<string> sheets, string? pwd, SheetProtectionOptions opts)> ProtectedSheetsHistory { get; } = new();
+        public List<(List<string> sheets, string? pwd)> UnprotectedSheetsHistory { get; } = new();
+        public List<string> SavedCopies { get; } = new();
+        public string? RestoredSnapshotPath { get; set; }
+        public (string title, int sRow, int sCol, int rCount, int cCount, int catCol, int actCol, int tgtCol)? LastCreatedChart { get; set; }
+
+        public IReadOnlyList<SheetProtectionStatus> GetSheetProtectionStatuses()
+        {
+            if (MockProtectionStatuses.Count > 0) return MockProtectionStatuses;
+            var list = new List<SheetProtectionStatus>();
+            foreach (var s in Sheets)
+            {
+                list.Add(new SheetProtectionStatus(s, false));
+            }
+            return list;
+        }
+
+        public (int successCount, List<string> errors) BatchProtectWorksheets(IEnumerable<string> sheetNames, string? password, SheetProtectionOptions options)
+        {
+            var list = new List<string>(sheetNames);
+            ProtectedSheetsHistory.Add((list, password, options));
+            return (list.Count, new List<string>());
+        }
+
+        public (int successCount, List<string> errors) BatchUnprotectWorksheets(IEnumerable<string> sheetNames, string? password)
+        {
+            var list = new List<string>(sheetNames);
+            UnprotectedSheetsHistory.Add((list, password));
+            return (list.Count, new List<string>());
+        }
+
+        public bool SaveActiveWorkbookCopy(string destinationPath)
+        {
+            SavedCopies.Add(destinationPath);
+            return true;
+        }
+
+        public bool RestoreWorkbookFromSnapshot(string snapshotPath)
+        {
+            RestoredSnapshotPath = snapshotPath;
+            return true;
+        }
+
+        public bool CreateTargetVsActualChart(string title, int startRow, int startCol, int rowCount, int colCount, int categoryColIndex, int actualColIndex, int targetColIndex)
+        {
+            LastCreatedChart = (title, startRow, startCol, rowCount, colCount, categoryColIndex, actualColIndex, targetColIndex);
+            return true;
         }
 
         public void ShowMessage(string message, string title, bool isError = false)

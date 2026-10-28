@@ -146,6 +146,12 @@ namespace ExcelProductivitySuite.AddIn.Ribbon
                 case "btnFolderListing": return "CMD_FILE_FOLDER_LISTING";
                 case "btnInsertTextFile": return "CMD_FILE_INSERT_TEXT_FILE";
                 case "btnBatchConvert": return "CMD_FILE_BATCH_CONVERT";
+                case "btnQuickStats": return "CMD_ANALYSIS_QUICK_STATS";
+                case "btnTargetVsActual": return "CMD_CHART_TARGET_VS_ACTUAL";
+                case "btnBatchProtect": return "CMD_SECURITY_BATCH_PROTECT";
+                case "btnBatchUnprotect": return "CMD_SECURITY_BATCH_UNPROTECT";
+                case "btnCreateSnapshot": return "CMD_RECOVERY_CREATE_SNAPSHOT";
+                case "btnRestoreSnapshot": return "CMD_RECOVERY_RESTORE_SNAPSHOT";
                 case "btnAbout": return "CMD_ABOUT";
                 default: return controlId;
             }

@@ -1,0 +1,86 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.BatchUnprotectSheetsDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Batch Unprotect Worksheets - Excel Productivity Suite"
+        Height="460" Width="520"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="🔓" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Batch Unprotect Worksheets" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Remove worksheet protection across multiple sheets using authorized password" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Sheet Selection List -->
+        <GroupBox Grid.Row="1" Header="Select Worksheets to Unprotect" Style="{StaticResource ModernGroupBoxStyle}">
+            <Grid Margin="4">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <ListBox x:Name="SheetsListBox" Grid.Row="0" BorderThickness="1" BorderBrush="#D1D5DB" Background="White">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <CheckBox Content="{Binding DisplayName}" IsChecked="{Binding IsSelected}" Margin="2,3" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,8,0,0">
+                    <Button Content="Select Protected" Style="{StaticResource ModernSecondaryButtonStyle}" Padding="8,4" Margin="0,0,4,0" Click="SelectProtected_Click" />
+                    <Button Content="Select All" Style="{StaticResource ModernSecondaryButtonStyle}" Padding="8,4" Margin="0,0,4,0" Click="SelectAll_Click" />
+                    <Button Content="Clear" Style="{StaticResource ModernSecondaryButtonStyle}" Padding="8,4" Click="ClearAll_Click" />
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+
+        <!-- Password Entry -->
+        <GroupBox Grid.Row="2" Header="Password (Leave blank if no password)" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,10,0,8">
+            <DockPanel Margin="4">
+                <Button x:Name="TogglePwdBtn" Content="👁" Width="30" DockPanel.Dock="Right" Style="{StaticResource ModernSecondaryButtonStyle}" Click="TogglePassword_Click" ToolTip="Show/Hide Password" />
+                <PasswordBox x:Name="PasswordBox" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,4,0" PasswordChanged="PasswordBox_PasswordChanged" />
+                <TextBox x:Name="PasswordVisibleBox" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,4,0" Visibility="Collapsed" TextChanged="PasswordVisibleBox_TextChanged" />
+            </DockPanel>
+        </GroupBox>
+
+        <!-- Status -->
+        <TextBlock x:Name="StatusText" Grid.Row="3" Text="" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,10" TextWrapping="Wrap" />
+
+        <!-- Footer Actions -->
+        <DockPanel Grid.Row="4">
+            <Button Content="Cancel" Style="{StaticResource ModernSecondaryButtonStyle}" DockPanel.Dock="Right" Width="80" Click="Cancel_Click" />
+            <Button Content="Unprotect Worksheets" Style="{StaticResource ModernPrimaryButtonStyle}" DockPanel.Dock="Right" Width="150" Margin="0,0,8,0" Click="Unprotect_Click" />
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

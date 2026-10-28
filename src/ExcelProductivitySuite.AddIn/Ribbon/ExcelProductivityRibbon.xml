@@ -368,6 +368,24 @@
                   onAction="OnRibbonButtonClicked" />
         </group>
 
+        <!-- Group: Charts & Analysis -->
+        <group id="grpChartsAnalysis" label="Charts &amp; Analysis">
+          <button id="btnQuickStats"
+                  label="Quick Stats"
+                  size="large"
+                  imageMso="AutoSum"
+                  screentip="Quick Statistics Dashboard"
+                  supertip="Instant statistical summary (Count, Sum, Mean, Median, Min, Max, StdDev, Variance) with one-click export."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnTargetVsActual"
+                  label="Target vs Actual"
+                  size="large"
+                  imageMso="ChartInsert"
+                  screentip="Target vs. Actual Chart"
+                  supertip="Generate dual-series variance comparison chart (Clustered Column + Target Line) for performance tracking."
+                  onAction="OnRibbonButtonClicked" />
+        </group>
+
       </tab>
 
       <!-- Secondary Tab: Workbook & Sheets -->
@@ -510,6 +528,39 @@
                   imageMso="FileSaveAsExcelXlsx"
                   screentip="Batch Convert Workbooks"
                   supertip="Convert entire folders of workbook files to modern XLSX, PDF, CSV, or legacy XLS format."
+                  onAction="OnRibbonButtonClicked" />
+        </group>
+
+        <!-- Group: Security & Recovery -->
+        <group id="grpSecurityRecovery" label="Security &amp; Recovery">
+          <button id="btnBatchProtect"
+                  label="Protect Sheets"
+                  size="large"
+                  imageMso="ProtectSheet"
+                  screentip="Batch Protect Worksheets"
+                  supertip="Protect multiple worksheets simultaneously with password and granular permissions."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnBatchUnprotect"
+                  label="Unprotect Sheets"
+                  size="large"
+                  imageMso="UnprotectSheet"
+                  screentip="Batch Unprotect Worksheets"
+                  supertip="Remove worksheet protection across multiple sheets using authorized password."
+                  onAction="OnRibbonButtonClicked" />
+          <separator id="sepSec1" />
+          <button id="btnCreateSnapshot"
+                  label="Take Snapshot"
+                  size="normal"
+                  imageMso="FileSaveAs"
+                  screentip="Create Workbook Snapshot"
+                  supertip="Capture an instant non-disruptive recovery snapshot of the active workbook."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnRestoreSnapshot"
+                  label="Restore Snapshot"
+                  size="normal"
+                  imageMso="FileHistory"
+                  screentip="Restore Workbook Snapshot"
+                  supertip="Roll back the active workbook to a previously captured safe recovery point."
                   onAction="OnRibbonButtonClicked" />
         </group>
 

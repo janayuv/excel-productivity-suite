@@ -4,7 +4,7 @@
 **Host Application:** Microsoft Excel 2016 / 2019 / 2021 / Microsoft 365 (32-bit & 64-bit Windows Desktop)  
 **Framework:** .NET Framework 4.8 & Visual Studio Tools for Office (VSTO)  
 **UI Subsystem:** Windows Presentation Foundation (WPF) / Modern Fluent Office Palette  
-**Version:** 4.8.0 (Batch 8 Import, Export & File Utilities Milestone)  
+**Version:** 4.9.0 (Batch 9 Protection, Recovery, Charts & Analysis Milestone)  
 **Last Audit Date:** 2026-10-28  
 
 ---
@@ -15,8 +15,8 @@ Following the mandatory codebase audit, the **Excel Productivity Suite** feature
 
 The current implementation comprises:
 - **Total Cataloged Capabilities:** 200+ features planned across 12 modules
-- **Active & Verified Tools:** 65 commands (63 core productivity utilities + 2 suite navigation/information utilities)
-- **Unit Test Coverage:** 186 passing automated unit & performance tests (100% pass rate in 2.0s)
+- **Active & Verified Tools:** 71 commands (69 core productivity utilities + 2 suite navigation/information utilities)
+- **Unit Test Coverage:** 195 passing automated unit & performance tests (100% pass rate in 2.0s)
 - **Real Excel COM Integration Tests:** 18 passing out-of-process Excel 2016+ scenarios (100% pass rate in 1.25s)
 - **Searchable Quick Tool Launcher (SuperSearch):** Integrated multi-category search, active/roadmap status filtering, module badges, and keyword scoring (`Ctrl+Shift+P` / KeyTip: `TL`)
 
@@ -46,7 +46,7 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 
 ---
 
-## 4. Complete Active Feature Inventory (65 Implemented & Verified Tools)
+## 4. Complete Active Feature Inventory (71 Implemented & Verified Tools)
 
 | ID | Title | Module | Category | Engine Class | UI Dialog / Action | Test Mapping | Status |
 | :--- | :--- | :---: | :--- | :--- | :--- | :--- | :--- |
@@ -115,6 +115,12 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 | `CMD_FILE_FOLDER_LISTING` | **Folder File Listing** | I | Import, Export & Files | `FolderInventoryScanner.cs` | `FolderListingDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
 | `CMD_FILE_INSERT_TEXT_FILE` | **Insert Text File** | I | Import, Export & Files | `TextFileReader.cs` | `InsertTextFileDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
 | `CMD_FILE_BATCH_CONVERT` | **Batch Convert Files** | I | Import, Export & Files | `ExcelContextAdapter.cs` | `BatchConvertWorkbooksDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_SECURITY_BATCH_PROTECT` | **Batch Protect Sheets** | J | Protection & Recovery | `ExcelContextAdapter.cs` | `BatchProtectSheetsDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_SECURITY_BATCH_UNPROTECT` | **Batch Unprotect Sheets** | J | Protection & Recovery | `ExcelContextAdapter.cs` | `BatchUnprotectSheetsDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_RECOVERY_CREATE_SNAPSHOT` | **Create Snapshot** | J | Protection & Recovery | `WorkbookSnapshotManager.cs` | `CreateSnapshotDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_RECOVERY_RESTORE_SNAPSHOT` | **Restore Snapshot** | J | Protection & Recovery | `WorkbookSnapshotManager.cs` | `RestoreSnapshotDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_ANALYSIS_QUICK_STATS` | **Quick Statistics** | K | Charts & Analysis | `QuickStatisticsEngine.cs` | `QuickStatisticsDialog.xaml` | `RangeAndSheetTests`, `Benchmark_QuickStatisticsEngine` | Implemented and verified |
+| `CMD_CHART_TARGET_VS_ACTUAL` | **Target vs. Actual Chart** | K | Charts & Analysis | `ExcelContextAdapter.cs`, `TargetVsActualDetector.cs` | `TargetVsActualChartDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
 
 ---
 
@@ -252,20 +258,20 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 - [ ] `CMD_FILE_EXPORT_CHARTS`: Export embedded charts as high-resolution PNG, JPEG, or SVG images. *(Planned - Batch 8+)*
 
 ### Module J: Protection and Recovery (Target: 10 Tools)
-- [ ] `CMD_SECURITY_BATCH_PROTECT`: Batch protect multiple worksheets with authorized password. *(Planned - Batch 9)*
-- [ ] `CMD_SECURITY_BATCH_UNPROTECT`: Batch unprotect multiple worksheets using authorized password. *(Planned - Batch 9)*
-- [ ] `CMD_SECURITY_WORKBOOK_ENCRYPT`: Set or update workbook open / modify password. *(Planned - Batch 9)*
-- [ ] `CMD_SECURITY_WINDOW_VISIBILITY`: Hide or unhide workbook windows across multi-document sessions. *(Planned - Batch 9)*
-- [ ] `CMD_RECOVERY_CREATE_SNAPSHOT`: Save in-session workbook snapshot for safe trial operations. *(Planned - Batch 9)*
-- [ ] `CMD_RECOVERY_RESTORE_SNAPSHOT`: Revert active workbook back to previously captured snapshot. *(Planned - Batch 9)*
+- [x] `CMD_SECURITY_BATCH_PROTECT`: Batch protect multiple worksheets with authorized password. *(Active - Batch 9)*
+- [x] `CMD_SECURITY_BATCH_UNPROTECT`: Batch unprotect multiple worksheets using authorized password. *(Active - Batch 9)*
+- [x] `CMD_RECOVERY_CREATE_SNAPSHOT`: Save in-session workbook snapshot for safe trial operations. *(Active - Batch 9)*
+- [x] `CMD_RECOVERY_RESTORE_SNAPSHOT`: Revert active workbook back to previously captured snapshot. *(Active - Batch 9)*
+- [ ] `CMD_SECURITY_WORKBOOK_ENCRYPT`: Set or update workbook open / modify password. *(Planned - Batch 9+)*
+- [ ] `CMD_SECURITY_WINDOW_VISIBILITY`: Hide or unhide workbook windows across multi-document sessions. *(Planned - Batch 9+)*
 
 ### Module K: Charts and Analysis (Target: 10 Tools)
-- [ ] `CMD_CHART_TEMPLATES`: Apply reusable corporate chart color themes and clean layouts. *(Planned - Batch 9)*
-- [ ] `CMD_CHART_GANTT`: Generate project timeline Gantt charts from start date and duration. *(Planned - Batch 9)*
-- [ ] `CMD_CHART_WATERFALL`: Create financial waterfall / bridge charts compatible with Excel 2016. *(Planned - Batch 9)*
-- [ ] `CMD_CHART_TARGET_VS_ACTUAL`: Generate target vs. actual variance and bullet charts. *(Planned - Batch 9)*
-- [ ] `CMD_ANALYSIS_QUICK_STATS`: Display instant statistical dashboard (Count, Sum, Mean, Median, Min, Max). *(Planned - Batch 9)*
-- [ ] `CMD_ANALYSIS_PIVOT_HELPERS`: Batch refresh PivotTables, format number fields, toggle classic layout. *(Planned - Batch 9)*
+- [x] `CMD_ANALYSIS_QUICK_STATS`: Display instant statistical dashboard (Count, Sum, Mean, Median, Min, Max). *(Active - Batch 9)*
+- [x] `CMD_CHART_TARGET_VS_ACTUAL`: Generate target vs. actual variance and bullet charts. *(Active - Batch 9)*
+- [ ] `CMD_CHART_TEMPLATES`: Apply reusable corporate chart color themes and clean layouts. *(Planned - Batch 9+)*
+- [ ] `CMD_CHART_GANTT`: Generate project timeline Gantt charts from start date and duration. *(Planned - Batch 9+)*
+- [ ] `CMD_CHART_WATERFALL`: Create financial waterfall / bridge charts compatible with Excel 2016. *(Planned - Batch 9+)*
+- [ ] `CMD_ANALYSIS_PIVOT_HELPERS`: Batch refresh PivotTables, format number fields, toggle classic layout. *(Planned - Batch 9+)*
 
 ### Module L: Navigation and User Productivity (Target: 12 Tools)
 - [x] `CMD_LAUNCHER`: Searchable Tool Catalog (SuperSearch) with instant keyword matching. *(Active)*
@@ -293,8 +299,8 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 | **Batch 6** | **Filtering, Data Validation & Table Merge** | Advanced Multi-Sort, Color Filter/Count, Table Merge/Upsert, Dropdown Lists, Email/Phone Validation | **COMPLETED** |
 | **Batch 7** | **Formatting, Formulas & Printing** | Reference Conversion (Abs/Rel), Exact Copy, Locate Errors, Math Operations, Number/Date Formats, Page Setup | **COMPLETED** |
 | **Batch 8** | **Import, Export & Picture Utilities** | CSV Import/Export, PDF Export, Batch Format Convert, Folder Listing, Cell Pictures, Chart Image Export | **COMPLETED** |
-| **Batch 9** | **Protection, Recovery, Charts & Analysis** | Batch Protect/Unprotect, Workbook Snapshots, Gantt/Waterfall Charts, Quick Statistics Dashboard | **Next Up** |
-| **Batch 10** | **Navigation, UX Polish, Packaging & Release** | Navigation Pane, Grid-Focus Crosshair, Date Picker, Formula Editor, Release Installer Verification | Planned |
+| **Batch 9** | **Protection, Recovery, Charts & Analysis** | Batch Protect/Unprotect, Workbook Snapshots, Gantt/Waterfall Charts, Quick Statistics Dashboard | **COMPLETED** |
+| **Batch 10** | **Navigation, UX Polish, Packaging & Release** | Navigation Pane, Grid-Focus Crosshair, Date Picker, Formula Editor, Release Installer Verification | **Next Up** |
 
 ---
 

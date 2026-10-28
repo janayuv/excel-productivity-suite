@@ -257,65 +257,35 @@ namespace ExcelProductivitySuite.AddIn.Startup
                 new[] { "export charts", "save chart as image", "chart picture export", "png charts" }, "ChartTypePieInsertGallery");
 
             // =========================================================================
-            // Module J: Protection and Recovery (Batch 9)
+            // Module J: Protection and Recovery (Batch 9 Expansion)
             // =========================================================================
-            AddPlanned(registry, "CMD_SECURITY_BATCH_PROTECT", "Batch Protect Worksheets",
-                "Apply protection passwords and permission flags across multiple worksheets simultaneously.",
-                CommandCategory.ProtectionAndRecovery, "J", "Batch 9",
-                new[] { "batch protect", "protect multiple sheets", "lock worksheets", "sheet security" }, "ProtectSheet");
-
-            AddPlanned(registry, "CMD_SECURITY_BATCH_UNPROTECT", "Batch Unprotect Worksheets",
-                "Batch unprotect multiple worksheets using a single user-authorized password entry.",
-                CommandCategory.ProtectionAndRecovery, "J", "Batch 9",
-                new[] { "batch unprotect", "unlock multiple sheets", "unprotect sheets", "remove password" }, "UnprotectSheet");
-
             AddPlanned(registry, "CMD_SECURITY_WORKBOOK_ENCRYPT", "Manage Workbook Password",
                 "Securely set or clear workbook open and modify passwords.",
-                CommandCategory.ProtectionAndRecovery, "J", "Batch 9",
+                CommandCategory.ProtectionAndRecovery, "J", "Batch 9+",
                 new[] { "workbook password", "encrypt workbook", "protect workbook structure" }, "ProtectWorkbook");
 
             AddPlanned(registry, "CMD_SECURITY_WINDOW_VISIBILITY", "Manage Workbook Windows",
                 "Batch hide or unhide workbook windows across multi-document sessions.",
-                CommandCategory.ProtectionAndRecovery, "J", "Batch 9",
+                CommandCategory.ProtectionAndRecovery, "J", "Batch 9+",
                 new[] { "hide windows", "unhide window", "window visibility", "excel windows" }, "WindowHide");
 
-            AddPlanned(registry, "CMD_RECOVERY_CREATE_SNAPSHOT", "Create Workbook Snapshot",
-                "Take a temporary in-session snapshot of active workbook state for safe trial operations.",
-                CommandCategory.ProtectionAndRecovery, "J", "Batch 9",
-                new[] { "workbook snapshot", "take snapshot", "backup state", "undo checkpoint", "restore point" }, "FileSaveAs");
-
-            AddPlanned(registry, "CMD_RECOVERY_RESTORE_SNAPSHOT", "Restore Workbook Snapshot",
-                "Revert the active workbook back to a previously saved in-session snapshot safely.",
-                CommandCategory.ProtectionAndRecovery, "J", "Batch 9",
-                new[] { "restore snapshot", "revert workbook", "undo to checkpoint", "restore state" }, "FileOpen");
-
             // =========================================================================
-            // Module K: Charts and Analysis (Batch 9)
+            // Module K: Charts and Analysis (Batch 9 Expansion)
             // =========================================================================
             AddPlanned(registry, "CMD_CHART_TEMPLATES", "Reusable Chart Templates",
                 "Apply standardized corporate color palettes and clean formatting to selected charts.",
-                CommandCategory.ChartsAndAnalysis, "K", "Batch 9",
+                CommandCategory.ChartsAndAnalysis, "K", "Batch 9+",
                 new[] { "chart templates", "format chart", "corporate charts", "clean chart style" }, "ChartTypeColumnInsertGallery");
 
             AddPlanned(registry, "CMD_CHART_GANTT", "Generate Project Gantt Chart",
                 "Create a project timeline Gantt chart from task names, start dates, and durations.",
-                CommandCategory.ChartsAndAnalysis, "K", "Batch 9",
+                CommandCategory.ChartsAndAnalysis, "K", "Batch 9+",
                 new[] { "gantt chart", "project timeline", "schedule chart", "task bar chart" }, "ChartTypeBarInsertGallery");
 
             AddPlanned(registry, "CMD_CHART_WATERFALL", "Generate Waterfall Chart",
                 "Construct a bridge / waterfall variance chart compatible with Excel 2016.",
-                CommandCategory.ChartsAndAnalysis, "K", "Batch 9",
+                CommandCategory.ChartsAndAnalysis, "K", "Batch 9+",
                 new[] { "waterfall chart", "bridge chart", "variance analysis", "financial chart" }, "ChartTypeColumnInsertGallery");
-
-            AddPlanned(registry, "CMD_CHART_TARGET_VS_ACTUAL", "Target vs. Actual Chart",
-                "Generate bullet or target-versus-actual comparison charts with achievement thresholds.",
-                CommandCategory.ChartsAndAnalysis, "K", "Batch 9",
-                new[] { "target vs actual", "bullet chart", "kpi chart", "performance chart" }, "ChartTypeLineInsertGallery");
-
-            AddPlanned(registry, "CMD_ANALYSIS_QUICK_STATS", "Quick Statistics Dashboard",
-                "Display an instant audit summary with Count, Sum, Mean, Median, Min, Max, and StdDev.",
-                CommandCategory.ChartsAndAnalysis, "K", "Batch 9",
-                new[] { "quick stats", "summary statistics", "median mean", "descriptive statistics" }, "FunctionsStatisticalInsertGallery");
 
             AddPlanned(registry, "CMD_ANALYSIS_PIVOT_HELPERS", "PivotTable Utilities",
                 "Bulk refresh all PivotTables, adjust field formatting, and toggle classic layout.",

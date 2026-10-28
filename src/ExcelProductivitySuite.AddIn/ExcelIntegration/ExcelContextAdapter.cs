@@ -41,6 +41,24 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
             }
         }
 
+        public string? ActiveWorkbookPath
+        {
+            get
+            {
+                try { return _app.ActiveWorkbook?.FullName; }
+                catch { return null; }
+            }
+        }
+
+        public string? ActiveWorkbookName
+        {
+            get
+            {
+                try { return _app.ActiveWorkbook?.Name; }
+                catch { return null; }
+            }
+        }
+
         public bool HasActiveWorksheet
         {
             get
@@ -1924,6 +1942,194 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
             }
 
             return count;
+        }
+
+        public IReadOnlyList<SheetProtectionStatus> GetSheetProtectionStatuses()
+        {
+            var list = new List<SheetProtectionStatus>();
+            if (!HasActiveWorkbook) return list;
+            try
+            {
+                foreach (Excel.Worksheet ws in _app.ActiveWorkbook.Worksheets)
+                {
+                    bool isProt = false;
+                    try { isProt = ws.ProtectContents; } catch { }
+                    list.Add(new SheetProtectionStatus(ws.Name, isProt));
+                }
+            }
+            catch { }
+            return list;
+        }
+
+        public (int successCount, List<string> errors) BatchProtectWorksheets(IEnumerable<string> sheetNames, string? password, SheetProtectionOptions options)
+        {
+            var errors = new List<string>();
+            int successCount = 0;
+            if (!HasActiveWorkbook) return (0, errors);
+
+            using (new ExcelStateScope(_app))
+            {
+                foreach (string name in sheetNames)
+                {
+                    try
+                    {
+                        var ws = (Excel.Worksheet)_app.ActiveWorkbook.Worksheets[name];
+                        object pwd = string.IsNullOrEmpty(password) ? Type.Missing : (object)password!;
+                        ws.Protect(
+                            Password: pwd,
+                            DrawingObjects: true,
+                            Contents: true,
+                            Scenarios: true,
+                            UserInterfaceOnly: Type.Missing,
+                            AllowFormattingCells: options.FormatCells,
+                            AllowFormattingColumns: options.FormatColumns,
+                            AllowFormattingRows: options.FormatRows,
+                            AllowInsertingColumns: options.InsertColumns,
+                            AllowInsertingRows: options.InsertRows,
+                            AllowInsertingHyperlinks: options.InsertHyperlinks,
+                            AllowDeletingColumns: options.DeleteColumns,
+                            AllowDeletingRows: options.DeleteRows,
+                            AllowSorting: options.Sort,
+                            AllowFiltering: options.AutoFilter,
+                            AllowUsingPivotTables: options.UsePivotTables);
+
+                        if (!options.SelectLockedCells)
+                            ws.EnableSelection = Excel.XlEnableSelection.xlNoSelection;
+                        else if (!options.SelectUnlockedCells)
+                            ws.EnableSelection = Excel.XlEnableSelection.xlUnlockedCells;
+                        else
+                            ws.EnableSelection = Excel.XlEnableSelection.xlNoRestrictions;
+
+                        successCount++;
+                    }
+                    catch (Exception ex)
+                    {
+                        errors.Add($"{name}: {ex.Message}");
+                    }
+                }
+            }
+            return (successCount, errors);
+        }
+
+        public (int successCount, List<string> errors) BatchUnprotectWorksheets(IEnumerable<string> sheetNames, string? password)
+        {
+            var errors = new List<string>();
+            int successCount = 0;
+            if (!HasActiveWorkbook) return (0, errors);
+
+            using (new ExcelStateScope(_app))
+            {
+                foreach (string name in sheetNames)
+                {
+                    try
+                    {
+                        var ws = (Excel.Worksheet)_app.ActiveWorkbook.Worksheets[name];
+                        if (string.IsNullOrEmpty(password))
+                        {
+                            ws.Unprotect();
+                        }
+                        else
+                        {
+                            ws.Unprotect(password);
+                        }
+                        successCount++;
+                    }
+                    catch (Exception ex)
+                    {
+                        errors.Add($"{name}: {ex.Message}");
+                    }
+                }
+            }
+            return (successCount, errors);
+        }
+
+        public bool SaveActiveWorkbookCopy(string destinationPath)
+        {
+            if (!HasActiveWorkbook) return false;
+            try
+            {
+                string? dir = System.IO.Path.GetDirectoryName(destinationPath);
+                if (!string.IsNullOrEmpty(dir) && !System.IO.Directory.Exists(dir))
+                {
+                    System.IO.Directory.CreateDirectory(dir);
+                }
+                _app.ActiveWorkbook.SaveCopyAs(destinationPath);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Failed to save workbook copy: {ex.Message}", "Snapshot Error", isError: true);
+                return false;
+            }
+        }
+
+        public bool RestoreWorkbookFromSnapshot(string snapshotPath)
+        {
+            if (!System.IO.File.Exists(snapshotPath)) return false;
+            try
+            {
+                if (HasActiveWorkbook)
+                {
+                    _app.ActiveWorkbook.Close(SaveChanges: false);
+                }
+                _app.Workbooks.Open(snapshotPath);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Failed to restore snapshot: {ex.Message}", "Restore Error", isError: true);
+                return false;
+            }
+        }
+
+        public bool CreateTargetVsActualChart(string title, int startRow, int startCol, int rowCount, int colCount, int categoryColIndex, int actualColIndex, int targetColIndex)
+        {
+            if (!HasActiveWorksheet) return false;
+            try
+            {
+                var ws = (Excel.Worksheet)_app.ActiveSheet;
+                var chartObjects = (Excel.ChartObjects)ws.ChartObjects();
+
+                var cell1 = (Excel.Range)ws.Cells[startRow, startCol];
+                var cell2 = (Excel.Range)ws.Cells[startRow + rowCount - 1, startCol + colCount - 1];
+                var range = ws.Range[cell1, cell2];
+
+                double left = 100;
+                double top = 100;
+                try
+                {
+                    left = (double)range.Left + (double)range.Width + 20;
+                    top = (double)range.Top;
+                }
+                catch { }
+
+                var chartObject = chartObjects.Add(left, top, 520, 320);
+                var chart = chartObject.Chart;
+
+                chart.ChartType = Excel.XlChartType.xlColumnClustered;
+                chart.SetSourceData(range, Excel.XlRowCol.xlColumns);
+
+                try
+                {
+                    var seriesCol = (Excel.SeriesCollection)chart.SeriesCollection();
+                    if (seriesCol.Count >= 2)
+                    {
+                        var targetSeries = (Excel.Series)seriesCol.Item(2);
+                        targetSeries.ChartType = Excel.XlChartType.xlLineMarkers;
+                    }
+                }
+                catch { }
+
+                chart.HasTitle = true;
+                chart.ChartTitle.Text = string.IsNullOrWhiteSpace(title) ? "Target vs. Actual Performance" : title;
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Failed to create chart: {ex.Message}", "Chart Error", isError: true);
+                return false;
+            }
         }
 
         public void ShowMessage(string message, string title, bool isError = false)

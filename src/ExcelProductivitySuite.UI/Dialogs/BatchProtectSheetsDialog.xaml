@@ -1,0 +1,116 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.BatchProtectSheetsDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Batch Protect Worksheets - Excel Productivity Suite"
+        Height="540" Width="640"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="🔒" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Batch Protect Worksheets" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Protect multiple worksheets simultaneously with password and granular permissions" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Main Body: Two Columns (Sheets List on Left, Options & Password on Right) -->
+        <Grid Grid.Row="1" Margin="0,0,0,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="260" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Sheet Selection List -->
+            <GroupBox Grid.Column="0" Header="Select Worksheets to Protect" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,0,10,0">
+                <Grid Margin="4">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <ListBox x:Name="SheetsListBox" Grid.Row="0" BorderThickness="1" BorderBrush="#D1D5DB" Background="White">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <CheckBox Content="{Binding DisplayName}" IsChecked="{Binding IsSelected}" Margin="2,3" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,8,0,0">
+                        <Button Content="Select All" Style="{StaticResource ModernSecondaryButtonStyle}" Padding="8,4" Margin="0,0,4,0" Click="SelectAll_Click" />
+                        <Button Content="Clear" Style="{StaticResource ModernSecondaryButtonStyle}" Padding="8,4" Margin="0,0,4,0" Click="ClearAll_Click" />
+                        <Button Content="Unprotected" Style="{StaticResource ModernSecondaryButtonStyle}" Padding="8,4" Click="SelectUnprotected_Click" />
+                    </StackPanel>
+                </Grid>
+            </GroupBox>
+
+            <!-- Protection Options & Password -->
+            <GroupBox Grid.Column="1" Header="Protection Settings &amp; Permissions" Style="{StaticResource ModernGroupBoxStyle}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="6">
+                        <!-- Password Box -->
+                        <TextBlock Text="Password (Optional):" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,2" />
+                        <DockPanel Margin="0,0,0,8">
+                            <Button x:Name="TogglePwdBtn" Content="👁" Width="30" DockPanel.Dock="Right" Style="{StaticResource ModernSecondaryButtonStyle}" Click="TogglePassword_Click" ToolTip="Show/Hide Password" />
+                            <PasswordBox x:Name="PasswordBox" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,4,0" PasswordChanged="PasswordBox_PasswordChanged" />
+                            <TextBox x:Name="PasswordVisibleBox" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,4,0" Visibility="Collapsed" TextChanged="PasswordVisibleBox_TextChanged" />
+                        </DockPanel>
+
+                        <TextBlock Text="Allow all users of this worksheet to:" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,4,0,4" />
+
+                        <!-- Permission Checkboxes -->
+                        <CheckBox x:Name="ChkSelectLocked" Content="Select locked cells" IsChecked="True" Margin="0,2" />
+                        <CheckBox x:Name="ChkSelectUnlocked" Content="Select unlocked cells" IsChecked="True" Margin="0,2" />
+                        <CheckBox x:Name="ChkFormatCells" Content="Format cells" Margin="0,2" />
+                        <CheckBox x:Name="ChkFormatColumns" Content="Format columns" Margin="0,2" />
+                        <CheckBox x:Name="ChkFormatRows" Content="Format rows" Margin="0,2" />
+                        <CheckBox x:Name="ChkInsertColumns" Content="Insert columns" Margin="0,2" />
+                        <CheckBox x:Name="ChkInsertRows" Content="Insert rows" Margin="0,2" />
+                        <CheckBox x:Name="ChkInsertHyperlinks" Content="Insert hyperlinks" Margin="0,2" />
+                        <CheckBox x:Name="ChkDeleteColumns" Content="Delete columns" Margin="0,2" />
+                        <CheckBox x:Name="ChkDeleteRows" Content="Delete rows" Margin="0,2" />
+                        <CheckBox x:Name="ChkSort" Content="Sort" Margin="0,2" />
+                        <CheckBox x:Name="ChkAutoFilter" Content="Use AutoFilter" Margin="0,2" />
+                        <CheckBox x:Name="ChkUsePivotTables" Content="Use PivotTable reports" Margin="0,2" />
+                    </StackPanel>
+                </ScrollViewer>
+            </GroupBox>
+        </Grid>
+
+        <!-- Status / Results -->
+        <TextBlock x:Name="StatusText" Grid.Row="2" Text="" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,10" TextWrapping="Wrap" />
+
+        <!-- Footer Actions -->
+        <DockPanel Grid.Row="3">
+            <Button Content="Cancel" Style="{StaticResource ModernSecondaryButtonStyle}" DockPanel.Dock="Right" Width="80" Click="Cancel_Click" />
+            <Button Content="Protect Worksheets" Style="{StaticResource ModernPrimaryButtonStyle}" DockPanel.Dock="Right" Width="140" Margin="0,0,8,0" Click="Protect_Click" />
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

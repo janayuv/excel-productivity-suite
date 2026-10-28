@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using ExcelProductivitySuite.Engine.Analysis;
 using ExcelProductivitySuite.Engine.DataCleaning;
 using ExcelProductivitySuite.Engine.Files;
 using ExcelProductivitySuite.Engine.Formulas;
@@ -696,6 +697,30 @@ namespace ExcelProductivitySuite.UnitTests
 
             Assert.IsTrue(csv.Length > 100000);
             Assert.IsTrue(sw.ElapsedMilliseconds < 500, $"RangeExporter benchmark took {sw.ElapsedMilliseconds} ms, target is < 500 ms");
+        }
+
+        [TestMethod]
+        public void Benchmark_QuickStatisticsEngine_100K_Cells_CompletesUnder500ms()
+        {
+            int rows = 10000;
+            int cols = 10;
+            object?[,] matrix = new object?[rows, cols];
+
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    matrix[r, c] = (double)(r * 10 + c);
+                }
+            }
+
+            var sw = Stopwatch.StartNew();
+            var stats = QuickStatisticsEngine.Calculate(matrix);
+            sw.Stop();
+
+            Assert.AreEqual(100000, stats.NumericCells);
+            Assert.IsTrue(stats.Sum > 0);
+            Assert.IsTrue(sw.ElapsedMilliseconds < 500, $"QuickStatisticsEngine benchmark took {sw.ElapsedMilliseconds} ms, target is < 500 ms");
         }
     }
 }

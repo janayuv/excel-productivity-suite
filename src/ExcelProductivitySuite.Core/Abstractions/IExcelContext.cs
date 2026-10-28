@@ -60,6 +60,16 @@ namespace ExcelProductivitySuite.Core.Abstractions
         int SelectionColumnCount { get; }
 
         /// <summary>
+        /// Gets the full file system path to the active workbook, or null if unsaved or no workbook is open.
+        /// </summary>
+        string? ActiveWorkbookPath { get; }
+
+        /// <summary>
+        /// Gets the filename of the active workbook, or null if no workbook is open.
+        /// </summary>
+        string? ActiveWorkbookName { get; }
+
+        /// <summary>
         /// Gets whether the current active worksheet has protection enabled.
         /// </summary>
         bool IsCurrentSheetProtected { get; }
@@ -308,6 +318,38 @@ namespace ExcelProductivitySuite.Core.Abstractions
         int BatchConvertWorkbooks(IEnumerable<string> filePaths, string outputDirectory, string targetExtension);
 
         /// <summary>
+        /// Gets the protection statuses of all worksheets in the active workbook.
+        /// </summary>
+        IReadOnlyList<SheetProtectionStatus> GetSheetProtectionStatuses();
+
+        /// <summary>
+        /// Protects the specified worksheets with optional password and configurable permission flags.
+        /// Returns the number of successfully protected sheets and any error messages.
+        /// </summary>
+        (int successCount, List<string> errors) BatchProtectWorksheets(IEnumerable<string> sheetNames, string? password, SheetProtectionOptions options);
+
+        /// <summary>
+        /// Unprotects the specified worksheets using the supplied password.
+        /// Returns the number of successfully unprotected sheets and any error messages.
+        /// </summary>
+        (int successCount, List<string> errors) BatchUnprotectWorksheets(IEnumerable<string> sheetNames, string? password);
+
+        /// <summary>
+        /// Saves a non-disruptive copy of the active workbook to the specified target path.
+        /// </summary>
+        bool SaveActiveWorkbookCopy(string destinationPath);
+
+        /// <summary>
+        /// Closes the current active workbook without saving and opens the specified snapshot workbook.
+        /// </summary>
+        bool RestoreWorkbookFromSnapshot(string snapshotPath);
+
+        /// <summary>
+        /// Creates a Target vs. Actual combo chart (Clustered Column + Line with Markers) for the specified data range.
+        /// </summary>
+        bool CreateTargetVsActualChart(string title, int startRow, int startCol, int rowCount, int colCount, int categoryColIndex, int actualColIndex, int targetColIndex);
+
+        /// <summary>
         /// Shows an informational, warning, or error alert dialog in Excel.
         /// </summary>
         void ShowMessage(string message, string title, bool isError = false);
@@ -408,5 +450,34 @@ namespace ExcelProductivitySuite.Core.Abstractions
             IsVisible = isVisible;
             IsVeryHidden = isVeryHidden;
         }
+    }
+
+    public class SheetProtectionStatus
+    {
+        public string SheetName { get; }
+        public bool IsProtected { get; }
+
+        public SheetProtectionStatus(string sheetName, bool isProtected)
+        {
+            SheetName = sheetName;
+            IsProtected = isProtected;
+        }
+    }
+
+    public class SheetProtectionOptions
+    {
+        public bool SelectLockedCells { get; set; } = true;
+        public bool SelectUnlockedCells { get; set; } = true;
+        public bool FormatCells { get; set; } = false;
+        public bool FormatColumns { get; set; } = false;
+        public bool FormatRows { get; set; } = false;
+        public bool InsertColumns { get; set; } = false;
+        public bool InsertRows { get; set; } = false;
+        public bool InsertHyperlinks { get; set; } = false;
+        public bool DeleteColumns { get; set; } = false;
+        public bool DeleteRows { get; set; } = false;
+        public bool Sort { get; set; } = false;
+        public bool AutoFilter { get; set; } = false;
+        public bool UsePivotTables { get; set; } = false;
     }
 }

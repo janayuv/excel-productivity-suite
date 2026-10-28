@@ -1,0 +1,82 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.RestoreSnapshotDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Restore Workbook Snapshot - Excel Productivity Suite"
+        Height="500" Width="680"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="⏪" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Restore Workbook Snapshot" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Revert the active workbook back to a previously captured safe point" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Filter bar -->
+        <DockPanel Grid.Row="1" Margin="0,0,0,8">
+            <Button Content="Open Folder" DockPanel.Dock="Right" Style="{StaticResource ModernSecondaryButtonStyle}" Padding="8,4" Click="OpenFolder_Click" />
+            <Button Content="Refresh" DockPanel.Dock="Right" Style="{StaticResource ModernSecondaryButtonStyle}" Padding="8,4" Margin="0,0,6,0" Click="Refresh_Click" />
+            <CheckBox x:Name="FilterActiveWbCheck" Content="Show only snapshots for active workbook" IsChecked="True" VerticalAlignment="Center" Click="Filter_Click" />
+        </DockPanel>
+
+        <!-- Snapshot DataGrid -->
+        <GroupBox Grid.Row="2" Header="Available Snapshots" Style="{StaticResource ModernGroupBoxStyle}">
+            <DataGrid x:Name="SnapshotsGrid" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True"
+                      SelectionMode="Single" SelectionUnit="FullRow"
+                      BorderThickness="1" BorderBrush="#D1D5DB" Background="White"
+                      SelectionChanged="SnapshotsGrid_SelectionChanged">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Timestamp" Binding="{Binding CreatedTime, StringFormat='yyyy-MM-dd HH:mm:ss'}" Width="150" />
+                    <DataGridTextColumn Header="Workbook" Binding="{Binding WorkbookName}" Width="130" />
+                    <DataGridTextColumn Header="Label / Tag" Binding="{Binding Tag}" Width="120" />
+                    <DataGridTextColumn Header="Size" Binding="{Binding FormattedSize}" Width="90" />
+                    <DataGridTextColumn Header="File Name" Binding="{Binding FileName}" Width="*" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </GroupBox>
+
+        <!-- Selected Snapshot Info & Warning -->
+        <Border Grid.Row="3" Background="#FFFBEB" BorderBrush="#FDE68A" BorderThickness="1" CornerRadius="4" Margin="0,10,0,12" Padding="10">
+            <StackPanel>
+                <TextBlock Text="⚠️ Note: Restoring a snapshot will replace the active session with the snapshot file. Make sure you have saved any current work." FontSize="11" Foreground="#92400E" FontWeight="SemiBold" />
+                <TextBlock x:Name="SelectedPathText" Text="Selected: (None)" FontSize="10" Foreground="#B45309" Margin="0,2,0,0" TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+        </Border>
+
+        <!-- Actions -->
+        <DockPanel Grid.Row="4">
+            <Button Content="Close" Style="{StaticResource ModernSecondaryButtonStyle}" DockPanel.Dock="Right" Width="80" Click="Close_Click" />
+            <Button x:Name="RestoreBtn" Content="Restore Snapshot" Style="{StaticResource ModernPrimaryButtonStyle}" DockPanel.Dock="Right" Width="140" Margin="0,0,8,0" IsEnabled="False" Click="Restore_Click" />
+            <Button x:Name="DeleteBtn" Content="Delete" Style="{StaticResource ModernSecondaryButtonStyle}" Width="80" IsEnabled="False" Click="Delete_Click" />
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

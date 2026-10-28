@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using ExcelProductivitySuite.Core.Abstractions;
 using ExcelProductivitySuite.Engine.DataCleaning;
+using ExcelProductivitySuite.Engine.Analysis;
 using ExcelProductivitySuite.Engine.Files;
 using ExcelProductivitySuite.Engine.Formulas;
 using ExcelProductivitySuite.Engine.Ranges;
+using ExcelProductivitySuite.Engine.Recovery;
 using ExcelProductivitySuite.Engine.Worksheets;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -1559,6 +1561,198 @@ namespace ExcelProductivitySuite.UnitTests
             Assert.AreEqual(2, converted);
             Assert.AreEqual(1, ctx.ConvertedWorkbooks.Count);
             Assert.AreEqual(".xlsx", ctx.ConvertedWorkbooks[0].ext);
+        }
+
+        #endregion
+
+        #region Batch 9: Protection, Recovery, Charts & Analysis Tests
+
+        [TestMethod]
+        public void QuickStatisticsEngine_EmptyArray_ReturnsZeroCounts()
+        {
+            var res = QuickStatisticsEngine.Calculate(null);
+            Assert.AreEqual(0, res.TotalCells);
+            Assert.AreEqual(0, res.NumericCells);
+            Assert.AreEqual(0, res.BlankCells);
+            Assert.AreEqual(0, res.Sum);
+
+            var emptyRes = QuickStatisticsEngine.Calculate(new object?[0, 0]);
+            Assert.AreEqual(0, emptyRes.TotalCells);
+        }
+
+        [TestMethod]
+        public void QuickStatisticsEngine_MixedData_CalculatesCorrectMetrics()
+        {
+            object?[,] matrix = new object?[2, 3]
+            {
+                { 10.0, 20.0, 30.0 },
+                { 40.0, null, "Text" }
+            };
+
+            var res = QuickStatisticsEngine.Calculate(matrix);
+
+            Assert.AreEqual(6, res.TotalCells);
+            Assert.AreEqual(4, res.NumericCells);
+            Assert.AreEqual(1, res.BlankCells);
+            Assert.AreEqual(1, res.TextCells);
+            Assert.AreEqual(0, res.ErrorCells);
+            Assert.AreEqual(100.0, res.Sum);
+            Assert.AreEqual(25.0, res.Mean);
+            Assert.AreEqual(25.0, res.Median); // (20 + 30) / 2
+            Assert.AreEqual(10.0, res.Min);
+            Assert.AreEqual(40.0, res.Max);
+            Assert.AreEqual(30.0, res.Range);
+            Assert.AreEqual(4, res.DistinctNumericCount);
+        }
+
+        [TestMethod]
+        public void QuickStatisticsEngine_AdvancedDispersion_VarianceAndSkewness()
+        {
+            // Set of 8 numbers: { 2, 4, 4, 4, 5, 5, 7, 9 }
+            // Sum = 40, Mean = 5.0, Mode = 4.0
+            // Diffs from 5: -3, -1, -1, -1, 0, 0, 2, 4 -> Sq: 9, 1, 1, 1, 0, 0, 4, 16 -> SumSq = 32
+            // PopVar = 32 / 8 = 4.0 -> PopStdDev = 2.0
+            // SampleVar = 32 / 7 = 4.5714...
+            object?[,] matrix = new object?[8, 1]
+            {
+                { 2 }, { 4 }, { 4 }, { 4 }, { 5 }, { 5 }, { 7 }, { 9 }
+            };
+
+            var res = QuickStatisticsEngine.Calculate(matrix);
+
+            Assert.AreEqual(8, res.NumericCells);
+            Assert.AreEqual(40.0, res.Sum);
+            Assert.AreEqual(5.0, res.Mean);
+            Assert.AreEqual(4.0, res.Mode);
+            Assert.AreEqual(4.5, res.Median);
+            Assert.AreEqual(4.0, res.PopulationVariance, 1e-4);
+            Assert.AreEqual(2.0, res.PopulationStdDev, 1e-4);
+            Assert.AreEqual(32.0 / 7.0, res.SampleVariance, 1e-4);
+            Assert.IsTrue(res.SampleStdDev > 2.0);
+            Assert.IsNotNull(res.Skewness);
+            Assert.IsTrue(res.Skewness > 0); // positive skew due to 7 and 9
+        }
+
+        [TestMethod]
+        public void QuickStatisticsEngine_GenerateSummaryTable_CreatesProper2DMatrix()
+        {
+            object?[,] matrix = new object?[3, 1]
+            {
+                { 100 }, { 200 }, { 300 }
+            };
+
+            var res = QuickStatisticsEngine.Calculate(matrix);
+            var table = QuickStatisticsEngine.GenerateSummaryTable(res, "$A$1:$A$3");
+
+            Assert.AreEqual("Statistic", table[0, 0]);
+            Assert.AreEqual("Value", table[0, 1]);
+            Assert.AreEqual("$A$1:$A$3", table[1, 1]);
+            Assert.AreEqual(600.0, Convert.ToDouble(table[8, 1])); // Sum row
+        }
+
+        [TestMethod]
+        public void WorkbookSnapshotManager_GenerateAndParsePaths()
+        {
+            string dir = Path.GetTempPath();
+            string path = WorkbookSnapshotManager.GenerateSnapshotFilePath(dir, "Financial Report 2026.xlsx", "CleanData");
+
+            Assert.IsTrue(path.Contains("Financial_Report_2026"));
+            Assert.IsTrue(path.Contains("CleanData"));
+            Assert.IsTrue(path.EndsWith(".xlsx"));
+        }
+
+        [TestMethod]
+        public void WorkbookSnapshotManager_FileOperations_CreateListDeleteClean()
+        {
+            string tempDir = Path.Combine(Path.GetTempPath(), "SnapshotsTest_" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempDir);
+            try
+            {
+                string f1 = Path.Combine(tempDir, "Budget_20261028_100000_Tag1.xlsx");
+                string f2 = Path.Combine(tempDir, "Budget_20261028_110000_Tag2.xlsx");
+                string f3 = Path.Combine(tempDir, "Other_20261028_120000_Tag3.xlsx");
+
+                File.WriteAllText(f1, "dummy");
+                File.WriteAllText(f2, "dummy");
+                File.WriteAllText(f3, "dummy");
+
+                var allSnapshots = WorkbookSnapshotManager.GetSnapshots(tempDir);
+                Assert.AreEqual(3, allSnapshots.Count);
+
+                var budgetSnapshots = WorkbookSnapshotManager.GetSnapshots(tempDir, "Budget.xlsx");
+                Assert.AreEqual(2, budgetSnapshots.Count);
+
+                bool deleted = WorkbookSnapshotManager.DeleteSnapshot(f3);
+                Assert.IsTrue(deleted);
+                Assert.IsFalse(File.Exists(f3));
+
+                int cleaned = WorkbookSnapshotManager.CleanOldSnapshots(tempDir, maxSnapshots: 1);
+                Assert.AreEqual(1, cleaned);
+                var remaining = WorkbookSnapshotManager.GetSnapshots(tempDir);
+                Assert.AreEqual(1, remaining.Count);
+            }
+            finally
+            {
+                if (Directory.Exists(tempDir)) Directory.Delete(tempDir, true);
+            }
+        }
+
+        [TestMethod]
+        public void TargetVsActualDetector_DetectColumnsAndSummary()
+        {
+            object?[,] matrix = new object?[3, 3]
+            {
+                { "Period", "Actual Sales", "Target Goal" },
+                { "Q1",     10000.0,        8000.0 },
+                { "Q2",     12000.0,        15000.0 }
+            };
+
+            var cfg = TargetVsActualDetector.Detect(matrix, 3);
+
+            Assert.AreEqual(1, cfg.CategoryColumnIndex);
+            Assert.AreEqual(2, cfg.ActualColumnIndex);
+            Assert.AreEqual(3, cfg.TargetColumnIndex);
+            Assert.AreEqual(2, cfg.ValidDataRowCount);
+            Assert.AreEqual(22000.0, cfg.TotalActual);
+            Assert.AreEqual(23000.0, cfg.TotalTarget);
+            Assert.AreEqual(-1000.0, cfg.TotalVariance);
+            Assert.IsTrue(cfg.VariancePercent < 0);
+        }
+
+        [TestMethod]
+        public void MockExcelContext_BatchProtectAndUnprotect()
+        {
+            var ctx = new MockExcelContext();
+            var options = new SheetProtectionOptions
+            {
+                FormatCells = true,
+                Sort = true,
+                SelectLockedCells = true
+            };
+
+            var (protCount, protErrors) = ctx.BatchProtectWorksheets(new[] { "Sheet1", "Sheet2" }, "Secret123", options);
+            Assert.AreEqual(2, protCount);
+            Assert.AreEqual(0, protErrors.Count);
+            Assert.AreEqual(1, ctx.ProtectedSheetsHistory.Count);
+            Assert.AreEqual("Secret123", ctx.ProtectedSheetsHistory[0].pwd);
+            Assert.IsTrue(ctx.ProtectedSheetsHistory[0].opts.FormatCells);
+
+            var (unprotCount, unprotErrors) = ctx.BatchUnprotectWorksheets(new[] { "Sheet1" }, "Secret123");
+            Assert.AreEqual(1, unprotCount);
+            Assert.AreEqual(0, unprotErrors.Count);
+
+            bool saved = ctx.SaveActiveWorkbookCopy(@"C:\Temp\Snapshot.xlsx");
+            Assert.IsTrue(saved);
+            Assert.AreEqual(1, ctx.SavedCopies.Count);
+
+            bool restored = ctx.RestoreWorkbookFromSnapshot(@"C:\Temp\Snapshot.xlsx");
+            Assert.IsTrue(restored);
+            Assert.AreEqual(@"C:\Temp\Snapshot.xlsx", ctx.RestoredSnapshotPath);
+
+            bool charted = ctx.CreateTargetVsActualChart("Q1-Q4 Review", 1, 1, 5, 3, 1, 2, 3);
+            Assert.IsTrue(charted);
+            Assert.IsNotNull(ctx.LastCreatedChart);
+            Assert.AreEqual("Q1-Q4 Review", ctx.LastCreatedChart.Value.title);
         }
 
         #endregion

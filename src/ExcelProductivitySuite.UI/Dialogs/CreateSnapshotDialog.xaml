@@ -1,0 +1,90 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.CreateSnapshotDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Create Workbook Snapshot - Excel Productivity Suite"
+        Height="420" Width="540"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,14">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="📸" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Create Workbook Snapshot" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Capture an instant recovery point without interrupting your work or altering file paths" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Snapshot Configuration -->
+        <StackPanel Grid.Row="1">
+            <GroupBox Header="Active Workbook Information" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,0,0,10">
+                <Grid Margin="6">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Workbook:" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2" />
+                    <TextBlock x:Name="WbNameText" Grid.Row="0" Grid.Column="1" Text="SalesData.xlsx" FontSize="11" FontWeight="SemiBold" Margin="0,2" />
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Current Path:" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2" />
+                    <TextBlock x:Name="WbPathText" Grid.Row="1" Grid.Column="1" Text="C:\Data\SalesData.xlsx" FontSize="10" Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" Margin="0,2" />
+                </Grid>
+            </GroupBox>
+
+            <GroupBox Header="Snapshot Label &amp; Destination" Style="{StaticResource ModernGroupBoxStyle}">
+                <StackPanel Margin="6">
+                    <TextBlock Text="Snapshot Label / Tag (Optional):" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,2" />
+                    <TextBox x:Name="TagBox" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,0,8" TextChanged="TagBox_TextChanged" />
+
+                    <TextBlock Text="Target Directory:" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,2" />
+                    <DockPanel Margin="0,0,0,8">
+                        <Button Content="Open Folder" DockPanel.Dock="Right" Style="{StaticResource ModernSecondaryButtonStyle}" Width="90" Click="OpenFolder_Click" />
+                        <TextBox x:Name="DirBox" Style="{StaticResource ModernTextBoxStyle}" IsReadOnly="True" Margin="0,0,8,0" Background="#F1F3F5" />
+                    </DockPanel>
+
+                    <TextBlock Text="Generated Snapshot Name:" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,2" />
+                    <TextBlock x:Name="PreviewNameText" Text="SalesData_20261028_153000.xlsx" FontSize="11" FontFamily="Consolas" Foreground="#0078D4" FontWeight="SemiBold" />
+                </StackPanel>
+            </GroupBox>
+        </StackPanel>
+
+        <!-- Status -->
+        <TextBlock x:Name="StatusText" Grid.Row="2" Text="" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,6,0,10" />
+
+        <!-- Footer Actions -->
+        <DockPanel Grid.Row="3">
+            <Button Content="Cancel" Style="{StaticResource ModernSecondaryButtonStyle}" DockPanel.Dock="Right" Width="80" Click="Cancel_Click" />
+            <Button Content="Take Snapshot" Style="{StaticResource ModernPrimaryButtonStyle}" DockPanel.Dock="Right" Width="130" Margin="0,0,8,0" Click="TakeSnapshot_Click" />
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

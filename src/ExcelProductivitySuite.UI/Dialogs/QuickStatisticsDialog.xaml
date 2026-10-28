@@ -1,0 +1,103 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.QuickStatisticsDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Quick Statistics Dashboard - Excel Productivity Suite"
+        Height="580" Width="720"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="📊" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Quick Statistics Dashboard" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock x:Name="ScopeSubtitle" Text="Comprehensive statistical summary for active selection" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Top KPI Metric Cards (4 Cards) -->
+        <UniformGrid Grid.Row="1" Columns="4" Margin="0,0,0,12">
+            <!-- Card 1: Sum -->
+            <Border Background="White" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="6" Padding="12,8" Margin="0,0,6,0">
+                <StackPanel>
+                    <TextBlock Text="SUM" FontSize="10" FontWeight="Bold" Foreground="{StaticResource TextSecondaryBrush}" />
+                    <TextBlock x:Name="CardSumText" Text="0" FontSize="18" FontWeight="Bold" Foreground="#0078D4" Margin="0,2,0,0" TextTrimming="CharacterEllipsis" />
+                    <TextBlock x:Name="CardCountSubtext" Text="0 numeric cells" FontSize="10" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,0" />
+                </StackPanel>
+            </Border>
+
+            <!-- Card 2: Average -->
+            <Border Background="White" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="6" Padding="12,8" Margin="0,0,6,0">
+                <StackPanel>
+                    <TextBlock Text="AVERAGE (MEAN)" FontSize="10" FontWeight="Bold" Foreground="{StaticResource TextSecondaryBrush}" />
+                    <TextBlock x:Name="CardMeanText" Text="0" FontSize="18" FontWeight="Bold" Foreground="#059669" Margin="0,2,0,0" TextTrimming="CharacterEllipsis" />
+                    <TextBlock x:Name="CardMedianSubtext" Text="Median: 0" FontSize="10" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,0" />
+                </StackPanel>
+            </Border>
+
+            <!-- Card 3: Min & Max -->
+            <Border Background="White" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="6" Padding="12,8" Margin="0,0,6,0">
+                <StackPanel>
+                    <TextBlock Text="MIN / MAX" FontSize="10" FontWeight="Bold" Foreground="{StaticResource TextSecondaryBrush}" />
+                    <TextBlock x:Name="CardMinMaxText" Text="0 / 0" FontSize="16" FontWeight="Bold" Foreground="#D97706" Margin="0,4,0,0" TextTrimming="CharacterEllipsis" />
+                    <TextBlock x:Name="CardRangeSubtext" Text="Range: 0" FontSize="10" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,0" />
+                </StackPanel>
+            </Border>
+
+            <!-- Card 4: Std. Deviation -->
+            <Border Background="White" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="6" Padding="12,8">
+                <StackPanel>
+                    <TextBlock Text="STD. DEVIATION" FontSize="10" FontWeight="Bold" Foreground="{StaticResource TextSecondaryBrush}" />
+                    <TextBlock x:Name="CardStdDevText" Text="0" FontSize="18" FontWeight="Bold" Foreground="#7C3AED" Margin="0,2,0,0" TextTrimming="CharacterEllipsis" />
+                    <TextBlock x:Name="CardVarianceSubtext" Text="Variance: 0" FontSize="10" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,0" />
+                </StackPanel>
+            </Border>
+        </UniformGrid>
+
+        <!-- Detailed Metrics Grid -->
+        <GroupBox Grid.Row="2" Header="Detailed Statistical Measures" Style="{StaticResource ModernGroupBoxStyle}">
+            <DataGrid x:Name="MetricsDataGrid" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True"
+                      SelectionMode="Single" SelectionUnit="FullRow"
+                      BorderThickness="1" BorderBrush="#D1D5DB" Background="White">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="140" />
+                    <DataGridTextColumn Header="Statistical Measure" Binding="{Binding Name}" Width="220" FontWeight="SemiBold" />
+                    <DataGridTextColumn Header="Calculated Value" Binding="{Binding FormattedValue}" Width="*" FontFamily="Consolas" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </GroupBox>
+
+        <!-- Footer Actions -->
+        <DockPanel Grid.Row="3" Margin="0,12,0,0">
+            <Button Content="Close" Style="{StaticResource ModernSecondaryButtonStyle}" DockPanel.Dock="Right" Width="80" Click="Close_Click" />
+            <Button Content="Insert into New Sheet" Style="{StaticResource ModernPrimaryButtonStyle}" DockPanel.Dock="Right" Width="170" Margin="0,0,8,0" Click="InsertSheet_Click" />
+            <Button Content="Copy All" Style="{StaticResource ModernSecondaryButtonStyle}" DockPanel.Dock="Left" Width="90" Margin="0,0,6,0" Click="CopyAll_Click" />
+            <Button Content="Copy Selected" Style="{StaticResource ModernSecondaryButtonStyle}" DockPanel.Dock="Left" Width="110" Click="CopySelected_Click" />
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>
