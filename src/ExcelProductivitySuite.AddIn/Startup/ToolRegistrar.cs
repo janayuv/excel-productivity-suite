@@ -1358,6 +1358,118 @@ namespace ExcelProductivitySuite.AddIn.Startup
                 roadmapBatch: "Batch 11"
             ));
 
+            // =========================================================================
+            // Module B & C: Advanced Range Operations & Copy/Paste Expansion (Batch 12)
+            // =========================================================================
+
+            // CMD_RANGE_COPY_NONCONTIGUOUS
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_RANGE_COPY_NONCONTIGUOUS",
+                title: "Copy Non-Contiguous Selection",
+                description: "Copy multiple disjoint selection areas into a single contiguous destination range.",
+                category: CommandCategory.RangeAndCells,
+                executeAction: ctx =>
+                {
+                    var dlg = new CopyMultipleRangesDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "copy noncontiguous", "disjoint copy", "multi area copy", "ctrl select copy", "stack ranges" },
+                officeIconName: "Copy",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "B",
+                roadmapBatch: "Batch 12"
+            ));
+
+            // CMD_RANGE_PASTE_VISIBLE_ONLY
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_RANGE_PASTE_VISIBLE_ONLY",
+                title: "Paste to Visible Cells Only",
+                description: "Paste clipboard data strictly into visible cells, bypassing filtered or hidden rows.",
+                category: CommandCategory.RangeAndCells,
+                executeAction: ctx =>
+                {
+                    var dlg = new PasteVisibleOnlyDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "paste visible", "skip hidden rows", "paste filtered", "visible cells only" },
+                officeIconName: "Paste",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "B",
+                roadmapBatch: "Batch 12"
+            ));
+
+            // CMD_RANGE_UNMERGE_FILL
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_RANGE_UNMERGE_FILL",
+                title: "Unmerge and Fill Cells",
+                description: "Safely unmerge composite cells and automatically populate all constituent cells with the original value.",
+                category: CommandCategory.RangeAndCells,
+                executeAction: ctx =>
+                {
+                    var dlg = new UnmergeAndFillDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "unmerge and fill", "split merged", "fill unmerged", "normalize merged cells" },
+                officeIconName: "TableSplitCells",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "B",
+                roadmapBatch: "Batch 12"
+            ));
+
+            // CMD_RANGE_RANDOM_SAMPLE
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_RANGE_RANDOM_SAMPLE",
+                title: "Random Sampling of Records",
+                description: "Extract an unbiased random sample of N rows or P% of records from a dataset (with/without replacement, seedable for audits).",
+                category: CommandCategory.RangeAndCells,
+                executeAction: ctx =>
+                {
+                    var dlg = new RandomSampleDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "random sample", "sample rows", "extract sample", "audit sample", "statistical sampling" },
+                officeIconName: "FunctionsStatisticalInsertGallery",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "B",
+                roadmapBatch: "Batch 12"
+            ));
+
+            // CMD_FIND_BY_FORMAT
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_FIND_BY_FORMAT",
+                title: "Find Cells by Format & Color",
+                description: "Locate and select cells matching specific font color, fill color, font style, or border attributes.",
+                category: CommandCategory.FindSelectCompare,
+                executeAction: ctx =>
+                {
+                    var dlg = new FindByFormatDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "find by color", "find formatting", "match cell color", "find bold cells", "select formatted" },
+                officeIconName: "ColorPicker",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "C",
+                roadmapBatch: "Batch 12"
+            ));
+
+            // CMD_FIND_BY_VALIDATION
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_FIND_BY_VALIDATION",
+                title: "Find Cells with Data Validation",
+                description: "Audit, inspect, filter, and select cells governed by Excel data validation rules.",
+                category: CommandCategory.FindSelectCompare,
+                executeAction: ctx =>
+                {
+                    var dlg = new FindByValidationDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "find validation", "cells with dropdowns", "validation cells", "inspect validation", "audit dropdown" },
+                officeIconName: "DataValidation",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "C",
+                roadmapBatch: "Batch 12"
+            ));
+
             // 16. Manage Worksheet Visibility - Module D: Worksheet and Workbook Management
             registry.RegisterCommand(new SuiteCommand(
                 id: "CMD_SHEET_VISIBILITY",

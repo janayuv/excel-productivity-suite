@@ -1,0 +1,90 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.FindByValidationDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Find Cells with Data Validation - Excel Productivity Suite"
+        Height="560" Width="780"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="🛡️" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Find Cells with Data Validation" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Audit, inspect, and select cells governed by Excel data validation rules and lists" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Filter Bar -->
+        <Border Grid.Row="1" Background="White" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="4" Padding="10" Margin="0,0,0,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Filter:" VerticalAlignment="Center" FontWeight="SemiBold" Margin="0,0,10,0" />
+                    <RadioButton x:Name="FilterAllRadio" Content="All Validation Rules" IsChecked="True" Margin="0,0,14,0" Checked="Filter_Changed" />
+                    <RadioButton x:Name="FilterListsRadio" Content="Dropdown Lists Only" Margin="0,0,14,0" Checked="Filter_Changed" />
+                    <RadioButton x:Name="FilterInvalidRadio" Content="⚠️ Invalid Values Only" Checked="Filter_Changed" />
+                </StackPanel>
+
+                <Button x:Name="RefreshBtn" Grid.Column="1" Content="🔄 Refresh Audit" Style="{StaticResource ModernSecondaryButtonStyle}" Height="26" Click="RefreshBtn_Click" />
+            </Grid>
+        </Border>
+
+        <!-- Rules Grid -->
+        <GroupBox Grid.Row="2" Header="Data Validation Cells" Style="{StaticResource ModernGroupBoxStyle}">
+            <DataGrid x:Name="RulesGrid" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True"
+                      SelectionMode="Single" SelectionUnit="FullRow"
+                      BorderThickness="1" BorderBrush="#D1D5DB" Background="White"
+                      MouseDoubleClick="RulesGrid_MouseDoubleClick">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Address" Binding="{Binding CellAddress}" Width="85" FontWeight="SemiBold" FontFamily="Consolas" />
+                    <DataGridTextColumn Header="Validation Type" Binding="{Binding ValidationType}" Width="120" />
+                    <DataGridTextColumn Header="Rule / List Values" Binding="{Binding Formula1}" Width="180" FontFamily="Consolas" />
+                    <DataGridTextColumn Header="Current Value" Binding="{Binding CurrentValue}" Width="120" />
+                    <DataGridTextColumn Header="Status" Binding="{Binding StatusDisplay}" Width="85" FontWeight="SemiBold" />
+                    <DataGridTextColumn Header="Error Message" Binding="{Binding ErrorMessage}" Width="*" Foreground="#6B7280" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </GroupBox>
+
+        <!-- Status -->
+        <TextBlock x:Name="StatusText" Grid.Row="3" Margin="0,8,0,12" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Text="Ready" />
+
+        <!-- Actions -->
+        <DockPanel Grid.Row="4" LastChildFill="False">
+            <Button x:Name="RemoveValBtn" Content="Remove Validation Rules" Style="{StaticResource ModernSecondaryButtonStyle}" DockPanel.Dock="Left" Width="170" IsEnabled="False" Click="RemoveValBtn_Click" />
+            <Button x:Name="CloseBtn" Content="Close" Style="{StaticResource ModernSecondaryButtonStyle}" DockPanel.Dock="Right" Width="80" Click="CloseBtn_Click" Margin="8,0,0,0" />
+            <Button x:Name="SelectAllBtn" Content="Select All in Excel" Style="{StaticResource ModernPrimaryButtonStyle}" DockPanel.Dock="Right" Width="150" IsEnabled="False" Click="SelectAllBtn_Click" />
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

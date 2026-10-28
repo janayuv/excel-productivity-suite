@@ -443,6 +443,71 @@ namespace ExcelProductivitySuite.Core.Abstractions
         /// Inserts a formula expression directly into the active cell cursor.
         /// </summary>
         void InsertFormulaAtActiveCell(string formula);
+
+        /// <summary>
+        /// Retrieves 2D matrix values from all disjoint areas in the active multi-selection.
+        /// </summary>
+        IReadOnlyList<object?[,]> GetMultiAreaSelectedValues();
+
+        /// <summary>
+        /// Retrieves cell addresses of each disjoint area in the active multi-selection.
+        /// </summary>
+        IReadOnlyList<string> GetMultiAreaAddresses();
+
+        /// <summary>
+        /// Writes a 2D matrix directly to a specified destination range address.
+        /// </summary>
+        bool WriteMatrixToAddress(string targetAddress, object?[,] matrix);
+
+        /// <summary>
+        /// Retrieves row indices of visible rows within a specified row range, skipping hidden/filtered rows.
+        /// </summary>
+        IReadOnlyList<int> GetVisibleRowIndices(int startRow, int maxRows = 2000);
+
+        /// <summary>
+        /// Pastes matrix data strictly into visible cells starting at the given coordinates, bypassing hidden rows.
+        /// </summary>
+        bool PasteIntoVisibleCells(object?[,] sourceMatrix, int startRow, int startCol);
+
+        /// <summary>
+        /// Retrieves information on all merged cell areas within the current selection.
+        /// </summary>
+        IReadOnlyList<MergedAreaInfo> GetMergedAreasInSelection();
+
+        /// <summary>
+        /// Unmerges all composite cells across the selection and populates all constituent cells with the original value.
+        /// </summary>
+        int UnmergeAndFillSelection();
+
+        /// <summary>
+        /// Creates a new worksheet and writes the given matrix data into it.
+        /// </summary>
+        bool WriteMatrixToNewWorksheet(string sheetName, object?[,] matrix);
+
+        /// <summary>
+        /// Scans worksheet or selection for cells matching specific font, fill, or style criteria.
+        /// </summary>
+        IReadOnlyList<FormatMatchItem> FindCellsByFormat(CellFormatCriteria criteria, bool selectionOnly = false);
+
+        /// <summary>
+        /// Reads format attributes (fill color, font color, bold, italic) from the current active cell cursor.
+        /// </summary>
+        CellFormatCriteria GetActiveCellFormatCriteria();
+
+        /// <summary>
+        /// Audits data validation rules across the worksheet or active selection.
+        /// </summary>
+        IReadOnlyList<ValidationRuleInfo> GetWorksheetValidationRules(bool selectionOnly = false);
+
+        /// <summary>
+        /// Selects multiple cells across the worksheet given their A1 addresses.
+        /// </summary>
+        void SelectCellsByAddresses(IEnumerable<string> addresses);
+
+        /// <summary>
+        /// Removes data validation rules from the specified cell addresses.
+        /// </summary>
+        void RemoveValidationFromRange(IEnumerable<string> addresses);
     }
 
     public class FormulaErrorInfo
@@ -671,6 +736,110 @@ namespace ExcelProductivitySuite.Core.Abstractions
             ValueText = valueText ?? string.Empty;
             FormulaText = formulaText ?? string.Empty;
             IsDirect = isDirect;
+        }
+    }
+
+    public class MergedAreaInfo
+    {
+        public int StartRow { get; }
+        public int StartCol { get; }
+        public int RowCount { get; }
+        public int ColCount { get; }
+        public string Address { get; }
+        public object? Value { get; }
+        public string ValueText => Value?.ToString() ?? string.Empty;
+
+        public MergedAreaInfo(int startRow, int startCol, int rowCount, int colCount, string address, object? value)
+        {
+            StartRow = startRow;
+            StartCol = startCol;
+            RowCount = rowCount;
+            ColCount = colCount;
+            Address = address;
+            Value = value;
+        }
+    }
+
+    public class CellFormatCriteria
+    {
+        public bool MatchFillColor { get; set; }
+        public int? FillColorRgb { get; set; }
+        public bool MatchFontColor { get; set; }
+        public int? FontColorRgb { get; set; }
+        public bool MatchBold { get; set; }
+        public bool? IsBold { get; set; }
+        public bool MatchItalic { get; set; }
+        public bool? IsItalic { get; set; }
+    }
+
+    public class FormatMatchItem
+    {
+        public int Row { get; }
+        public int Column { get; }
+        public string Address { get; }
+        public string SheetName { get; }
+        public string ValueText { get; }
+        public int? FillColorRgb { get; }
+        public int? FontColorRgb { get; }
+        public bool IsBold { get; }
+        public bool IsItalic { get; }
+
+        public string FillHex => FillColorRgb.HasValue ? $"#{FillColorRgb.Value:X6}" : "None";
+        public string FontHex => FontColorRgb.HasValue ? $"#{FontColorRgb.Value:X6}" : "Auto";
+
+        public FormatMatchItem(int row, int col, string address, string sheetName, string valText, int? fillRgb, int? fontRgb, bool isBold, bool isItalic)
+        {
+            Row = row;
+            Column = col;
+            Address = address;
+            SheetName = sheetName;
+            ValueText = valText;
+            FillColorRgb = fillRgb;
+            FontColorRgb = fontRgb;
+            IsBold = isBold;
+            IsItalic = isItalic;
+        }
+    }
+
+    public class ValidationRuleInfo
+    {
+        public string SheetName { get; }
+        public string CellAddress { get; }
+        public int Row { get; }
+        public int Column { get; }
+        public string ValidationType { get; }
+        public string Operator { get; }
+        public string Formula1 { get; }
+        public string Formula2 { get; }
+        public string CurrentValue { get; }
+        public string ErrorMessage { get; }
+        public bool? IsValid { get; }
+        public string StatusDisplay => IsValid.HasValue ? (IsValid.Value ? "Valid" : "⚠️ Invalid") : "Active";
+
+        public ValidationRuleInfo(
+            string sheetName,
+            string cellAddress,
+            int row,
+            int col,
+            string validationType,
+            string op,
+            string formula1,
+            string formula2,
+            string currentValue,
+            string errorMessage,
+            bool? isValid)
+        {
+            SheetName = sheetName;
+            CellAddress = cellAddress;
+            Row = row;
+            Column = col;
+            ValidationType = validationType;
+            Operator = op;
+            Formula1 = formula1 ?? string.Empty;
+            Formula2 = formula2 ?? string.Empty;
+            CurrentValue = currentValue ?? string.Empty;
+            ErrorMessage = errorMessage ?? string.Empty;
+            IsValid = isValid;
         }
     }
 }

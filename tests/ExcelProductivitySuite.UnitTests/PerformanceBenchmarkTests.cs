@@ -781,5 +781,68 @@ namespace ExcelProductivitySuite.UnitTests
             Assert.AreEqual(10000, res.TextDatesConverted);
             Assert.IsTrue(sw.ElapsedMilliseconds < 500, $"DateFormatStandardizer benchmark took {sw.ElapsedMilliseconds} ms, target is < 500 ms");
         }
+
+        [TestMethod]
+        public void Benchmark_MultiAreaRangeCopier_5Areas_10K_Cells_CompletesUnder300ms()
+        {
+            var areas = new List<object?[,]>();
+            for (int a = 0; a < 5; a++)
+            {
+                var area = new object?[2000, 4];
+                for (int r = 0; r < 2000; r++)
+                {
+                    for (int c = 0; c < 4; c++)
+                    {
+                        area[r, c] = $"Area{a}_R{r}C{c}";
+                    }
+                }
+                areas.Add(area);
+            }
+
+            var sw = Stopwatch.StartNew();
+            var combinedVertical = MultiAreaRangeCopier.Combine(areas, new MultiAreaCopyOptions { Mode = MultiAreaCombineMode.StackVertically });
+            var combinedHorizontal = MultiAreaRangeCopier.Combine(areas, new MultiAreaCopyOptions { Mode = MultiAreaCombineMode.PlaceSideBySide });
+            sw.Stop();
+
+            Assert.AreEqual(10000, combinedVertical.GetLength(0));
+            Assert.AreEqual(4, combinedVertical.GetLength(1));
+            Assert.AreEqual(2000, combinedHorizontal.GetLength(0));
+            Assert.AreEqual(20, combinedHorizontal.GetLength(1));
+            Assert.IsTrue(sw.ElapsedMilliseconds < 300, $"MultiAreaRangeCopier benchmark took {sw.ElapsedMilliseconds} ms, target is < 300 ms");
+        }
+
+        [TestMethod]
+        public void Benchmark_RandomSampler_100K_Rows_CompletesUnder250ms()
+        {
+            int rows = 100000;
+            int cols = 5;
+            object?[,] dataset = new object?[rows, cols];
+            for (int c = 0; c < cols; c++) dataset[0, c] = $"Col_{c}";
+
+            for (int r = 1; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    dataset[r, c] = r * 10 + c;
+                }
+            }
+
+            var options = new RandomSampleOptions
+            {
+                Mode = RandomSampleMode.FixedCount,
+                Count = 5000,
+                HasHeaders = true,
+                WithReplacement = false,
+                RandomSeed = 12345
+            };
+
+            var sw = Stopwatch.StartNew();
+            var sampleResult = RandomSampler.ExtractSample(dataset, options);
+            sw.Stop();
+
+            Assert.AreEqual(5001, sampleResult.SampleMatrix.GetLength(0));
+            Assert.AreEqual(5, sampleResult.SampleMatrix.GetLength(1));
+            Assert.IsTrue(sw.ElapsedMilliseconds < 250, $"RandomSampler benchmark took {sw.ElapsedMilliseconds} ms, target is < 250 ms");
+        }
     }
 }

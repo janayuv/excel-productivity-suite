@@ -2180,6 +2180,517 @@ namespace ExcelProductivitySuite.UnitTests
 
         #endregion
 
+        #region Batch 12: Advanced Range Operations & Copy/Paste Expansion
+
+        #region MultiAreaRangeCopier Tests
+
+        [TestMethod]
+        public void MultiAreaRangeCopier_Combine_NullOrEmptyAreas_ReturnsEmptyMatrix()
+        {
+            var res1 = MultiAreaRangeCopier.Combine(null!, new MultiAreaCopyOptions { Mode = MultiAreaCombineMode.StackVertically });
+            Assert.AreEqual(0, res1.GetLength(0));
+            Assert.AreEqual(0, res1.GetLength(1));
+
+            var res2 = MultiAreaRangeCopier.Combine(new List<object?[,]>(), new MultiAreaCopyOptions { Mode = MultiAreaCombineMode.PlaceSideBySide });
+            Assert.AreEqual(0, res2.GetLength(0));
+            Assert.AreEqual(0, res2.GetLength(1));
+        }
+
+        [TestMethod]
+        public void MultiAreaRangeCopier_Combine_VerticalStack_PadsDifferentWidths()
+        {
+            var a1 = new object?[2, 2]
+            {
+                { "A1", "B1" },
+                { "A2", "B2" }
+            };
+
+            var a2 = new object?[1, 3]
+            {
+                { "C1", "D1", "E1" }
+            };
+
+            var combined = MultiAreaRangeCopier.Combine(new[] { a1, a2 }, new MultiAreaCopyOptions { Mode = MultiAreaCombineMode.StackVertically });
+
+            // Total rows: 2 + 1 = 3, Max cols = 3
+            Assert.AreEqual(3, combined.GetLength(0));
+            Assert.AreEqual(3, combined.GetLength(1));
+
+            Assert.AreEqual("A1", combined[0, 0]);
+            Assert.AreEqual("B1", combined[0, 1]);
+            Assert.IsNull(combined[0, 2]); // Padded
+
+            Assert.AreEqual("A2", combined[1, 0]);
+            Assert.AreEqual("B2", combined[1, 1]);
+            Assert.IsNull(combined[1, 2]); // Padded
+
+            Assert.AreEqual("C1", combined[2, 0]);
+            Assert.AreEqual("D1", combined[2, 1]);
+            Assert.AreEqual("E1", combined[2, 2]);
+        }
+
+        [TestMethod]
+        public void MultiAreaRangeCopier_Combine_SideBySide_PadsDifferentHeights()
+        {
+            var a1 = new object?[3, 1]
+            {
+                { "Row1" },
+                { "Row2" },
+                { "Row3" }
+            };
+
+            var a2 = new object?[2, 2]
+            {
+                { "ColA", "ColB" },
+                { "ValA", "ValB" }
+            };
+
+            var combined = MultiAreaRangeCopier.Combine(new[] { a1, a2 }, new MultiAreaCopyOptions { Mode = MultiAreaCombineMode.PlaceSideBySide });
+
+            // Max rows = 3, Total cols = 1 + 2 = 3
+            Assert.AreEqual(3, combined.GetLength(0));
+            Assert.AreEqual(3, combined.GetLength(1));
+
+            Assert.AreEqual("Row1", combined[0, 0]);
+            Assert.AreEqual("ColA", combined[0, 1]);
+            Assert.AreEqual("ColB", combined[0, 2]);
+
+            Assert.AreEqual("Row2", combined[1, 0]);
+            Assert.AreEqual("ValA", combined[1, 1]);
+            Assert.AreEqual("ValB", combined[1, 2]);
+
+            Assert.AreEqual("Row3", combined[2, 0]);
+            Assert.IsNull(combined[2, 1]); // Padded
+            Assert.IsNull(combined[2, 2]); // Padded
+        }
+
+        [TestMethod]
+        public void MultiAreaRangeCopier_Combine_SingleArea_PreservesData()
+        {
+            var a1 = new object?[2, 2]
+            {
+                { 10, 20 },
+                { 30, 40 }
+            };
+
+            var combined = MultiAreaRangeCopier.Combine(new[] { a1 }, new MultiAreaCopyOptions { Mode = MultiAreaCombineMode.StackVertically });
+            Assert.AreEqual(2, combined.GetLength(0));
+            Assert.AreEqual(2, combined.GetLength(1));
+            Assert.AreEqual(10, combined[0, 0]);
+            Assert.AreEqual(40, combined[1, 1]);
+        }
+
+        #endregion
+
+        #region VisibleCellsPasteEngine Tests
+
+        [TestMethod]
+        public void VisibleCellsPasteEngine_ComputeMapping_ContinuousVisibleRows_MapsCorrectly()
+        {
+            var src = new object?[2, 2]
+            {
+                { "A", "B" },
+                { "C", "D" }
+            };
+
+            var visibleRows = new List<int> { 5, 6, 7 };
+            var mappings = VisibleCellsPasteEngine.ComputeMapping(src, visibleRows);
+
+            Assert.AreEqual(2, mappings.Count);
+            Assert.AreEqual(5, mappings[0].TargetRowIndex);
+            Assert.AreEqual("A", mappings[0].Values[0]);
+            Assert.AreEqual("B", mappings[0].Values[1]);
+
+            Assert.AreEqual(6, mappings[1].TargetRowIndex);
+            Assert.AreEqual("C", mappings[1].Values[0]);
+            Assert.AreEqual("D", mappings[1].Values[1]);
+        }
+
+        [TestMethod]
+        public void VisibleCellsPasteEngine_ComputeMapping_SkipsFilteredRows()
+        {
+            var src = new object?[3, 1]
+            {
+                { "Item1" },
+                { "Item2" },
+                { "Item3" }
+            };
+
+            // Rows 2, 4, 7 are visible (rows 3, 5, 6 are hidden)
+            var visibleRows = new List<int> { 2, 4, 7, 10 };
+            var mappings = VisibleCellsPasteEngine.ComputeMapping(src, visibleRows);
+
+            Assert.AreEqual(3, mappings.Count);
+            Assert.AreEqual(2, mappings[0].TargetRowIndex);
+            Assert.AreEqual("Item1", mappings[0].Values[0]);
+
+            Assert.AreEqual(4, mappings[1].TargetRowIndex);
+            Assert.AreEqual("Item2", mappings[1].Values[0]);
+
+            Assert.AreEqual(7, mappings[2].TargetRowIndex);
+            Assert.AreEqual("Item3", mappings[2].Values[0]);
+        }
+
+        [TestMethod]
+        public void VisibleCellsPasteEngine_ComputeMapping_InsufficientVisibleRows_MapsAvailableCount()
+        {
+            var src = new object?[5, 1];
+            for (int i = 0; i < 5; i++) src[i, 0] = $"Val{i}";
+            var visibleRows = new List<int> { 1, 2 }; // only 2 visible, source has 5
+            var mappings = VisibleCellsPasteEngine.ComputeMapping(src, visibleRows);
+
+            Assert.AreEqual(2, mappings.Count);
+            Assert.AreEqual("Val0", mappings[0].Values[0]);
+            Assert.AreEqual("Val1", mappings[1].Values[0]);
+        }
+
+        #endregion
+
+        #region UnmergeAndFillEngine Tests
+
+        [TestMethod]
+        public void UnmergeAndFillEngine_Process_FillsAllCellsInMergedArea()
+        {
+            // 4 rows x 3 cols
+            var matrix = new object?[4, 3]
+            {
+                { "North", null,    100 },
+                { null,    null,    200 },
+                { "South", "RepB",  300 },
+                { null,    "RepC",  400 }
+            };
+
+            // North is merged across rows 1..2, cols 1..2 (0-based: r:0..1, c:0..1)
+            // South is merged across rows 3..4, col 1 (0-based: r:2..3, c:0..0)
+            var merged = new List<MergedAreaInfo>
+            {
+                new MergedAreaInfo(1, 1, 2, 2, "A1:B2", "North"),
+                new MergedAreaInfo(3, 1, 2, 1, "A3:A4", "South")
+            };
+
+            var processed = UnmergeAndFillEngine.Process(matrix, merged).ProcessedValues;
+
+            // A1:B2 should all be "North"
+            Assert.AreEqual("North", processed[0, 0]);
+            Assert.AreEqual("North", processed[0, 1]);
+            Assert.AreEqual("North", processed[1, 0]);
+            Assert.AreEqual("North", processed[1, 1]);
+
+            // C1, C2 preserved
+            Assert.AreEqual(100, processed[0, 2]);
+            Assert.AreEqual(200, processed[1, 2]);
+
+            // A3:A4 should both be "South"
+            Assert.AreEqual("South", processed[2, 0]);
+            Assert.AreEqual("South", processed[3, 0]);
+            Assert.AreEqual("RepB", processed[2, 1]);
+            Assert.AreEqual("RepC", processed[3, 1]);
+        }
+
+        [TestMethod]
+        public void UnmergeAndFillEngine_Process_NoMergedAreas_ReturnsClone()
+        {
+            var matrix = new object?[2, 2]
+            {
+                { "A", "B" },
+                { "C", "D" }
+            };
+
+            var processed = UnmergeAndFillEngine.Process(matrix, new List<MergedAreaInfo>()).ProcessedValues;
+            Assert.AreEqual("A", processed[0, 0]);
+            Assert.AreEqual("D", processed[1, 1]);
+        }
+
+        #endregion
+
+        #region RandomSampler Tests
+
+        [TestMethod]
+        public void RandomSampler_ExtractSample_CountMode_ExactSampleExtracted()
+        {
+            var data = new object?[10, 2];
+            for (int r = 0; r < 10; r++)
+            {
+                data[r, 0] = $"ID_{r}";
+                data[r, 1] = r * 10;
+            }
+
+            var options = new RandomSampleOptions
+            {
+                Mode = RandomSampleMode.FixedCount,
+                Count = 4,
+                HasHeaders = false,
+                WithReplacement = false,
+                RandomSeed = 42
+            };
+
+            var res = RandomSampler.ExtractSample(data, options);
+            Assert.AreEqual(4, res.SampleMatrix.GetLength(0));
+            Assert.AreEqual(2, res.SampleMatrix.GetLength(1));
+        }
+
+        [TestMethod]
+        public void RandomSampler_ExtractSample_PreserveHeaders_KeepsHeaderRow()
+        {
+            var data = new object?[6, 2]
+            {
+                { "ID", "Score" },
+                { 1, 90 },
+                { 2, 85 },
+                { 3, 77 },
+                { 4, 95 },
+                { 5, 88 }
+            };
+
+            var options = new RandomSampleOptions
+            {
+                Mode = RandomSampleMode.FixedCount,
+                Count = 2,
+                HasHeaders = true,
+                WithReplacement = false,
+                RandomSeed = 100
+            };
+
+            var res = RandomSampler.ExtractSample(data, options);
+            // 1 header row + 2 sampled rows = 3 rows total
+            Assert.AreEqual(3, res.SampleMatrix.GetLength(0));
+            Assert.AreEqual("ID", res.SampleMatrix[0, 0]);
+            Assert.AreEqual("Score", res.SampleMatrix[0, 1]);
+        }
+
+        [TestMethod]
+        public void RandomSampler_ExtractSample_PercentageMode_CalculatesCorrectCount()
+        {
+            var data = new object?[101, 1];
+            data[0, 0] = "Header";
+            for (int i = 1; i <= 100; i++) data[i, 0] = i;
+
+            var options = new RandomSampleOptions
+            {
+                Mode = RandomSampleMode.Percentage,
+                Percentage = 25.0, // 25% of 100 data rows = 25 rows
+                HasHeaders = true,
+                WithReplacement = false,
+                RandomSeed = 999
+            };
+
+            var res = RandomSampler.ExtractSample(data, options);
+            Assert.AreEqual(26, res.SampleMatrix.GetLength(0)); // 1 header + 25 rows
+        }
+
+        [TestMethod]
+        public void RandomSampler_ExtractSample_SeedDeterminism_ProducesSameResults()
+        {
+            var data = new object?[20, 2];
+            for (int r = 0; r < 20; r++)
+            {
+                data[r, 0] = $"R{r}";
+                data[r, 1] = r;
+            }
+
+            var opts1 = new RandomSampleOptions { Mode = RandomSampleMode.FixedCount, Count = 5, RandomSeed = 777 };
+            var opts2 = new RandomSampleOptions { Mode = RandomSampleMode.FixedCount, Count = 5, RandomSeed = 777 };
+
+            var s1 = RandomSampler.ExtractSample(data, opts1).SampleMatrix;
+            var s2 = RandomSampler.ExtractSample(data, opts2).SampleMatrix;
+
+            for (int r = 0; r < 5; r++)
+            {
+                Assert.AreEqual(s1[r, 0], s2[r, 0]);
+                Assert.AreEqual(s1[r, 1], s2[r, 1]);
+            }
+        }
+
+        #endregion
+
+        #region MockExcelContext Batch 12 Integration Tests
+
+        [TestMethod]
+        public void MockExcelContext_MultiAreaAndPasteVisible_ExecutesCorrectly()
+        {
+            var ctx = new MockExcelContext();
+            ctx.MockMultiAreaAddresses.Add("A1:B2");
+            ctx.MockMultiAreaAddresses.Add("D1:E2");
+
+            var a1 = new object?[2, 2] { { "A1", "B1" }, { "A2", "B2" } };
+            var a2 = new object?[2, 2] { { "D1", "E1" }, { "D2", "E2" } };
+            ctx.MockMultiAreaValues.Add(a1);
+            ctx.MockMultiAreaValues.Add(a2);
+
+            var addrs = ctx.GetMultiAreaAddresses();
+            Assert.AreEqual(4, addrs.Count); // 2 default + 2 added
+
+            var values = ctx.GetMultiAreaSelectedValues();
+            Assert.AreEqual(2, values.Count);
+
+            var matrixToWrite = new object?[2, 4]
+            {
+                { "A1", "B1", "D1", "E1" },
+                { "A2", "B2", "D2", "E2" }
+            };
+
+            bool written = ctx.WriteMatrixToAddress("Sheet1!A10", matrixToWrite);
+            Assert.IsTrue(written);
+            Assert.AreEqual("Sheet1!A10", ctx.WrittenMatrices[0].address);
+
+            bool newSheet = ctx.WriteMatrixToNewWorksheet("SampleExport", matrixToWrite);
+            Assert.IsTrue(newSheet);
+            Assert.AreEqual("SampleExport", ctx.CreatedWorksheets[0].name);
+
+            // Visible rows & paste
+            ctx.MockVisibleRows.Clear();
+            ctx.MockVisibleRows.AddRange(new[] { 10, 11 });
+            var visibleRows = ctx.GetVisibleRowIndices(10, 2);
+            Assert.AreEqual(2, visibleRows.Count);
+            Assert.AreEqual(10, visibleRows[0]);
+            Assert.AreEqual(11, visibleRows[1]);
+
+            bool pasted = ctx.PasteIntoVisibleCells(a1, 10, 1);
+            Assert.IsTrue(pasted);
+            Assert.IsTrue(ctx.WrittenMatrices.Any(w => w.address == "Visible_R10C1"));
+        }
+
+        [TestMethod]
+        public void MockExcelContext_UnmergeAndValidation_ExecutesCorrectly()
+        {
+            var ctx = new MockExcelContext();
+            ctx.MockMergedAreas.Add(new MergedAreaInfo(2, 2, 2, 2, "B2:C3", "MergedTitle"));
+
+            var areas = ctx.GetMergedAreasInSelection();
+            Assert.AreEqual(1, areas.Count);
+            Assert.AreEqual("B2:C3", areas[0].Address);
+
+            int unmerged = ctx.UnmergeAndFillSelection();
+            Assert.AreEqual(5, unmerged);
+
+            // Validation rules
+            ctx.MockValidationRules.Add(new ValidationRuleInfo("Sheet1", "D2:D10", 2, 4, "List", "", "High,Medium,Low", "", "High", "", true));
+            var rules = ctx.GetWorksheetValidationRules();
+            Assert.AreEqual(1, rules.Count);
+            Assert.AreEqual("High,Medium,Low", rules[0].Formula1);
+
+            ctx.SelectCellsByAddresses(new[] { "D2:D10" });
+            Assert.AreEqual("D2:D10", ctx.SelectedCellAddressesHistory[0]);
+
+            ctx.RemoveValidationFromRange(new[] { "D2:D10" });
+            Assert.AreEqual("D2:D10", ctx.RemovedValidationHistory[0]);
+        }
+
+        [TestMethod]
+        public void MockExcelContext_FindByFormat_ExecutesCorrectly()
+        {
+            var ctx = new MockExcelContext();
+            ctx.MockFormatMatches.Add(new FormatMatchItem(1, 1, "A1", "Sheet1", "Test", 0xFF0000, 0xFFFFFF, true, false));
+
+            var matches = ctx.FindCellsByFormat(new CellFormatCriteria { MatchFillColor = true, FillColorRgb = 0xFF0000 });
+            Assert.AreEqual(1, matches.Count);
+            Assert.AreEqual("A1", matches[0].Address);
+            Assert.AreEqual("#FF0000", matches[0].FillHex);
+
+            var activeCriteria = ctx.GetActiveCellFormatCriteria();
+            Assert.IsNotNull(activeCriteria);
+        }
+
+        #endregion
+
+        #region Batch 12 Command Registrations Test
+
+        [TestMethod]
+        public void Batch12_Commands_RegisterAndExecuteProperly()
+        {
+            var registry = new CommandRegistry();
+            var ctx = new MockExcelContext();
+
+            var cmd1 = new SuiteCommand(
+                id: "CMD_RANGE_COPY_NONCONTIGUOUS",
+                title: "Copy Non-Contiguous Selection",
+                description: "Copy disjoint ranges",
+                category: CommandCategory.RangeAndCells,
+                executeAction: c => c.ShowMessage("Copy Multiple", "Ranges"),
+                keywords: new[] { "copy noncontiguous" },
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "B",
+                roadmapBatch: "Batch 12");
+
+            var cmd2 = new SuiteCommand(
+                id: "CMD_RANGE_PASTE_VISIBLE_ONLY",
+                title: "Paste to Visible Cells",
+                description: "Paste visible only",
+                category: CommandCategory.RangeAndCells,
+                executeAction: c => c.ShowMessage("Paste Visible", "Ranges"),
+                keywords: new[] { "paste visible" },
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "B",
+                roadmapBatch: "Batch 12");
+
+            var cmd3 = new SuiteCommand(
+                id: "CMD_RANGE_UNMERGE_FILL",
+                title: "Unmerge and Fill",
+                description: "Unmerge and fill values",
+                category: CommandCategory.RangeAndCells,
+                executeAction: c => c.ShowMessage("Unmerge Fill", "Ranges"),
+                keywords: new[] { "unmerge and fill" },
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "B",
+                roadmapBatch: "Batch 12");
+
+            var cmd4 = new SuiteCommand(
+                id: "CMD_RANGE_RANDOM_SAMPLE",
+                title: "Random Sampling",
+                description: "Random sample records",
+                category: CommandCategory.RangeAndCells,
+                executeAction: c => c.ShowMessage("Random Sample", "Ranges"),
+                keywords: new[] { "random sample" },
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "B",
+                roadmapBatch: "Batch 12");
+
+            var cmd5 = new SuiteCommand(
+                id: "CMD_FIND_BY_FORMAT",
+                title: "Find by Format",
+                description: "Find formatted cells",
+                category: CommandCategory.FindSelectCompare,
+                executeAction: c => c.ShowMessage("Find Format", "FindSelect"),
+                keywords: new[] { "find by color" },
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "C",
+                roadmapBatch: "Batch 12");
+
+            var cmd6 = new SuiteCommand(
+                id: "CMD_FIND_BY_VALIDATION",
+                title: "Find Validation",
+                description: "Find validation cells",
+                category: CommandCategory.FindSelectCompare,
+                executeAction: c => c.ShowMessage("Find Validation", "FindSelect"),
+                keywords: new[] { "find validation" },
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "C",
+                roadmapBatch: "Batch 12");
+
+            registry.RegisterCommand(cmd1);
+            registry.RegisterCommand(cmd2);
+            registry.RegisterCommand(cmd3);
+            registry.RegisterCommand(cmd4);
+            registry.RegisterCommand(cmd5);
+            registry.RegisterCommand(cmd6);
+
+            Assert.AreEqual(6, registry.GetAllCommands().Count);
+            Assert.IsTrue(registry.GetAllCommands().All(c => c.IsImplemented));
+
+            registry.Execute("CMD_RANGE_COPY_NONCONTIGUOUS", ctx);
+            registry.Execute("CMD_RANGE_PASTE_VISIBLE_ONLY", ctx);
+            registry.Execute("CMD_RANGE_UNMERGE_FILL", ctx);
+            registry.Execute("CMD_RANGE_RANDOM_SAMPLE", ctx);
+            registry.Execute("CMD_FIND_BY_FORMAT", ctx);
+            registry.Execute("CMD_FIND_BY_VALIDATION", ctx);
+
+            Assert.AreEqual(6, ctx.MessagesShown.Count);
+        }
+
+        #endregion
+
+        #endregion
+
         #endregion
 
         #endregion

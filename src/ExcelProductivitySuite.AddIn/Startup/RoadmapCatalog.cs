@@ -38,42 +38,6 @@ namespace ExcelProductivitySuite.AddIn.Startup
                 new[] { "extract url", "find links", "parse websites", "http extract", "hyperlink text" }, "HyperlinkInsert");
 
             // =========================================================================
-            // Module B: Range and Cell Operations (Remaining Future Roadmap)
-            // =========================================================================
-            AddPlanned(registry, "CMD_RANGE_COPY_NONCONTIGUOUS", "Copy Non-Contiguous Selection",
-                "Copy multiple disjoint selection areas into a single contiguous destination range.",
-                CommandCategory.RangeAndCells, "B", "Batch 3+",
-                new[] { "copy noncontiguous", "disjoint copy", "multi area copy", "ctrl select copy" }, "Copy");
-
-            AddPlanned(registry, "CMD_RANGE_PASTE_VISIBLE_ONLY", "Paste into Visible Cells Only",
-                "Paste clipboard data strictly into visible cells, bypassing filtered or hidden rows.",
-                CommandCategory.RangeAndCells, "B", "Batch 3+",
-                new[] { "paste visible", "skip hidden rows", "paste filtered", "visible cells only" }, "Paste");
-
-            AddPlanned(registry, "CMD_RANGE_UNMERGE_FILL", "Unmerge and Fill Cells",
-                "Safely unmerge composite cells and automatically populate all constituent cells with the original value.",
-                CommandCategory.RangeAndCells, "B", "Batch 3+",
-                new[] { "unmerge and fill", "split merged", "fill unmerged", "normalize merged cells" }, "TableSplitCells");
-
-            AddPlanned(registry, "CMD_RANGE_RANDOM_SAMPLE", "Random Sampling of Records",
-                "Select or extract a random sample of N rows or P% of records from a dataset.",
-                CommandCategory.RangeAndCells, "B", "Batch 3+",
-                new[] { "random sample", "sample rows", "extract sample", "audit sample", "statistical sampling" }, "FunctionsStatisticalInsertGallery");
-
-            // =========================================================================
-            // Module C: Find, Select, and Compare (Remaining Future Roadmap)
-            // =========================================================================
-            AddPlanned(registry, "CMD_FIND_BY_FORMAT", "Find Cells by Format & Color",
-                "Locate cells matching specific font color, fill color, font style, or border attributes.",
-                CommandCategory.FindSelectCompare, "C", "Batch 4+",
-                new[] { "find by color", "find formatting", "match cell color", "find bold cells" }, "ColorPicker");
-
-            AddPlanned(registry, "CMD_FIND_BY_VALIDATION", "Find Cells with Data Validation",
-                "Select and highlight all cells that have Excel data validation rules applied.",
-                CommandCategory.FindSelectCompare, "C", "Batch 4+",
-                new[] { "find validation", "cells with dropdowns", "validation cells", "inspect validation" }, "DataValidation");
-
-            // =========================================================================
             // Module D: Worksheet and Workbook Management (Remaining Future Roadmap)
             // =========================================================================
             AddPlanned(registry, "CMD_SHEET_SEQUENCE_NAMES", "Create Sequentially Named Sheets",

@@ -4,7 +4,7 @@
 **Host Application:** Microsoft Excel 2016 / 2019 / 2021 / Microsoft 365 (32-bit & 64-bit Windows Desktop)  
 **Framework:** .NET Framework 4.8 & Visual Studio Tools for Office (VSTO)  
 **UI Subsystem:** Windows Presentation Foundation (WPF) / Modern Fluent Office Palette  
-**Version:** 5.1.0 (Batch 11 Formulas & Formatting Expansion Milestone)  
+**Version:** 5.2.0 (Batch 12 Advanced Range Operations & Copy/Paste Expansion Milestone)  
 **Last Audit Date:** 2026-10-28  
 
 ---
@@ -15,8 +15,8 @@ Following the mandatory codebase audit, the **Excel Productivity Suite** feature
 
 The current implementation comprises:
 - **Total Cataloged Capabilities:** 200+ features planned across 12 modules
-- **Active & Verified Tools:** 83 commands (81 core productivity utilities + 2 suite navigation/information utilities)
-- **Unit Test Coverage:** 212 passing automated unit & performance tests (100% pass rate in 2.0s)
+- **Active & Verified Tools:** 89 commands (87 core productivity utilities + 2 suite navigation/information utilities)
+- **Unit Test Coverage:** 231 passing automated unit & performance tests (100% pass rate in 1.8s)
 - **Real Excel COM Integration Tests:** 18 passing out-of-process Excel 2016+ scenarios (100% pass rate in 1.27s)
 - **Searchable Quick Tool Launcher (SuperSearch):** Integrated multi-category search, active/roadmap status filtering, module badges, and keyword scoring (`Ctrl+Shift+P` / KeyTip: `TL`)
 
@@ -46,7 +46,7 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 
 ---
 
-## 4. Complete Active Feature Inventory (83 Implemented & Verified Tools)
+## 4. Complete Active Feature Inventory (89 Implemented & Verified Tools)
 
 | ID | Title | Module | Category | Engine Class | UI Dialog / Action | Test Mapping | Status |
 | :--- | :--- | :---: | :--- | :--- | :--- | :--- | :--- |
@@ -133,6 +133,12 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 | `CMD_FORMULA_TEMPLATES` | **Formula Templates Library** | G | Formulas & Calculation | `FormulaTemplateLibrary.cs` | `FormulaTemplatesDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
 | `CMD_FORMAT_BATCH_NUMBERS` | **Batch Number Formatting** | H | Formatting & Design | `NumberFormatPresets.cs` | `BatchNumberFormatDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
 | `CMD_FORMAT_DATE_STANDARDS` | **Standardize Date Formats** | H | Formatting & Design | `DateFormatStandardizer.cs` | `StandardizeDateFormatsDialog.xaml` | `RangeAndSheetTests`, `Benchmark_DateFormatStandardizer` | Implemented and verified |
+| `CMD_RANGE_COPY_NONCONTIGUOUS` | **Copy Multiple Ranges** | B | Range & Cells | `MultiAreaRangeCopier.cs` | `CopyMultipleRangesDialog.xaml` | `RangeAndSheetTests`, `Benchmark_MultiAreaRangeCopier` | Implemented and verified |
+| `CMD_RANGE_PASTE_VISIBLE_ONLY` | **Paste to Visible Only** | B | Range & Cells | `VisibleCellsPasteEngine.cs` | `PasteVisibleOnlyDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_RANGE_UNMERGE_FILL` | **Unmerge & Fill** | B | Range & Cells | `UnmergeAndFillEngine.cs` | `UnmergeAndFillDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_RANGE_RANDOM_SAMPLE` | **Random Sampling** | B | Range & Cells | `RandomSampler.cs` | `RandomSampleDialog.xaml` | `RangeAndSheetTests`, `Benchmark_RandomSampler` | Implemented and verified |
+| `CMD_FIND_BY_FORMAT` | **Find by Format** | C | Find & Select | `ExcelContextAdapter.cs` | `FindByFormatDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_FIND_BY_VALIDATION` | **Find Validation** | C | Find & Select | `ExcelContextAdapter.cs` | `FindByValidationDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
 
 ---
 
@@ -171,11 +177,11 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 - [x] `CMD_RANGE_INSERT_BLANK_ROWS`: Insert blank rows at regular intervals or value changes. *(Active - Batch 3)*
 - [x] `CMD_RANGE_DELETE_BLANK_ROWS`: Delete completely empty rows or columns safely. *(Active - Batch 3)*
 - [x] `CMD_RANGE_MATH_OPERATIONS`: Apply bulk arithmetic operations (+, -, *, /, ^, %) directly to numeric cells without formulas. *(Active - Batch 7)*
-- [ ] `CMD_RANGE_COPY_NONCONTIGUOUS`: Copy disjoint multi-area selection into contiguous target. *(Planned - Batch 3+)*
-- [ ] `CMD_RANGE_PASTE_VISIBLE_ONLY`: Paste clipboard data strictly into visible cells skipping hidden rows. *(Planned - Batch 3+)*
-- [ ] `CMD_RANGE_UNMERGE_FILL`: Unmerge composite cells and fill all constituent cells with value. *(Planned - Batch 3+)*
-- [ ] `CMD_RANGE_DECIMALS`: Increase or decrease decimal places in bulk. *(Planned - Batch 3+)*
-- [ ] `CMD_RANGE_RANDOM_SAMPLE`: Extract random sample of N records or P% from dataset. *(Planned - Batch 3+)*
+- [x] `CMD_RANGE_COPY_NONCONTIGUOUS`: Copy disjoint multi-area selection into contiguous target. *(Active - Batch 12)*
+- [x] `CMD_RANGE_PASTE_VISIBLE_ONLY`: Paste clipboard data strictly into visible cells skipping hidden rows. *(Active - Batch 12)*
+- [x] `CMD_RANGE_UNMERGE_FILL`: Unmerge composite cells and fill all constituent cells with value. *(Active - Batch 12)*
+- [x] `CMD_RANGE_RANDOM_SAMPLE`: Extract random sample of N records or P% from dataset. *(Active - Batch 12)*
+- [ ] `CMD_RANGE_DECIMALS`: Increase or decrease decimal places in bulk. *(Planned - Batch 13+)*
 
 ### Module C: Find, Select, and Compare (Target: 14 Tools)
 - [x] `CMD_RANGE_COMPARE`: Side-by-side cell comparison and discrepancy identification. *(Active)*
@@ -185,11 +191,11 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 - [x] `CMD_SELECT_MAX_MIN`: Locate and select maximum or minimum numeric cells across selection, rows, or columns. *(Active - Batch 4)*
 - [x] `CMD_SELECT_ROW_DIFFERENCES`: Compare each cell in a row or column against a baseline reference cell and select mismatches. *(Active - Batch 4)*
 - [x] `CMD_FIND_BY_COMMENT`: Select, list, filter, and audit cells containing legacy comments or modern notes across worksheets. *(Active - Batch 4)*
-- [ ] `CMD_FIND_BY_FORMAT`: Find cells matching font color, fill color, font weight, or borders. *(Planned - Batch 4+)*
-- [ ] `CMD_FIND_BY_VALIDATION`: Locate all cells governed by data validation rules. *(Planned - Batch 4+)*
-- [ ] `CMD_SELECT_DUPLICATES`: Quick one-click selection of duplicate cells. *(Planned - Batch 4+)*
-- [ ] `CMD_HIGHLIGHT_DUPLICATES`: Direct conditional color highlighting rule generator for duplicate rows. *(Planned - Batch 4+)*
-- [ ] `CMD_SELECT_COLUMN_DIFFERENCES`: Direct single-click column difference selector. *(Planned - Batch 4+)*
+- [x] `CMD_FIND_BY_FORMAT`: Find cells matching font color, fill color, font weight, or borders. *(Active - Batch 12)*
+- [x] `CMD_FIND_BY_VALIDATION`: Locate all cells governed by data validation rules. *(Active - Batch 12)*
+- [ ] `CMD_SELECT_DUPLICATES`: Quick one-click selection of duplicate cells. *(Planned - Batch 13+)*
+- [ ] `CMD_HIGHLIGHT_DUPLICATES`: Direct conditional color highlighting rule generator for duplicate rows. *(Planned - Batch 13+)*
+- [ ] `CMD_SELECT_COLUMN_DIFFERENCES`: Direct single-click column difference selector. *(Planned - Batch 13+)*
 
 ### Module D: Worksheet and Workbook Management (Target: 18 Tools)
 - [x] `CMD_SHEET_VISIBILITY`: Bulk toggle Visible, Hidden, and VeryHidden worksheet states. *(Active)*
@@ -314,6 +320,7 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 | **Batch 9** | **Protection, Recovery, Charts & Analysis** | Batch Protect/Unprotect, Workbook Snapshots, Gantt/Waterfall Charts, Quick Statistics Dashboard | **COMPLETED** |
 | **Batch 10** | **Navigation, UX Polish, Packaging & Release** | Navigation Pane, Grid-Focus Crosshair, Date Picker, Formula Editor, Release Installer Verification | **COMPLETED** |
 | **Batch 11** | **Formulas & Formatting Expansion** | Audit Precedents/Dependents, Replace Formula Refs, Formula Templates Library, Batch Number Formatting, Standardize Dates | **COMPLETED** |
+| **Batch 12** | **Advanced Range Operations & Copy/Paste Expansion** | Copy Non-Contiguous Selection, Paste to Visible Only, Unmerge and Fill Cells, Random Sampling, Find by Format, Audit Validation Rules | **COMPLETED** |
 
 ---
 

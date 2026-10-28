@@ -487,5 +487,101 @@ namespace ExcelProductivitySuite.UnitTests
         {
             InsertedFormulasHistory.Add(formula);
         }
+
+        public List<object?[,]> MockMultiAreaValues { get; } = new();
+        public List<string> MockMultiAreaAddresses { get; } = new() { "$A$1:$A$5", "$C$1:$C$5" };
+        public List<(string address, object?[,] matrix)> WrittenMatrices { get; } = new();
+        public List<int> MockVisibleRows { get; } = new() { 1, 2, 5, 6, 8, 10 };
+        public List<MergedAreaInfo> MockMergedAreas { get; } = new();
+        public List<FormatMatchItem> MockFormatMatches { get; } = new();
+        public List<ValidationRuleInfo> MockValidationRules { get; } = new();
+        public List<string> SelectedCellAddressesHistory { get; } = new();
+        public List<string> RemovedValidationHistory { get; } = new();
+        public List<(string name, object?[,] matrix)> CreatedWorksheets { get; } = new();
+
+        public IReadOnlyList<object?[,]> GetMultiAreaSelectedValues()
+        {
+            if (MockMultiAreaValues.Count > 0) return MockMultiAreaValues;
+            return new List<object?[,]>
+            {
+                new object?[,] { { "A1" }, { "A2" }, { "A3" } },
+                new object?[,] { { "C1" }, { "C2" }, { "C3" } }
+            };
+        }
+
+        public IReadOnlyList<string> GetMultiAreaAddresses() => MockMultiAreaAddresses;
+
+        public bool WriteMatrixToAddress(string targetAddress, object?[,] matrix)
+        {
+            WrittenMatrices.Add((targetAddress, matrix));
+            return true;
+        }
+
+        public IReadOnlyList<int> GetVisibleRowIndices(int startRow, int maxRows = 2000) => MockVisibleRows;
+
+        public bool PasteIntoVisibleCells(object?[,] sourceMatrix, int startRow, int startCol)
+        {
+            WrittenMatrices.Add(($"Visible_R{startRow}C{startCol}", sourceMatrix));
+            return true;
+        }
+
+        public IReadOnlyList<MergedAreaInfo> GetMergedAreasInSelection()
+        {
+            if (MockMergedAreas.Count > 0) return MockMergedAreas;
+            return new List<MergedAreaInfo>
+            {
+                new MergedAreaInfo(1, 1, 2, 2, "$A$1:$B$2", "MergedGroup1"),
+                new MergedAreaInfo(4, 1, 3, 1, "$A$4:$A$6", "MergedGroup2")
+            };
+        }
+
+        public int UnmergeAndFillSelection() => 5;
+
+        public bool WriteMatrixToNewWorksheet(string sheetName, object?[,] matrix)
+        {
+            CreatedWorksheets.Add((sheetName, matrix));
+            return true;
+        }
+
+        public IReadOnlyList<FormatMatchItem> FindCellsByFormat(CellFormatCriteria criteria, bool selectionOnly = false)
+        {
+            if (MockFormatMatches.Count > 0) return MockFormatMatches;
+            return new List<FormatMatchItem>
+            {
+                new FormatMatchItem(2, 2, "$B$2", "Sheet1", "Match1", 0xFFFF00, 0x000000, true, false),
+                new FormatMatchItem(5, 3, "$C$5", "Sheet1", "Match2", 0xFFFF00, 0x000000, true, false)
+            };
+        }
+
+        public CellFormatCriteria GetActiveCellFormatCriteria()
+        {
+            return new CellFormatCriteria
+            {
+                MatchFillColor = true,
+                FillColorRgb = 0xFFFF00,
+                MatchBold = true,
+                IsBold = true
+            };
+        }
+
+        public IReadOnlyList<ValidationRuleInfo> GetWorksheetValidationRules(bool selectionOnly = false)
+        {
+            if (MockValidationRules.Count > 0) return MockValidationRules;
+            return new List<ValidationRuleInfo>
+            {
+                new ValidationRuleInfo("Sheet1", "$A$2", 2, 1, "List", "", "High,Medium,Low", "", "High", "", true),
+                new ValidationRuleInfo("Sheet1", "$B$2", 2, 2, "Whole Number", "Between", "1", "100", "150", "Must be 1-100", false)
+            };
+        }
+
+        public void SelectCellsByAddresses(IEnumerable<string> addresses)
+        {
+            SelectedCellAddressesHistory.AddRange(addresses);
+        }
+
+        public void RemoveValidationFromRange(IEnumerable<string> addresses)
+        {
+            RemovedValidationHistory.AddRange(addresses);
+        }
     }
 }

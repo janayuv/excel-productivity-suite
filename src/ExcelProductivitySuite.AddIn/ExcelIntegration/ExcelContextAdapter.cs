@@ -6,6 +6,7 @@ using System.Windows;
 using ExcelProductivitySuite.Core.Abstractions;
 using ExcelProductivitySuite.Engine.Formulas;
 using ExcelProductivitySuite.Engine.Navigation;
+using ExcelProductivitySuite.Engine.Ranges;
 using Excel = Microsoft.Office.Interop.Excel;
 
 namespace ExcelProductivitySuite.AddIn.ExcelIntegration
@@ -2676,6 +2677,541 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
             catch (Exception ex)
             {
                 ShowMessage($"Failed to insert formula: {ex.Message}", "Formula Insertion Error", isError: true);
+            }
+        }
+
+        public IReadOnlyList<object?[,]> GetMultiAreaSelectedValues()
+        {
+            var list = new List<object?[,]>();
+            if (!HasActiveWorksheet) return list;
+
+            try
+            {
+                if (_app.Selection is Excel.Range sel)
+                {
+                    foreach (Excel.Range area in sel.Areas)
+                    {
+                        object?[,] vals = area.Rows.Count == 1 && area.Columns.Count == 1
+                            ? new object?[,] { { area.Value2 } }
+                            : (object?[,])area.Value2;
+
+                        if (vals != null) list.Add(vals);
+                    }
+                }
+            }
+            catch { }
+            return list;
+        }
+
+        public IReadOnlyList<string> GetMultiAreaAddresses()
+        {
+            var list = new List<string>();
+            if (!HasActiveWorksheet) return list;
+
+            try
+            {
+                if (_app.Selection is Excel.Range sel)
+                {
+                    foreach (Excel.Range area in sel.Areas)
+                    {
+                        list.Add(area.get_Address());
+                    }
+                }
+            }
+            catch { }
+            return list;
+        }
+
+        public bool WriteMatrixToAddress(string targetAddress, object?[,] matrix)
+        {
+            if (!HasActiveWorksheet || string.IsNullOrWhiteSpace(targetAddress) || matrix == null) return false;
+
+            try
+            {
+                var ws = (Excel.Worksheet)_app.ActiveSheet;
+                var originCell = ws.Range[targetAddress];
+                int startR = originCell.Row;
+                int startC = originCell.Column;
+
+                int rCount = matrix.GetUpperBound(0) - matrix.GetLowerBound(0) + 1;
+                int cCount = matrix.GetUpperBound(1) - matrix.GetLowerBound(1) + 1;
+
+                using (new ExcelStateScope(_app))
+                {
+                    var destRange = ws.Range[ws.Cells[startR, startC], ws.Cells[startR + rCount - 1, startC + cCount - 1]];
+                    destRange.Value2 = matrix;
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Failed to write data to {targetAddress}: {ex.Message}", "Paste Error", isError: true);
+                return false;
+            }
+        }
+
+        public IReadOnlyList<int> GetVisibleRowIndices(int startRow, int maxRows = 2000)
+        {
+            var list = new List<int>();
+            if (!HasActiveWorksheet || startRow < 1) return list;
+
+            try
+            {
+                var ws = (Excel.Worksheet)_app.ActiveSheet;
+                int maxAvailable = ws.Rows.Count;
+                int r = startRow;
+
+                while (list.Count < maxRows && r <= maxAvailable)
+                {
+                    bool isHidden = false;
+                    try
+                    {
+                        isHidden = (bool)((Excel.Range)ws.Rows[r]).Hidden;
+                    }
+                    catch { }
+
+                    if (!isHidden)
+                    {
+                        list.Add(r);
+                    }
+                    r++;
+                }
+            }
+            catch { }
+            return list;
+        }
+
+        public bool PasteIntoVisibleCells(object?[,] sourceMatrix, int startRow, int startCol)
+        {
+            if (!HasActiveWorksheet || sourceMatrix == null) return false;
+
+            try
+            {
+                int rCount = sourceMatrix.GetUpperBound(0) - sourceMatrix.GetLowerBound(0) + 1;
+                int cCount = sourceMatrix.GetUpperBound(1) - sourceMatrix.GetLowerBound(1) + 1;
+
+                var visibleRows = GetVisibleRowIndices(startRow, rCount);
+                if (visibleRows.Count == 0) return false;
+
+                var mappings = VisibleCellsPasteEngine.ComputeMapping(sourceMatrix, visibleRows);
+                var ws = (Excel.Worksheet)_app.ActiveSheet;
+
+                using (new ExcelStateScope(_app))
+                {
+                    foreach (var m in mappings)
+                    {
+                        var rowMatrix = new object[1, cCount];
+                        for (int c = 0; c < cCount; c++)
+                        {
+                            rowMatrix[0, c] = m.Values[c]!;
+                        }
+
+                        var dest = ws.Range[ws.Cells[m.TargetRowIndex, startCol], ws.Cells[m.TargetRowIndex, startCol + cCount - 1]];
+                        dest.Value2 = rowMatrix;
+                    }
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Failed to paste into visible cells: {ex.Message}", "Paste Error", isError: true);
+                return false;
+            }
+        }
+
+        public IReadOnlyList<MergedAreaInfo> GetMergedAreasInSelection()
+        {
+            var list = new List<MergedAreaInfo>();
+            if (!HasActiveWorksheet) return list;
+
+            try
+            {
+                if (_app.Selection is Excel.Range sel)
+                {
+                    var visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+                    // Quick safeguard: if whole selection is unmerged, exit fast
+                    if (sel.MergeCells is bool b && !b) return list;
+
+                    foreach (Excel.Range cell in sel.Cells)
+                    {
+                        if (cell.MergeCells is bool isMerged && isMerged)
+                        {
+                            var mArea = cell.MergeArea;
+                            string addr = mArea.get_Address();
+                            if (!visited.Contains(addr))
+                            {
+                                visited.Add(addr);
+                                int sRow = mArea.Row;
+                                int sCol = mArea.Column;
+                                int rCount = mArea.Rows.Count;
+                                int cCount = mArea.Columns.Count;
+                                object? val = ((Excel.Range)mArea.Cells[1, 1]).Value2;
+                                list.Add(new MergedAreaInfo(sRow, sCol, rCount, cCount, addr, val));
+                            }
+                        }
+                    }
+                }
+            }
+            catch { }
+            return list;
+        }
+
+        public int UnmergeAndFillSelection()
+        {
+            if (!HasActiveWorksheet) return 0;
+
+            try
+            {
+                var mergedAreas = GetMergedAreasInSelection();
+                if (mergedAreas.Count == 0) return 0;
+
+                var ws = (Excel.Worksheet)_app.ActiveSheet;
+                int totalCellsFilled = 0;
+
+                using (new ExcelStateScope(_app))
+                {
+                    foreach (var area in mergedAreas)
+                    {
+                        object? val = area.Value;
+                        var targetRange = ws.Range[area.Address];
+                        targetRange.UnMerge();
+                        targetRange.Value2 = val;
+                        totalCellsFilled += (area.RowCount * area.ColCount);
+                    }
+                }
+                return totalCellsFilled;
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Failed to unmerge and fill: {ex.Message}", "Unmerge Error", isError: true);
+                return 0;
+            }
+        }
+
+        public bool WriteMatrixToNewWorksheet(string sheetName, object?[,] matrix)
+        {
+            if (!HasActiveWorkbook || matrix == null) return false;
+
+            try
+            {
+                var wb = _app.ActiveWorkbook;
+                var existing = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (Excel.Worksheet w in wb.Worksheets)
+                {
+                    existing.Add(w.Name);
+                }
+
+                string validName = string.IsNullOrWhiteSpace(sheetName) ? "SampledData" : sheetName;
+                if (existing.Contains(validName) || validName.Length > 31)
+                {
+                    string baseName = validName.Length > 25 ? validName.Substring(0, 25) : validName;
+                    int counter = 1;
+                    do
+                    {
+                        validName = $"{baseName}_{counter++}";
+                    } while (existing.Contains(validName));
+                }
+
+                var ws = (Excel.Worksheet)wb.Worksheets.Add();
+                try { ws.Name = validName; } catch { }
+
+                int rCount = matrix.GetUpperBound(0) - matrix.GetLowerBound(0) + 1;
+                int cCount = matrix.GetUpperBound(1) - matrix.GetLowerBound(1) + 1;
+
+                using (new ExcelStateScope(_app))
+                {
+                    var destRange = ws.Range[ws.Cells[1, 1], ws.Cells[rCount, cCount]];
+                    destRange.Value2 = matrix;
+                }
+
+                ws.Activate();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Failed to output to new worksheet: {ex.Message}", "Worksheet Error", isError: true);
+                return false;
+            }
+        }
+
+        public IReadOnlyList<FormatMatchItem> FindCellsByFormat(CellFormatCriteria criteria, bool selectionOnly = false)
+        {
+            var matches = new List<FormatMatchItem>();
+            if (!HasActiveWorksheet || criteria == null) return matches;
+
+            try
+            {
+                var ws = (Excel.Worksheet)_app.ActiveSheet;
+                Excel.Range scanRange = selectionOnly ? (_app.Selection as Excel.Range ?? ws.UsedRange) : ws.UsedRange;
+                if (scanRange == null) return matches;
+
+                string sheetName = ws.Name;
+                int scanned = 0;
+
+                foreach (Excel.Range cell in scanRange.Cells)
+                {
+                    scanned++;
+                    if (scanned > 5000) break; // Performance safeguard
+
+                    bool isMatch = true;
+
+                    // Fill Color check
+                    int? cellFill = null;
+                    try
+                    {
+                        if (cell.Interior.Color != null && !(cell.Interior.ColorIndex is int idx && idx == (int)Excel.Constants.xlNone))
+                        {
+                            cellFill = Convert.ToInt32(cell.Interior.Color);
+                        }
+                    }
+                    catch { }
+
+                    if (criteria.MatchFillColor)
+                    {
+                        if (criteria.FillColorRgb.HasValue && cellFill != criteria.FillColorRgb.Value)
+                            isMatch = false;
+                        else if (!criteria.FillColorRgb.HasValue && cellFill.HasValue)
+                            isMatch = false;
+                    }
+
+                    // Font Color check
+                    int? cellFontColor = null;
+                    try
+                    {
+                        if (cell.Font.Color != null)
+                        {
+                            cellFontColor = Convert.ToInt32(cell.Font.Color);
+                        }
+                    }
+                    catch { }
+
+                    if (isMatch && criteria.MatchFontColor)
+                    {
+                        if (criteria.FontColorRgb.HasValue && cellFontColor != criteria.FontColorRgb.Value)
+                            isMatch = false;
+                    }
+
+                    // Bold check
+                    bool cellBold = false;
+                    try { cellBold = cell.Font.Bold is bool b && b; } catch { }
+
+                    if (isMatch && criteria.MatchBold)
+                    {
+                        if (criteria.IsBold.HasValue && cellBold != criteria.IsBold.Value)
+                            isMatch = false;
+                    }
+
+                    // Italic check
+                    bool cellItalic = false;
+                    try { cellItalic = cell.Font.Italic is bool it && it; } catch { }
+
+                    if (isMatch && criteria.MatchItalic)
+                    {
+                        if (criteria.IsItalic.HasValue && cellItalic != criteria.IsItalic.Value)
+                            isMatch = false;
+                    }
+
+                    if (isMatch)
+                    {
+                        string addr = cell.get_Address();
+                        string val = cell.Value2?.ToString() ?? "";
+                        matches.Add(new FormatMatchItem(cell.Row, cell.Column, addr, sheetName, val, cellFill, cellFontColor, cellBold, cellItalic));
+                    }
+                }
+            }
+            catch { }
+            return matches;
+        }
+
+        public CellFormatCriteria GetActiveCellFormatCriteria()
+        {
+            var criteria = new CellFormatCriteria();
+            if (!HasActiveWorksheet) return criteria;
+
+            try
+            {
+                var cell = _app.ActiveCell;
+                if (cell != null)
+                {
+                    try
+                    {
+                        if (cell.Interior.Color != null && !(cell.Interior.ColorIndex is int idx && idx == (int)Excel.Constants.xlNone))
+                        {
+                            criteria.MatchFillColor = true;
+                            criteria.FillColorRgb = Convert.ToInt32(cell.Interior.Color);
+                        }
+                    }
+                    catch { }
+
+                    try
+                    {
+                        if (cell.Font.Color != null)
+                        {
+                            criteria.MatchFontColor = true;
+                            criteria.FontColorRgb = Convert.ToInt32(cell.Font.Color);
+                        }
+                    }
+                    catch { }
+
+                    try
+                    {
+                        if (cell.Font.Bold is bool b && b)
+                        {
+                            criteria.MatchBold = true;
+                            criteria.IsBold = true;
+                        }
+                    }
+                    catch { }
+
+                    try
+                    {
+                        if (cell.Font.Italic is bool it && it)
+                        {
+                            criteria.MatchItalic = true;
+                            criteria.IsItalic = true;
+                        }
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+            return criteria;
+        }
+
+        public IReadOnlyList<ValidationRuleInfo> GetWorksheetValidationRules(bool selectionOnly = false)
+        {
+            var list = new List<ValidationRuleInfo>();
+            if (!HasActiveWorksheet) return list;
+
+            try
+            {
+                var ws = (Excel.Worksheet)_app.ActiveSheet;
+                Excel.Range baseRange = selectionOnly ? (_app.Selection as Excel.Range ?? ws.UsedRange) : ws.UsedRange;
+                if (baseRange == null) return list;
+
+                Excel.Range? valRange = null;
+                try
+                {
+                    valRange = baseRange.SpecialCells(Excel.XlCellType.xlCellTypeAllValidation);
+                }
+                catch (COMException)
+                {
+                    valRange = null;
+                }
+
+                if (valRange != null)
+                {
+                    string sheetName = ws.Name;
+                    int count = 0;
+
+                    foreach (Excel.Range cell in valRange.Cells)
+                    {
+                        count++;
+                        if (count > 2000) break; // Performance safeguard
+
+                        string typeName = "Custom";
+                        string opName = "";
+                        string f1 = "";
+                        string f2 = "";
+                        string errMsg = "";
+                        bool? isValid = null;
+
+                        try
+                        {
+                            var v = cell.Validation;
+                            int typeVal = v.Type;
+                            typeName = typeVal switch
+                            {
+                                0 => "Any Value",
+                                1 => "Whole Number",
+                                2 => "Decimal",
+                                3 => "List",
+                                4 => "Date",
+                                5 => "Time",
+                                6 => "Text Length",
+                                7 => "Custom",
+                                _ => "Other"
+                            };
+
+                            try { opName = v.Operator.ToString(); } catch { }
+                            try { f1 = v.Formula1 ?? ""; } catch { }
+                            try { f2 = v.Formula2 ?? ""; } catch { }
+                            try { errMsg = v.ErrorMessage ?? ""; } catch { }
+                            try { isValid = v.Value; } catch { }
+                        }
+                        catch { }
+
+                        string valStr = cell.Value2?.ToString() ?? "";
+                        list.Add(new ValidationRuleInfo(sheetName, cell.get_Address(), cell.Row, cell.Column, typeName, opName, f1, f2, valStr, errMsg, isValid));
+                    }
+                }
+            }
+            catch { }
+            return list;
+        }
+
+        public void SelectCellsByAddresses(IEnumerable<string> addresses)
+        {
+            if (!HasActiveWorksheet || addresses == null) return;
+
+            try
+            {
+                var ws = (Excel.Worksheet)_app.ActiveSheet;
+                var list = new List<string>(addresses);
+                if (list.Count == 0) return;
+
+                // Group addresses into chunks to respect Excel's 255-character Range string limit
+                Excel.Range? unionRange = null;
+                var currentChunk = new List<string>();
+                int currentLen = 0;
+
+                foreach (var addr in list)
+                {
+                    if (currentLen + addr.Length + 1 > 240)
+                    {
+                        var chunkRange = ws.Range[string.Join(",", currentChunk)];
+                        unionRange = unionRange == null ? chunkRange : _app.Union(unionRange, chunkRange);
+                        currentChunk.Clear();
+                        currentLen = 0;
+                    }
+                    currentChunk.Add(addr);
+                    currentLen += addr.Length + 1;
+                }
+
+                if (currentChunk.Count > 0)
+                {
+                    var chunkRange = ws.Range[string.Join(",", currentChunk)];
+                    unionRange = unionRange == null ? chunkRange : _app.Union(unionRange, chunkRange);
+                }
+
+                unionRange?.Select();
+            }
+            catch { }
+        }
+
+        public void RemoveValidationFromRange(IEnumerable<string> addresses)
+        {
+            if (!HasActiveWorksheet || addresses == null) return;
+
+            try
+            {
+                var ws = (Excel.Worksheet)_app.ActiveSheet;
+                using (new ExcelStateScope(_app))
+                {
+                    foreach (var addr in addresses)
+                    {
+                        try
+                        {
+                            ws.Range[addr].Validation.Delete();
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Failed to remove validation: {ex.Message}", "Validation Error", isError: true);
             }
         }
     }

@@ -144,6 +144,12 @@ namespace ExcelProductivitySuite.AddIn.Ribbon
                 case "btnBatchNumberFormats": return "CMD_FORMAT_BATCH_NUMBERS";
                 case "btnDateFormatStandards": return "CMD_FORMAT_DATE_STANDARDS";
                 case "btnRangeMath": return "CMD_RANGE_MATH_OPERATIONS";
+                case "btnCopyMultipleRanges": return "CMD_RANGE_COPY_NONCONTIGUOUS";
+                case "btnPasteVisibleOnly": return "CMD_RANGE_PASTE_VISIBLE_ONLY";
+                case "btnUnmergeAndFill": return "CMD_RANGE_UNMERGE_FILL";
+                case "btnRandomSample": return "CMD_RANGE_RANDOM_SAMPLE";
+                case "btnFindByFormat": return "CMD_FIND_BY_FORMAT";
+                case "btnFindByValidation": return "CMD_FIND_BY_VALIDATION";
                 case "btnCopyPageSetup": return "CMD_FORMAT_PAGE_SETUP_COPY";
                 case "btnFreezePanesMulti": return "CMD_FORMAT_FREEZE_PANES";
                 case "btnImportCsv": return "CMD_FILE_IMPORT_CSV";

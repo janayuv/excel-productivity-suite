@@ -1,0 +1,84 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.PasteVisibleOnlyDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Paste into Visible Cells Only - Excel Productivity Suite"
+        Height="520" Width="680"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="👁️" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Paste into Visible Cells Only" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Paste data sequentially into non-hidden rows, skipping all filtered or hidden records" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Target Configuration -->
+        <Border Grid.Row="1" Background="White" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="4" Padding="12" Margin="0,0,0,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="140" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="Target Destination:" VerticalAlignment="Center" FontWeight="SemiBold" />
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Row:" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="{StaticResource TextSecondaryBrush}" />
+                    <TextBox x:Name="TargetRowBox" Text="2" Style="{StaticResource ModernTextBoxStyle}" Width="60" Margin="0,0,12,0" TextChanged="TargetCoordinates_Changed" />
+                    <TextBlock Text="Column:" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="{StaticResource TextSecondaryBrush}" />
+                    <TextBox x:Name="TargetColBox" Text="1" Style="{StaticResource ModernTextBoxStyle}" Width="60" Margin="0,0,12,0" TextChanged="TargetCoordinates_Changed" />
+                    <Button x:Name="UseSelectionBtn" Content="Use Selection Cursor" Style="{StaticResource ModernSecondaryButtonStyle}" Height="26" Click="UseSelectionBtn_Click" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Mapping Preview Grid -->
+        <GroupBox Grid.Row="2" Header="Paste Mapping (Skipping Hidden Rows)" Style="{StaticResource ModernGroupBoxStyle}">
+            <DataGrid x:Name="MappingGrid" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True"
+                      SelectionMode="Single" SelectionUnit="FullRow"
+                      BorderThickness="1" BorderBrush="#D1D5DB" Background="White">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Source Row" Binding="{Binding SourceRowIndex}" Width="100" />
+                    <DataGridTextColumn Header="Target Visible Row" Binding="{Binding TargetRowIndex}" Width="140" FontWeight="Bold" Foreground="{StaticResource BrandPrimaryBrush}" />
+                    <DataGridTextColumn Header="Sample Values" Binding="{Binding ValuesDisplay}" Width="*" FontFamily="Consolas" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </GroupBox>
+
+        <!-- Status -->
+        <TextBlock x:Name="StatusText" Grid.Row="3" Margin="0,8,0,12" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Text="Ready to paste into visible rows." />
+
+        <!-- Actions -->
+        <DockPanel Grid.Row="4" LastChildFill="False">
+            <Button x:Name="CloseBtn" Content="Close" Style="{StaticResource ModernSecondaryButtonStyle}" DockPanel.Dock="Right" Width="80" Click="CloseBtn_Click" Margin="8,0,0,0" />
+            <Button x:Name="PasteBtn" Content="Paste into Visible Cells" Style="{StaticResource ModernPrimaryButtonStyle}" DockPanel.Dock="Right" Width="170" Click="PasteBtn_Click" />
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

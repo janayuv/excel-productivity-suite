@@ -223,6 +223,35 @@
                   screentip="Math Calculations on Range"
                   supertip="Apply arithmetic operations (+, -, *, /, ^, %) directly to cell values in bulk without formula overhead."
                   onAction="OnRibbonButtonClicked" />
+          <separator id="sepRange3" />
+          <button id="btnCopyMultipleRanges"
+                  label="Copy Disjoint"
+                  size="normal"
+                  imageMso="Copy"
+                  screentip="Copy Multiple Ranges"
+                  supertip="Combine non-contiguous selections vertically or side-by-side into a single contiguous output."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnPasteVisibleOnly"
+                  label="Paste Visible"
+                  size="normal"
+                  imageMso="Paste"
+                  screentip="Paste to Visible Cells"
+                  supertip="Paste clipboard contents strictly into visible cells, bypassing filtered and hidden rows."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnUnmergeAndFill"
+                  label="Unmerge &amp; Fill"
+                  size="normal"
+                  imageMso="TableSplitCells"
+                  screentip="Unmerge &amp; Fill Values"
+                  supertip="Unmerge composite cells and automatically populate all constituent cells with the original value."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnRandomSample"
+                  label="Random Sample"
+                  size="normal"
+                  imageMso="FunctionsStatisticalInsertGallery"
+                  screentip="Random Sampling of Records"
+                  supertip="Extract an unbiased random sample of N rows or P% of records from a dataset (with/without replacement, seedable for audits)."
+                  onAction="OnRibbonButtonClicked" />
         </group>
 
         <!-- Group: Find & Select -->
@@ -261,6 +290,21 @@
                   imageMso="ReviewShowOrHideMarkup"
                   screentip="Comment Inspector &amp; Manager"
                   supertip="Inspect, filter, navigate, and audit cell comments across worksheets."
+                  onAction="OnRibbonButtonClicked" />
+          <separator id="sepFindSelect1" />
+          <button id="btnFindByFormat"
+                  label="Find by Format"
+                  size="normal"
+                  imageMso="ColorPicker"
+                  screentip="Find &amp; Select by Format"
+                  supertip="Locate and select cells matching specific background fill color, font color, bold, or italic styles."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnFindByValidation"
+                  label="Validation Rules"
+                  size="normal"
+                  imageMso="DataValidation"
+                  screentip="Find &amp; Audit Data Validation"
+                  supertip="Audit, inspect, filter, and select cells governed by Excel data validation rules."
                   onAction="OnRibbonButtonClicked" />
         </group>
 

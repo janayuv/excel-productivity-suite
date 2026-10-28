@@ -1,0 +1,102 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.CopyMultipleRangesDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Copy Multiple Ranges - Excel Productivity Suite"
+        Height="520" Width="680"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="📋" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Copy Multiple Ranges (Non-Contiguous)" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Combine disjoint Ctrl-selected areas into a single contiguous destination block" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Detected Areas List -->
+        <GroupBox Grid.Row="1" Header="Detected Selection Areas" Style="{StaticResource ModernGroupBoxStyle}">
+            <ListBox x:Name="AreasList" BorderThickness="1" BorderBrush="#D1D5DB" Background="White">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="4,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="80" />
+                                <ColumnDefinition Width="160" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{Binding AreaNumber}" FontWeight="Bold" Foreground="{StaticResource BrandPrimaryBrush}" />
+                            <TextBlock Grid.Column="1" Text="{Binding Address}" FontFamily="Consolas" FontWeight="SemiBold" />
+                            <TextBlock Grid.Column="2" Text="{Binding DimensionsText}" Foreground="{StaticResource TextSecondaryBrush}" />
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </GroupBox>
+
+        <!-- Combine Mode & Target Configuration -->
+        <Border Grid.Row="2" Background="White" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="4" Padding="12" Margin="0,10,0,10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="140" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Mode -->
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Combine Mode:" VerticalAlignment="Center" FontWeight="SemiBold" />
+                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <RadioButton x:Name="StackVertRadio" Content="Stack Vertically (Rows under rows)" IsChecked="True" Margin="0,0,16,0" />
+                    <RadioButton x:Name="SideBySideRadio" Content="Place Side-by-Side (Columns next to columns)" />
+                </StackPanel>
+
+                <!-- Destination -->
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Destination:" VerticalAlignment="Center" FontWeight="SemiBold" Margin="0,10,0,0" />
+                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,10,0,0">
+                    <RadioButton x:Name="DestCellRadio" Content="Active Sheet Cell:" IsChecked="True" VerticalAlignment="Center" Margin="0,0,6,0" />
+                    <TextBox x:Name="DestAddressBox" Text="$E$1" Style="{StaticResource ModernTextBoxStyle}" Width="100" FontFamily="Consolas" Margin="0,0,16,0" />
+                    <RadioButton x:Name="DestNewSheetRadio" Content="New Worksheet" VerticalAlignment="Center" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Status -->
+        <TextBlock x:Name="StatusText" Grid.Row="3" Margin="0,0,0,12" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Text="Ready to copy combined range." />
+
+        <!-- Actions -->
+        <DockPanel Grid.Row="4" LastChildFill="False">
+            <Button x:Name="CloseBtn" Content="Close" Style="{StaticResource ModernSecondaryButtonStyle}" DockPanel.Dock="Right" Width="80" Click="CloseBtn_Click" Margin="8,0,0,0" />
+            <Button x:Name="CopyBtn" Content="Combine &amp; Paste" Style="{StaticResource ModernPrimaryButtonStyle}" DockPanel.Dock="Right" Width="150" Click="CopyBtn_Click" />
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>
