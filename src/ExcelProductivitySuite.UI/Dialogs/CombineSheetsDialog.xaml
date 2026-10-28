@@ -1,0 +1,91 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.CombineSheetsDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Combine Worksheets - Excel Productivity Suite"
+        Height="540" Width="600"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="📑" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Combine Worksheets into One" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Consolidate selected sheets into a unified master worksheet with header controls" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Sheet Selection List -->
+        <GroupBox Grid.Row="1" Header="Select Worksheets to Combine" Style="{StaticResource ModernGroupBoxStyle}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,6">
+                    <Button Content="Select All" Style="{StaticResource ModernSecondaryButtonStyle}" Padding="8,2" Margin="0,0,8,0" Click="SelectAll_Click" />
+                    <Button Content="Deselect All" Style="{StaticResource ModernSecondaryButtonStyle}" Padding="8,2" Click="DeselectAll_Click" />
+                </StackPanel>
+
+                <ListBox x:Name="SheetsListBox" Grid.Row="1" Background="White" BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <CheckBox Content="{Binding Name}" IsChecked="{Binding IsSelected}" Margin="4,2" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+        </GroupBox>
+
+        <!-- Combine Options -->
+        <GroupBox Grid.Row="2" Header="Consolidation Options" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,10,0,10">
+            <StackPanel>
+                <CheckBox x:Name="HasHeadersCheck" Content="Sheets have header row in first line" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" Margin="0,0,0,4" />
+                <CheckBox x:Name="KeepFirstHeaderCheck" Content="Keep only the first sheet's header row (strip duplicate headers)" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" Margin="0,0,0,4" />
+                <CheckBox x:Name="AddSourceColCheck" Content="Insert column with source worksheet name" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" Margin="0,0,0,6" />
+
+                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                    <TextBlock Text="Blank rows between sheets:" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="11" />
+                    <TextBox x:Name="BlankRowsBox" Text="0" Width="40" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,24,0" />
+
+                    <TextBlock Text="Master sheet name:" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="11" />
+                    <TextBox x:Name="MasterSheetNameBox" Text="Combined_Data" Width="140" Style="{StaticResource ModernTextBoxStyle}" />
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Actions -->
+        <DockPanel Grid.Row="3">
+            <TextBlock x:Name="StatusLabel" Text="Ready to combine sheets." VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Cancel" Width="85" Height="28" Margin="0,0,8,0" Style="{StaticResource ModernSecondaryButtonStyle}" Click="Cancel_Click" />
+                <Button Content="Combine Sheets" Width="120" Height="28" Style="{StaticResource ModernPrimaryButtonStyle}" Click="Combine_Click" />
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

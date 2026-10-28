@@ -754,6 +754,118 @@ namespace ExcelProductivitySuite.AddIn.Startup
                 roadmapBatch: "Active"
             ));
 
+            // =========================================================================
+            // Module D: Worksheet and Workbook Management (Batch 5 Expansion)
+            // =========================================================================
+
+            // Combine Worksheets into One
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_SHEET_COMBINE",
+                title: "Combine Worksheets",
+                description: "Consolidate multiple worksheets into a single master sheet with header alignment.",
+                category: CommandCategory.WorksheetAndWorkbook,
+                executeAction: ctx =>
+                {
+                    var dlg = new CombineSheetsDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "combine sheets", "merge worksheets", "stack sheets", "master worksheet", "consolidate sheets" },
+                officeIconName: "TableMergeCells",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "D",
+                roadmapBatch: "Batch 5"
+            ));
+
+            // Combine Workbooks
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_WB_COMBINE_FILES",
+                title: "Combine Workbooks",
+                description: "Batch import worksheets from multiple external Excel files into the active workbook.",
+                category: CommandCategory.WorksheetAndWorkbook,
+                executeAction: ctx =>
+                {
+                    var dlg = new CombineWorkbooksDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "combine workbooks", "merge excel files", "batch combine", "consolidate files" },
+                officeIconName: "FileOpen",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "D",
+                roadmapBatch: "Batch 5"
+            ));
+
+            // Split Workbook into Separate Files
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_WB_SPLIT_FILES",
+                title: "Split Workbook",
+                description: "Save each worksheet as an independent Excel (.xlsx), PDF, or CSV file.",
+                category: CommandCategory.WorksheetAndWorkbook,
+                executeAction: ctx =>
+                {
+                    var dlg = new SplitWorkbookDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "split workbook", "save sheets as files", "separate workbooks", "export sheets", "pdf export" },
+                officeIconName: "TableSplitCells",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "D",
+                roadmapBatch: "Batch 5"
+            ));
+
+            // Sort Worksheet Tabs
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_SHEET_SORT_TABS",
+                title: "Sort Worksheet Tabs",
+                description: "Reorder worksheet tabs alphabetically (A-Z / Z-A), naturally by numbers, or reversed.",
+                category: CommandCategory.WorksheetAndWorkbook,
+                executeAction: ctx =>
+                {
+                    var dlg = new SortSheetTabsDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "sort sheet tabs", "sort worksheets", "alphabetical sheets", "natural sort", "tab order" },
+                officeIconName: "SortAscending",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "D",
+                roadmapBatch: "Batch 5"
+            ));
+
+            // Create Linked Sheet Index (TOC)
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_SHEET_CREATE_INDEX",
+                title: "Create Sheet Index",
+                description: "Generate a Table of Contents worksheet with clickable hyperlinks to every sheet in the workbook.",
+                category: CommandCategory.WorksheetAndWorkbook,
+                executeAction: ctx =>
+                {
+                    var dlg = new CreateSheetIndexDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "sheet index", "table of contents", "linked sheets", "toc generator", "hyperlinks" },
+                officeIconName: "HyperlinkInsert",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "D",
+                roadmapBatch: "Batch 5"
+            ));
+
+            // Delete Blank Worksheets
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_SHEET_DELETE_BLANKS",
+                title: "Delete Blank Sheets",
+                description: "Scan and batch remove completely empty worksheets after confirmation.",
+                category: CommandCategory.WorksheetAndWorkbook,
+                executeAction: ctx =>
+                {
+                    var dlg = new DeleteBlankSheetsDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "delete blank sheets", "remove empty worksheets", "clean empty sheets" },
+                officeIconName: "SheetDelete",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "D",
+                roadmapBatch: "Batch 5"
+            ));
+
             // 20. About Dialog - General / Information
             registry.RegisterCommand(new SuiteCommand(
                 id: "CMD_ABOUT",

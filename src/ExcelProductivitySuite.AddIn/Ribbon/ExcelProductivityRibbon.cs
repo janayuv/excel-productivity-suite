@@ -120,6 +120,12 @@ namespace ExcelProductivitySuite.AddIn.Ribbon
                 case "btnFormulaToValue": return "CMD_FORMULA_TO_VALUE";
                 case "btnSheetVisibility": return "CMD_SHEET_VISIBILITY";
                 case "btnBatchRename": return "CMD_SHEET_BATCH_RENAME";
+                case "btnCombineSheets": return "CMD_SHEET_COMBINE";
+                case "btnSortSheetTabs": return "CMD_SHEET_SORT_TABS";
+                case "btnCreateSheetIndex": return "CMD_SHEET_CREATE_INDEX";
+                case "btnDeleteBlankSheets": return "CMD_SHEET_DELETE_BLANKS";
+                case "btnCombineWorkbooksFiles": return "CMD_WB_COMBINE_FILES";
+                case "btnSplitWorkbookFiles": return "CMD_WB_SPLIT_FILES";
                 case "btnSplitDataToSheets": return "CMD_SPLIT_DATA_TO_SHEETS";
                 case "btnCompareWorkbooks": return "CMD_COMPARE_WORKBOOKS";
                 case "btnAbout": return "CMD_ABOUT";

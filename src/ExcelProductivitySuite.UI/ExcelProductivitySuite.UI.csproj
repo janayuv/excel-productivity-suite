@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Reference Include="System.Windows.Forms" />
     <ProjectReference Include="..\ExcelProductivitySuite.Core\ExcelProductivitySuite.Core.csproj" />
     <ProjectReference Include="..\ExcelProductivitySuite.Engine\ExcelProductivitySuite.Engine.csproj" />
   </ItemGroup>

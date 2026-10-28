@@ -831,5 +831,182 @@ namespace ExcelProductivitySuite.UnitTests
         }
 
         #endregion
+
+        #region Batch 5: Worksheet and Workbook Management Tests
+
+        [TestMethod]
+        public void SheetCombiner_CombinesMultipleSheets_KeepFirstHeaderOnly()
+        {
+            object?[,] sheet1Data = new object?[3, 2]
+            {
+                { "ID", "Name" },
+                { 1,    "Alice" },
+                { 2,    "Bob" }
+            };
+
+            object?[,] sheet2Data = new object?[2, 2]
+            {
+                { "ID", "Name" },
+                { 3,    "Charlie" }
+            };
+
+            var sheets = new List<SheetDataInfo>
+            {
+                new SheetDataInfo("North", sheet1Data),
+                new SheetDataInfo("South", sheet2Data)
+            };
+
+            var options = new SheetCombineOptions
+            {
+                HasHeaders = true,
+                KeepFirstSheetHeaderOnly = true,
+                AddSourceSheetColumn = true,
+                BlankRowsBetweenSheets = 0
+            };
+
+            var combined = SheetCombiner.Combine(sheets, options, out int totalRows);
+
+            Assert.AreEqual(4, totalRows);
+            Assert.AreEqual(4, combined.GetLength(0));
+            Assert.AreEqual(3, combined.GetLength(1)); // Source Col + ID + Name
+
+            // Header row
+            Assert.AreEqual("Source Sheet", combined[0, 0]);
+            Assert.AreEqual("ID", combined[0, 1]);
+            Assert.AreEqual("Name", combined[0, 2]);
+
+            // Sheet 1 data
+            Assert.AreEqual("North", combined[1, 0]);
+            Assert.AreEqual(1, combined[1, 1]);
+            Assert.AreEqual("Alice", combined[1, 2]);
+
+            Assert.AreEqual("North", combined[2, 0]);
+            Assert.AreEqual(2, combined[2, 1]);
+            Assert.AreEqual("Bob", combined[2, 2]);
+
+            // Sheet 2 data (header omitted, row appended)
+            Assert.AreEqual("South", combined[3, 0]);
+            Assert.AreEqual(3, combined[3, 1]);
+            Assert.AreEqual("Charlie", combined[3, 2]);
+        }
+
+        [TestMethod]
+        public void SheetCombiner_BlankRowsSpacing_InsertsConfiguredBlanks()
+        {
+            object?[,] s1 = new object?[2, 1] { { "H" }, { "A" } };
+            object?[,] s2 = new object?[2, 1] { { "H" }, { "B" } };
+
+            var sheets = new List<SheetDataInfo>
+            {
+                new SheetDataInfo("S1", s1),
+                new SheetDataInfo("S2", s2)
+            };
+
+            var options = new SheetCombineOptions
+            {
+                HasHeaders = true,
+                KeepFirstSheetHeaderOnly = true,
+                AddSourceSheetColumn = false,
+                BlankRowsBetweenSheets = 1
+            };
+
+            var combined = SheetCombiner.Combine(sheets, options, out int totalRows);
+
+            // Row 0: H, Row 1: A, Row 2: (blank), Row 3: B -> 4 rows
+            Assert.AreEqual(4, totalRows);
+            Assert.AreEqual("H", combined[0, 0]);
+            Assert.AreEqual("A", combined[1, 0]);
+            Assert.IsNull(combined[2, 0]);
+            Assert.AreEqual("B", combined[3, 0]);
+        }
+
+        [TestMethod]
+        public void SheetTabSorter_NaturalNumeric_CorrectlyOrdersEmbeddedNumbers()
+        {
+            var raw = new List<string> { "Sheet10", "Sheet2", "Sheet1", "Sheet20" };
+            var sorted = SheetTabSorter.Sort(raw, SheetSortMode.NaturalNumeric);
+
+            Assert.AreEqual("Sheet1", sorted[0]);
+            Assert.AreEqual("Sheet2", sorted[1]);
+            Assert.AreEqual("Sheet10", sorted[2]);
+            Assert.AreEqual("Sheet20", sorted[3]);
+        }
+
+        [TestMethod]
+        public void SheetTabSorter_AlphabeticalAndReverse_SortsCorrectly()
+        {
+            var raw = new List<string> { "Zebra", "Apple", "Mango" };
+
+            var asc = SheetTabSorter.Sort(raw, SheetSortMode.AlphabeticalAscending);
+            Assert.AreEqual("Apple", asc[0]);
+            Assert.AreEqual("Mango", asc[1]);
+            Assert.AreEqual("Zebra", asc[2]);
+
+            var desc = SheetTabSorter.Sort(raw, SheetSortMode.AlphabeticalDescending);
+            Assert.AreEqual("Zebra", desc[0]);
+            Assert.AreEqual("Mango", desc[1]);
+            Assert.AreEqual("Apple", desc[2]);
+
+            var rev = SheetTabSorter.Sort(raw, SheetSortMode.ReverseCurrent);
+            Assert.AreEqual("Mango", rev[0]);
+            Assert.AreEqual("Apple", rev[1]);
+            Assert.AreEqual("Zebra", rev[2]);
+        }
+
+        [TestMethod]
+        public void SheetIndexGenerator_GeneratesEntriesAndFormulas()
+        {
+            var sheets = new List<string> { "Summary", "Q1 Sales", "Settings" };
+            var entries = SheetIndexGenerator.GenerateEntries(sheets, "Index");
+
+            Assert.AreEqual(3, entries.Count);
+            Assert.AreEqual(1, entries[0].SequenceNumber);
+            Assert.AreEqual("Summary", entries[0].SheetName);
+            Assert.AreEqual("=HYPERLINK(\"#'Summary'!A1\", \"Go to Summary\")", entries[0].HyperlinkFormula);
+
+            // Back-link formula
+            string backLink = SheetIndexGenerator.CreateBackLinkFormula("Index");
+            Assert.AreEqual("=HYPERLINK(\"#'Index'!A1\", \"[Back to Index]\")", backLink);
+        }
+
+        [TestMethod]
+        public void BlankSheetDetector_IdentifiesBlankMatrix()
+        {
+            // Null matrix is blank
+            Assert.IsTrue(BlankSheetDetector.IsMatrixBlank(null));
+
+            // Matrix containing only nulls and empty whitespace is blank
+            object?[,] emptyMatrix = new object?[2, 2]
+            {
+                { null, "" },
+                { "   ", "\t" }
+            };
+            Assert.IsTrue(BlankSheetDetector.IsMatrixBlank(emptyMatrix));
+
+            // Matrix containing data is NOT blank
+            object?[,] dataMatrix = new object?[2, 2]
+            {
+                { null, null },
+                { null, "Real Content" }
+            };
+            Assert.IsFalse(BlankSheetDetector.IsMatrixBlank(dataMatrix));
+        }
+
+        [TestMethod]
+        public void WorkbookSplitter_ResolvesPatternAndSanitizes()
+        {
+            string sanitized = WorkbookSplitter.SanitizeFileName("Quarter 1/2*Data?");
+            Assert.AreEqual("Quarter 1_2_Data", sanitized);
+
+            string resolved = WorkbookSplitter.ResolveFileName(
+                "[WorkbookName]_[SheetName]",
+                "AnnualReport.xlsx",
+                "Q1:Sales",
+                "pdf");
+
+            Assert.AreEqual("AnnualReport_Q1_Sales.pdf", resolved);
+        }
+
+        #endregion
     }
 }

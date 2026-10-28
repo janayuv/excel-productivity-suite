@@ -202,9 +202,54 @@ namespace ExcelProductivitySuite.Core.Abstractions
         IReadOnlyList<CommentInfo> GetWorksheetComments(string? sheetName = null);
 
         /// <summary>
+        /// Reads range or UsedRange values from a specific worksheet in the active workbook.
+        /// </summary>
+        object?[,]? GetActiveWorksheetRangeValues(string sheetName, string? rangeAddress = null);
+
+        /// <summary>
+        /// Reorders worksheet tabs in the active workbook to match the specified sequence.
+        /// </summary>
+        void ReorderWorksheets(IList<string> orderedSheetNames);
+
+        /// <summary>
+        /// Detects and returns names of all completely blank worksheets in the active workbook.
+        /// </summary>
+        IReadOnlyList<string> GetBlankWorksheetNames();
+
+        /// <summary>
+        /// Deletes the specified worksheets from the active workbook.
+        /// Returns the count of successfully deleted worksheets.
+        /// </summary>
+        int DeleteWorksheets(IEnumerable<string> sheetNames);
+
+        /// <summary>
+        /// Creates an interactive Table of Contents worksheet with clickable hyperlinks to target sheets.
+        /// </summary>
+        bool CreateIndexWorksheet(string indexSheetName, IEnumerable<string> sheetNames, bool includeBackLinks = false);
+
+        /// <summary>
+        /// Splits worksheets of the active workbook into separate individual files.
+        /// Returns the count of files successfully written.
+        /// </summary>
+        int SplitWorksheetsToFiles(IEnumerable<string> sheetNames, string targetDirectory, SplitFileFormat format, string namingPattern);
+
+        /// <summary>
+        /// Imports worksheets from an external workbook file into the active workbook.
+        /// Returns the count of imported sheets.
+        /// </summary>
+        int ImportSheetsFromWorkbook(string filePath, bool firstSheetOnly, bool prefixWithFileName);
+
+        /// <summary>
         /// Shows an informational, warning, or error alert dialog in Excel.
         /// </summary>
         void ShowMessage(string message, string title, bool isError = false);
+    }
+
+    public enum SplitFileFormat
+    {
+        ExcelWorkbook,
+        Pdf,
+        Csv
     }
 
     public class CommentInfo

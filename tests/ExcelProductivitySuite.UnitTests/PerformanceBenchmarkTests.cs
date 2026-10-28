@@ -487,5 +487,44 @@ namespace ExcelProductivitySuite.UnitTests
             Assert.AreEqual(100000, matches.Count);
             Assert.IsTrue(sw.ElapsedMilliseconds < 500, $"MultiSheetFindReplace benchmark took {sw.ElapsedMilliseconds} ms, target is < 500 ms");
         }
+
+        [TestMethod]
+        public void Benchmark_SheetCombiner_100K_Cells_CompletesUnder500ms()
+        {
+            int sheetCount = 5;
+            int rowsPerSheet = 2000;
+            int cols = 10;
+
+            var sheets = new List<SheetDataInfo>();
+            for (int s = 0; s < sheetCount; s++)
+            {
+                object?[,] data = new object?[rowsPerSheet, cols];
+                for (int r = 0; r < rowsPerSheet; r++)
+                {
+                    for (int c = 0; c < cols; c++)
+                    {
+                        data[r, c] = (r == 0) ? $"Header_{c}" : $"Data_{s}_{r}_{c}";
+                    }
+                }
+                sheets.Add(new SheetDataInfo($"Sheet_{s}", data));
+            }
+
+            var options = new SheetCombineOptions
+            {
+                HasHeaders = true,
+                KeepFirstSheetHeaderOnly = true,
+                AddSourceSheetColumn = true,
+                BlankRowsBetweenSheets = 0
+            };
+
+            var sw = Stopwatch.StartNew();
+            var combined = SheetCombiner.Combine(sheets, options, out int totalRows);
+            sw.Stop();
+
+            // 1 header row + 5 * 1999 data rows = 9996 rows x 11 cols (~110,000 cells)
+            Assert.IsTrue(totalRows > 9900);
+            Assert.AreEqual(11, combined.GetLength(1));
+            Assert.IsTrue(sw.ElapsedMilliseconds < 500, $"SheetCombiner benchmark took {sw.ElapsedMilliseconds} ms, target is < 500 ms");
+        }
     }
 }

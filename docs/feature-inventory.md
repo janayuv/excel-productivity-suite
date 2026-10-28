@@ -4,7 +4,7 @@
 **Host Application:** Microsoft Excel 2016 / 2019 / 2021 / Microsoft 365 (32-bit & 64-bit Windows Desktop)  
 **Framework:** .NET Framework 4.8 & Visual Studio Tools for Office (VSTO)  
 **UI Subsystem:** Windows Presentation Foundation (WPF) / Modern Fluent Office Palette  
-**Version:** 4.4.0 (Batch 4 Find, Select, Duplicate Detection & Comparison Milestone)  
+**Version:** 4.5.0 (Batch 5 Worksheet & Workbook Management Milestone)  
 **Last Audit Date:** 2026-10-28  
 
 ---
@@ -15,8 +15,8 @@ Following the mandatory codebase audit, the **Excel Productivity Suite** feature
 
 The current implementation comprises:
 - **Total Cataloged Capabilities:** 200+ features planned across 12 modules
-- **Active & Verified Tools:** 41 commands (39 core productivity utilities + 2 suite navigation/information utilities)
-- **Unit Test Coverage:** 145 passing automated unit & performance tests (100% pass rate in 1.0s)
+- **Active & Verified Tools:** 47 commands (45 core productivity utilities + 2 suite navigation/information utilities)
+- **Unit Test Coverage:** 153 passing automated unit & performance tests (100% pass rate in 1.0s)
 - **Real Excel COM Integration Tests:** 18 passing out-of-process Excel 2016+ scenarios (100% pass rate in 1.25s)
 - **Searchable Quick Tool Launcher (SuperSearch):** Integrated multi-category search, active/roadmap status filtering, module badges, and keyword scoring (`Ctrl+Shift+P` / KeyTip: `TL`)
 
@@ -148,16 +148,16 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 - [x] `CMD_SHEET_BATCH_RENAME`: Batch rename sheets with prefix, suffix, and sequence numbers. *(Active)*
 - [x] `CMD_SPLIT_DATA_TO_SHEETS`: Distribute rows into separate sheets based on key column. *(Active)*
 - [x] `CMD_COMPARE_WORKBOOKS`: Cross-workbook structural and cell difference auditing. *(Active)*
-- [ ] `CMD_SHEET_COMBINE`: Consolidate multiple worksheets into a single master worksheet. *(Planned - Batch 5)*
-- [ ] `CMD_WB_COMBINE_FILES`: Combine worksheets from multiple external workbooks. *(Planned - Batch 5)*
-- [ ] `CMD_WB_SPLIT_FILES`: Save each worksheet in the active workbook as a separate file. *(Planned - Batch 5)*
-- [ ] `CMD_SHEET_SORT_TABS`: Sort worksheet tabs alphabetically (A-Z / Z-A) or by color. *(Planned - Batch 5)*
-- [ ] `CMD_SHEET_CREATE_INDEX`: Create table of contents sheet with hyperlinks to all tabs. *(Planned - Batch 5)*
-- [ ] `CMD_SHEET_DELETE_BLANKS`: Scan and delete all blank worksheets after confirmation. *(Planned - Batch 5)*
-- [ ] `CMD_SHEET_COPY_PAGE_SETUP`: Copy margins, orientation, and scaling across sheets. *(Planned - Batch 5)*
-- [ ] `CMD_SHEET_FREEZE_MULTI`: Synchronize Freeze Panes across all worksheets simultaneously. *(Planned - Batch 5)*
-- [ ] `CMD_SHEET_SEQUENCE_NAMES`: Create a sequence of new worksheets with custom naming pattern. *(Planned - Batch 5)*
-- [ ] `CMD_SHEET_CONSOLIDATE`: Aggregate values across identical sheets using standard math functions. *(Planned - Batch 5)*
+- [x] `CMD_SHEET_COMBINE`: Consolidate multiple selected worksheets into a single master worksheet with header options. *(Active - Batch 5)*
+- [x] `CMD_WB_COMBINE_FILES`: Batch import worksheets from multiple external Excel files into one central workbook. *(Active - Batch 5)*
+- [x] `CMD_WB_SPLIT_FILES`: Save each worksheet as an independent Excel (.xlsx), PDF, or CSV file. *(Active - Batch 5)*
+- [x] `CMD_SHEET_SORT_TABS`: Reorder worksheet tabs alphabetically (A-Z / Z-A), numerically, or reversed. *(Active - Batch 5)*
+- [x] `CMD_SHEET_CREATE_INDEX`: Generate Table of Contents sheet with clickable hyperlinks to all tabs. *(Active - Batch 5)*
+- [x] `CMD_SHEET_DELETE_BLANKS`: Scan and delete completely empty worksheets after confirmation. *(Active - Batch 5)*
+- [ ] `CMD_SHEET_COPY_PAGE_SETUP`: Copy margins, orientation, and scaling across sheets. *(Planned - Batch 5+)*
+- [ ] `CMD_SHEET_FREEZE_MULTI`: Synchronize Freeze Panes across all worksheets simultaneously. *(Planned - Batch 5+)*
+- [ ] `CMD_SHEET_SEQUENCE_NAMES`: Create a sequence of new worksheets with custom naming pattern. *(Planned - Batch 5+)*
+- [ ] `CMD_SHEET_CONSOLIDATE`: Aggregate values across identical sheets using standard math functions. *(Planned - Batch 5+)*
 - [ ] `CMD_WB_OPEN_FOLDER`: Open Windows File Explorer at active workbook's containing folder. *(Planned - Batch 5)*
 - [ ] `CMD_WB_COPY_PATH`: Copy full workbook file path to clipboard. *(Planned - Batch 5)*
 - [ ] `CMD_WB_PROPERTIES`: Inspect detailed workbook properties, sheet count, author, and size. *(Planned - Batch 5)*
@@ -259,8 +259,8 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 | **Batch 2** | **Core Text Tools Expansion** | Reverse Text, Combine Cells, Clean Characters, Convert Numbers/Dates, Remove by Position, Spell Number | **COMPLETED** |
 | **Batch 3** | **Range & Cell Operations** | Transpose, Flip H/V, Swap Ranges, Non-Contiguous Copy, Paste Visible Only, Merge Keep Data, Sign/Round | **COMPLETED** |
 | **Batch 4** | **Find, Select, Duplicate Detection & Comparison** | Advanced Duplicate Finder, Select Duplicates, Multi-Sheet Find/Replace, Max/Min, Row Diff, Comments | **COMPLETED** |
-| **Batch 5** | **Worksheet & Workbook Management** | Combine Sheets, Combine Workbooks, Split Workbook to Files, Sort Tabs, Sheet Index TOC, Delete Blanks | **Next Up** |
-| **Batch 6** | **Filtering, Data Validation & Table Merge** | Advanced Multi-Sort, Color Filter/Count, Table Merge/Upsert, Dropdown Lists, Email/Phone Validation | Planned |
+| **Batch 5** | **Worksheet & Workbook Management** | Combine Sheets, Combine Workbooks, Split Workbook to Files, Sort Tabs, Sheet Index TOC, Delete Blanks | **COMPLETED** |
+| **Batch 6** | **Filtering, Data Validation & Table Merge** | Advanced Multi-Sort, Color Filter/Count, Table Merge/Upsert, Dropdown Lists, Email/Phone Validation | **Next Up** |
 | **Batch 7** | **Formatting, Formulas & Printing** | Reference Conversion (Abs/Rel), Exact Copy, Locate Errors, Math Operations, Number/Date Formats, Page Setup | Planned |
 | **Batch 8** | **Import, Export & Picture Utilities** | CSV Import/Export, PDF Export, Batch Format Convert, Folder Listing, Cell Pictures, Chart Image Export | Planned |
 | **Batch 9** | **Protection, Recovery, Charts & Analysis** | Batch Protect/Unprotect, Workbook Snapshots, Gantt/Waterfall Charts, Quick Statistics Dashboard | Planned |

@@ -888,6 +888,428 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
             }
         }
 
+        public object?[,]? GetActiveWorksheetRangeValues(string sheetName, string? rangeAddress = null)
+        {
+            try
+            {
+                if (_app.ActiveWorkbook == null) return null;
+                Excel.Worksheet? ws = null;
+                foreach (Excel.Worksheet s in _app.ActiveWorkbook.Worksheets)
+                {
+                    if (string.Equals(s.Name, sheetName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        ws = s;
+                        break;
+                    }
+                }
+
+                if (ws == null) return null;
+
+                Excel.Range target = !string.IsNullOrWhiteSpace(rangeAddress)
+                    ? ws.Range[rangeAddress]
+                    : ws.UsedRange;
+
+                if (target == null) return null;
+
+                object raw = target.Value2;
+                if (raw is object[,] matrix)
+                {
+                    return (object?[,])matrix;
+                }
+
+                object?[,] single = new object?[1, 1];
+                single[0, 0] = raw;
+                return single;
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Unable to read range from worksheet '{sheetName}': {ex.Message}", "Read Error", isError: true);
+                return null;
+            }
+        }
+
+        public void ReorderWorksheets(IList<string> orderedSheetNames)
+        {
+            if (orderedSheetNames == null || orderedSheetNames.Count == 0) return;
+            if (IsWorkbookProtected)
+            {
+                ShowMessage("The active workbook structure is protected. Cannot reorder worksheets.", "Workbook Protected", isError: true);
+                return;
+            }
+
+            try
+            {
+                if (_app.ActiveWorkbook == null) return;
+                using (new ExcelStateScope(_app))
+                {
+                    for (int i = 0; i < orderedSheetNames.Count; i++)
+                    {
+                        try
+                        {
+                            var ws = (Excel.Worksheet)_app.ActiveWorkbook.Worksheets[orderedSheetNames[i]];
+                            if (ws != null)
+                            {
+                                ws.Move(After: _app.ActiveWorkbook.Worksheets[_app.ActiveWorkbook.Worksheets.Count]);
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Error reordering worksheets: {ex.Message}", "Worksheet Error", isError: true);
+            }
+        }
+
+        public IReadOnlyList<string> GetBlankWorksheetNames()
+        {
+            var blankSheets = new List<string>();
+            try
+            {
+                if (_app.ActiveWorkbook == null) return blankSheets;
+                foreach (Excel.Worksheet ws in _app.ActiveWorkbook.Worksheets)
+                {
+                    bool isBlank = true;
+                    try
+                    {
+                        Excel.Range used = ws.UsedRange;
+                        if (used != null)
+                        {
+                            object val = used.Value2;
+                            if (val is object[,] matrix)
+                            {
+                                int rStart = matrix.GetLowerBound(0);
+                                int rEnd = matrix.GetUpperBound(0);
+                                int cStart = matrix.GetLowerBound(1);
+                                int cEnd = matrix.GetUpperBound(1);
+
+                                for (int r = rStart; r <= rEnd && isBlank; r++)
+                                {
+                                    for (int c = cStart; c <= cEnd; c++)
+                                    {
+                                        var cellVal = matrix[r, c];
+                                        if (cellVal != null && !string.IsNullOrWhiteSpace(cellVal.ToString()))
+                                        {
+                                            isBlank = false;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            else if (val != null && !string.IsNullOrWhiteSpace(val.ToString()))
+                            {
+                                isBlank = false;
+                            }
+                        }
+
+                        if (isBlank && ws.Shapes != null && ws.Shapes.Count > 0)
+                        {
+                            isBlank = false;
+                        }
+                    }
+                    catch
+                    {
+                        isBlank = false;
+                    }
+
+                    if (isBlank)
+                    {
+                        blankSheets.Add(ws.Name);
+                    }
+                }
+            }
+            catch { }
+            return blankSheets;
+        }
+
+        public int DeleteWorksheets(IEnumerable<string> sheetNames)
+        {
+            if (sheetNames == null) return 0;
+            if (IsWorkbookProtected)
+            {
+                ShowMessage("The active workbook structure is protected. Cannot delete worksheets.", "Workbook Protected", isError: true);
+                return 0;
+            }
+
+            int deletedCount = 0;
+            try
+            {
+                if (_app.ActiveWorkbook == null) return 0;
+
+                var toDelete = new HashSet<string>(sheetNames, StringComparer.OrdinalIgnoreCase);
+                int totalSheets = _app.ActiveWorkbook.Worksheets.Count;
+                if (toDelete.Count >= totalSheets)
+                {
+                    ShowMessage("Cannot delete all worksheets in the workbook. At least one sheet must remain.", "Delete Canceled", isError: true);
+                    return 0;
+                }
+
+                using (new ExcelStateScope(_app))
+                {
+                    _app.DisplayAlerts = false;
+                    foreach (string sName in toDelete)
+                    {
+                        try
+                        {
+                            var ws = (Excel.Worksheet)_app.ActiveWorkbook.Worksheets[sName];
+                            if (ws != null)
+                            {
+                                ws.Delete();
+                                deletedCount++;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Error deleting worksheets: {ex.Message}", "Delete Error", isError: true);
+            }
+            return deletedCount;
+        }
+
+        public bool CreateIndexWorksheet(string indexSheetName, IEnumerable<string> sheetNames, bool includeBackLinks = false)
+        {
+            if (sheetNames == null) return false;
+            if (IsWorkbookProtected)
+            {
+                ShowMessage("The active workbook structure is protected. Cannot create Table of Contents worksheet.", "Workbook Protected", isError: true);
+                return false;
+            }
+
+            try
+            {
+                if (_app.ActiveWorkbook == null) return false;
+
+                using (new ExcelStateScope(_app))
+                {
+                    var existing = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    foreach (Excel.Worksheet w in _app.ActiveWorkbook.Worksheets)
+                    {
+                        existing.Add(w.Name);
+                    }
+
+                    string validName = indexSheetName;
+                    if (existing.Contains(validName) || validName.Length > 31)
+                    {
+                        string baseName = validName.Length > 25 ? validName.Substring(0, 25) : validName;
+                        int counter = 1;
+                        do
+                        {
+                            validName = $"{baseName}_{counter++}";
+                        } while (existing.Contains(validName));
+                    }
+
+                    var firstSheet = (Excel.Worksheet)_app.ActiveWorkbook.Worksheets[1];
+                    Excel.Worksheet indexSheet = (Excel.Worksheet)_app.ActiveWorkbook.Worksheets.Add(Before: firstSheet);
+                    indexSheet.Name = validName;
+
+                    indexSheet.Cells[1, 1].Value2 = "#";
+                    indexSheet.Cells[1, 2].Value2 = "Worksheet Name";
+                    indexSheet.Cells[1, 3].Value2 = "Status";
+                    indexSheet.Cells[1, 4].Value2 = "Quick Link";
+
+                    Excel.Range headerRange = indexSheet.Range["A1", "D1"];
+                    headerRange.Font.Bold = true;
+                    headerRange.Interior.Color = 0xE8F5E9;
+
+                    int rowIdx = 2;
+                    int seq = 1;
+                    foreach (string sName in sheetNames)
+                    {
+                        if (string.Equals(sName, validName, StringComparison.OrdinalIgnoreCase)) continue;
+
+                        try
+                        {
+                            var targetWs = (Excel.Worksheet)_app.ActiveWorkbook.Worksheets[sName];
+                            string status = targetWs.Visible == Excel.XlSheetVisibility.xlSheetVisible ? "Visible" : "Hidden";
+                            string safeTargetName = sName.Replace("'", "''");
+
+                            indexSheet.Cells[rowIdx, 1].Value2 = seq++;
+                            indexSheet.Cells[rowIdx, 2].Value2 = sName;
+                            indexSheet.Cells[rowIdx, 3].Value2 = status;
+
+                            Excel.Range linkCell = indexSheet.Cells[rowIdx, 4];
+                            linkCell.Formula = $"=HYPERLINK(\"#'{safeTargetName}'!A1\", \"Go to {safeTargetName}\")";
+
+                            if (includeBackLinks && targetWs.Visible == Excel.XlSheetVisibility.xlSheetVisible && !targetWs.ProtectContents)
+                            {
+                                try
+                                {
+                                    Excel.Range backCell = targetWs.Range["Z1"];
+                                    if (backCell.Value2 == null)
+                                    {
+                                        backCell.Formula = $"=HYPERLINK(\"#'{validName}'!A1\", \"[Back to Index]\")";
+                                    }
+                                }
+                                catch { }
+                            }
+
+                            rowIdx++;
+                        }
+                        catch { }
+                    }
+
+                    indexSheet.Columns.AutoFit();
+                    indexSheet.Activate();
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Error creating Table of Contents: {ex.Message}", "TOC Error", isError: true);
+                return false;
+            }
+        }
+
+        public int SplitWorksheetsToFiles(IEnumerable<string> sheetNames, string targetDirectory, SplitFileFormat format, string namingPattern)
+        {
+            if (sheetNames == null || string.IsNullOrWhiteSpace(targetDirectory)) return 0;
+            if (!System.IO.Directory.Exists(targetDirectory))
+            {
+                try { System.IO.Directory.CreateDirectory(targetDirectory); }
+                catch (Exception ex)
+                {
+                    ShowMessage($"Cannot create output directory: {ex.Message}", "Directory Error", isError: true);
+                    return 0;
+                }
+            }
+
+            int exportedCount = 0;
+            try
+            {
+                if (_app.ActiveWorkbook == null) return 0;
+                string wbName = System.IO.Path.GetFileNameWithoutExtension(_app.ActiveWorkbook.Name);
+
+                using (new ExcelStateScope(_app))
+                {
+                    _app.DisplayAlerts = false;
+                    foreach (string sName in sheetNames)
+                    {
+                        try
+                        {
+                            var ws = (Excel.Worksheet)_app.ActiveWorkbook.Worksheets[sName];
+                            if (ws == null) continue;
+
+                            string sanitizedSheetName = string.Join("_", sName.Split(System.IO.Path.GetInvalidFileNameChars()));
+                            string fileBaseName = namingPattern
+                                .Replace("[SheetName]", sanitizedSheetName)
+                                .Replace("[WorkbookName]", wbName);
+
+                            if (string.IsNullOrWhiteSpace(fileBaseName)) fileBaseName = sanitizedSheetName;
+
+                            switch (format)
+                            {
+                                case SplitFileFormat.ExcelWorkbook:
+                                    string xlsxPath = System.IO.Path.Combine(targetDirectory, $"{fileBaseName}.xlsx");
+                                    ws.Copy();
+                                    var newWb = _app.ActiveWorkbook;
+                                    newWb.SaveAs(xlsxPath, Excel.XlFileFormat.xlOpenXMLWorkbook);
+                                    newWb.Close(false);
+                                    exportedCount++;
+                                    break;
+
+                                case SplitFileFormat.Pdf:
+                                    string pdfPath = System.IO.Path.Combine(targetDirectory, $"{fileBaseName}.pdf");
+                                    ws.ExportAsFixedFormat(Excel.XlFixedFormatType.xlTypePDF, pdfPath);
+                                    exportedCount++;
+                                    break;
+
+                                case SplitFileFormat.Csv:
+                                    string csvPath = System.IO.Path.Combine(targetDirectory, $"{fileBaseName}.csv");
+                                    ws.Copy();
+                                    var csvWb = _app.ActiveWorkbook;
+                                    csvWb.SaveAs(csvPath, Excel.XlFileFormat.xlCSV);
+                                    csvWb.Close(false);
+                                    exportedCount++;
+                                    break;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Error splitting worksheets: {ex.Message}", "Split Error", isError: true);
+            }
+
+            return exportedCount;
+        }
+
+        public int ImportSheetsFromWorkbook(string filePath, bool firstSheetOnly, bool prefixWithFileName)
+        {
+            if (string.IsNullOrWhiteSpace(filePath) || !System.IO.File.Exists(filePath))
+            {
+                ShowMessage($"File does not exist: {filePath}", "File Not Found", isError: true);
+                return 0;
+            }
+
+            if (IsWorkbookProtected)
+            {
+                ShowMessage("The active workbook structure is protected. Cannot import worksheets.", "Workbook Protected", isError: true);
+                return 0;
+            }
+
+            int importedCount = 0;
+            Excel.Workbook? srcWb = null;
+            try
+            {
+                if (_app.ActiveWorkbook == null) return 0;
+                Excel.Workbook targetWb = _app.ActiveWorkbook;
+                string filePrefix = System.IO.Path.GetFileNameWithoutExtension(filePath);
+
+                using (new ExcelStateScope(_app))
+                {
+                    _app.DisplayAlerts = false;
+                    srcWb = _app.Workbooks.Open(filePath, ReadOnly: true);
+                    if (srcWb != null)
+                    {
+                        int sheetCount = srcWb.Worksheets.Count;
+                        int limit = firstSheetOnly ? 1 : sheetCount;
+
+                        for (int i = 1; i <= limit; i++)
+                        {
+                            try
+                            {
+                                var srcSheet = (Excel.Worksheet)srcWb.Worksheets[i];
+                                string originalName = srcSheet.Name;
+                                srcSheet.Copy(After: targetWb.Worksheets[targetWb.Worksheets.Count]);
+
+                                var copiedSheet = (Excel.Worksheet)targetWb.Worksheets[targetWb.Worksheets.Count];
+                                if (prefixWithFileName)
+                                {
+                                    string candidate = $"{filePrefix}_{originalName}";
+                                    if (candidate.Length > 31) candidate = candidate.Substring(0, 31);
+                                    try { copiedSheet.Name = candidate; } catch { }
+                                }
+
+                                importedCount++;
+                            }
+                            catch { }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Error importing sheets from '{System.IO.Path.GetFileName(filePath)}': {ex.Message}", "Import Error", isError: true);
+            }
+            finally
+            {
+                if (srcWb != null)
+                {
+                    try { srcWb.Close(false); } catch { }
+                    try { System.Runtime.InteropServices.Marshal.FinalReleaseComObject(srcWb); } catch { }
+                    srcWb = null;
+                }
+            }
+
+            return importedCount;
+        }
+
         public void ShowMessage(string message, string title, bool isError = false)
         {
             MessageBox.Show(message, title, MessageBoxButton.OK, isError ? MessageBoxImage.Error : MessageBoxImage.Information);

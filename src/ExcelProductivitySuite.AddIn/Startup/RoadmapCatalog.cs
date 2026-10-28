@@ -74,38 +74,8 @@ namespace ExcelProductivitySuite.AddIn.Startup
                 new[] { "find validation", "cells with dropdowns", "validation cells", "inspect validation" }, "DataValidation");
 
             // =========================================================================
-            // Module D: Worksheet and Workbook Management (Batch 5)
+            // Module D: Worksheet and Workbook Management (Remaining Future Roadmap)
             // =========================================================================
-            AddPlanned(registry, "CMD_SHEET_COMBINE", "Combine Worksheets into One",
-                "Merge multiple worksheets into a single consolidated master sheet with header options.",
-                CommandCategory.WorksheetAndWorkbook, "D", "Batch 5",
-                new[] { "combine sheets", "merge worksheets", "stack sheets", "master worksheet", "consolidate sheets" }, "TableMergeCells");
-
-            AddPlanned(registry, "CMD_WB_COMBINE_FILES", "Combine Workbooks",
-                "Combine sheets from multiple external Excel workbooks into one central workbook.",
-                CommandCategory.WorksheetAndWorkbook, "D", "Batch 5",
-                new[] { "combine workbooks", "merge excel files", "batch combine", "consolidate files" }, "FileOpen");
-
-            AddPlanned(registry, "CMD_WB_SPLIT_FILES", "Split Workbook into Separate Files",
-                "Split each worksheet of the active workbook into an independent Excel file (.xlsx, .pdf, .csv).",
-                CommandCategory.WorksheetAndWorkbook, "D", "Batch 5",
-                new[] { "split workbook", "save sheets as files", "separate workbooks", "export sheets" }, "TableSplitCells");
-
-            AddPlanned(registry, "CMD_SHEET_SORT_TABS", "Sort Worksheet Tabs",
-                "Sort sheet tabs alphabetically (A-Z or Z-A), numerically, or by tab color.",
-                CommandCategory.WorksheetAndWorkbook, "D", "Batch 5",
-                new[] { "sort sheet tabs", "sort worksheets", "alphabetical sheets", "tab order", "reorder sheets" }, "SortAscending");
-
-            AddPlanned(registry, "CMD_SHEET_CREATE_INDEX", "Create Linked Sheet Index (TOC)",
-                "Generate a table of contents worksheet with clickable hyperlinks to every sheet in the workbook.",
-                CommandCategory.WorksheetAndWorkbook, "D", "Batch 5",
-                new[] { "sheet index", "table of contents", "linked sheets", "toc generator", "worksheet directory" }, "HyperlinkInsert");
-
-            AddPlanned(registry, "CMD_SHEET_DELETE_BLANKS", "Delete Blank Worksheets",
-                "Identify and delete all completely empty worksheets in the active workbook with confirmation.",
-                CommandCategory.WorksheetAndWorkbook, "D", "Batch 5",
-                new[] { "delete blank sheets", "remove empty worksheets", "clean empty sheets" }, "SheetDelete");
-
             AddPlanned(registry, "CMD_SHEET_COPY_PAGE_SETUP", "Copy Page Setup Across Sheets",
                 "Copy margins, orientation, headers/footers, and print scaling from active sheet to other sheets.",
                 CommandCategory.WorksheetAndWorkbook, "D", "Batch 5",

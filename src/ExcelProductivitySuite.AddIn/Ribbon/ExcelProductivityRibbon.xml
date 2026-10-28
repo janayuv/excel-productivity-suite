@@ -295,20 +295,67 @@
       <tab id="tabWorkbookAndSheets" label="Workbook &amp; Sheets">
         
         <group id="grpSheets" label="Worksheet Tools">
+          <button id="btnCombineSheets"
+                  label="Combine Sheets"
+                  size="large"
+                  imageMso="TableMergeCells"
+                  screentip="Combine Multiple Worksheets into One"
+                  supertip="Consolidate selected worksheets into a single master sheet with header alignment."
+                  onAction="OnRibbonButtonClicked" />
           <button id="btnSheetVisibility"
                   label="Sheet Visibility"
-                  size="large"
+                  size="normal"
                   imageMso="ViewNormalViewExcel"
                   screentip="Worksheet Visibility Manager"
                   supertip="Manage Visible, Hidden, and VeryHidden worksheet states in bulk."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnBatchRename"
                   label="Rename Sheets"
-                  size="large"
+                  size="normal"
                   imageMso="SheetRename"
                   screentip="Batch Rename Worksheets"
                   supertip="Rename multiple sheets simultaneously with prefix, suffix, and sequence rules."
                   onAction="OnRibbonButtonClicked" />
+          <separator id="sepSheets1" />
+          <button id="btnSortSheetTabs"
+                  label="Sort Tabs"
+                  size="normal"
+                  imageMso="SortAscending"
+                  screentip="Sort Worksheet Tabs"
+                  supertip="Reorder worksheet tabs alphabetically (A-Z / Z-A), numerically, or reversed."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnCreateSheetIndex"
+                  label="Sheet Index TOC"
+                  size="normal"
+                  imageMso="HyperlinkInsert"
+                  screentip="Create Linked Sheet Index"
+                  supertip="Generate a Table of Contents worksheet with clickable hyperlinks to every sheet."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnDeleteBlankSheets"
+                  label="Delete Blanks"
+                  size="normal"
+                  imageMso="SheetDelete"
+                  screentip="Delete Blank Worksheets"
+                  supertip="Scan and batch remove completely empty worksheets after confirmation."
+                  onAction="OnRibbonButtonClicked" />
+        </group>
+
+        <group id="grpWorkbooks" label="Workbook Operations">
+          <button id="btnCombineWorkbooksFiles"
+                  label="Combine Files"
+                  size="large"
+                  imageMso="FileOpen"
+                  screentip="Combine Workbooks into One"
+                  supertip="Batch import worksheets from multiple external Excel files into the active workbook."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnSplitWorkbookFiles"
+                  label="Split Files"
+                  size="large"
+                  imageMso="TableSplitCells"
+                  screentip="Split Workbook into Separate Files"
+                  supertip="Save each worksheet as an independent Excel (.xlsx), PDF, or CSV file."
+                  onAction="OnRibbonButtonClicked" />
+          <separator id="sepWb1" />
           <button id="btnSplitDataToSheets"
                   label="Split to Sheets"
                   size="normal"

@@ -180,6 +180,53 @@ namespace ExcelProductivitySuite.UnitTests
 
         public object?[,]? GetWorkbookRangeValues(string workbookName, string sheetName, string? rangeAddress = null) => CurrentValues;
 
+        public Dictionary<string, object?[,]> SheetDataMap { get; } = new();
+        public List<string> BlankSheets { get; } = new();
+
+        public object?[,]? GetActiveWorksheetRangeValues(string sheetName, string? rangeAddress = null)
+        {
+            if (SheetDataMap.TryGetValue(sheetName, out var data)) return data;
+            return CurrentValues;
+        }
+
+        public void ReorderWorksheets(IList<string> orderedSheetNames)
+        {
+            Sheets.Clear();
+            Sheets.AddRange(orderedSheetNames);
+        }
+
+        public IReadOnlyList<string> GetBlankWorksheetNames() => BlankSheets;
+
+        public int DeleteWorksheets(IEnumerable<string> sheetNames)
+        {
+            int deleted = 0;
+            foreach (var s in sheetNames)
+            {
+                if (Sheets.Remove(s)) deleted++;
+            }
+            return deleted;
+        }
+
+        public bool CreateIndexWorksheet(string indexSheetName, IEnumerable<string> sheetNames, bool includeBackLinks = false)
+        {
+            Sheets.Insert(0, indexSheetName);
+            return true;
+        }
+
+        public int SplitWorksheetsToFiles(IEnumerable<string> sheetNames, string targetDirectory, SplitFileFormat format, string namingPattern)
+        {
+            int count = 0;
+            foreach (var s in sheetNames) count++;
+            return count;
+        }
+
+        public int ImportSheetsFromWorkbook(string filePath, bool firstSheetOnly, bool prefixWithFileName)
+        {
+            string importedSheet = prefixWithFileName ? $"Imported_Sheet1" : "Imported_Sheet";
+            Sheets.Add(importedSheet);
+            return 1;
+        }
+
         public void ShowMessage(string message, string title, bool isError = false)
         {
             MessagesShown.Add($"[{title}] {message}");

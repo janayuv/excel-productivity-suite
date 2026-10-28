@@ -1,0 +1,80 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.CreateSheetIndexDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Create Linked Sheet Index - Excel Productivity Suite"
+        Height="470" Width="540"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="🔗" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Create Linked Sheet Index (TOC)" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Generate a Table of Contents worksheet with clickable hyperlinks to every tab" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Options -->
+        <GroupBox Grid.Row="1" Header="Index Configuration" Style="{StaticResource ModernGroupBoxStyle}">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                    <TextBlock Text="Index worksheet name:" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="11" />
+                    <TextBox x:Name="IndexNameBox" Text="Table of Contents" Width="180" Style="{StaticResource ModernTextBoxStyle}" />
+                </StackPanel>
+
+                <CheckBox x:Name="IncludeHiddenCheck" Content="Include hidden worksheets in index list" Style="{StaticResource ModernCheckBoxStyle}" Margin="0,0,0,4" Checked="Option_Changed" Unchecked="Option_Changed" />
+                <CheckBox x:Name="AddBackLinksCheck" Content="Add '[Back to Index]' navigation link on each worksheet" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" />
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Preview List -->
+        <GroupBox Grid.Row="2" Header="Sheets to be Indexed" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,10,0,10">
+            <ListBox x:Name="SheetsListBox" Background="White" BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="📄 " FontSize="11" />
+                            <TextBlock Text="{Binding Name}" FontWeight="Medium" Margin="0,0,12,0" />
+                            <TextBlock Text="{Binding StatusText}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </GroupBox>
+
+        <!-- Actions -->
+        <DockPanel Grid.Row="3">
+            <TextBlock x:Name="StatusLabel" Text="Ready to create index sheet." VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Cancel" Width="85" Height="28" Margin="0,0,8,0" Style="{StaticResource ModernSecondaryButtonStyle}" Click="Cancel_Click" />
+                <Button Content="Create Index" Width="110" Height="28" Style="{StaticResource ModernPrimaryButtonStyle}" Click="CreateIndex_Click" />
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>
