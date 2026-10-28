@@ -1008,5 +1008,259 @@ namespace ExcelProductivitySuite.UnitTests
         }
 
         #endregion
+
+        #region Batch 6: Data, Filtering, and Validation Tests
+
+        [TestMethod]
+        public void AdvancedSorter_SortsByTextLength_AscendingAndDescending()
+        {
+            object?[,] matrix = new object?[5, 1]
+            {
+                { "Header" },
+                { "Watermelon" }, // 10
+                { "Fig" },        // 3
+                { "Banana" },     // 6
+                { "Pineapple" }   // 9
+            };
+
+            // Ascending
+            var ascOptions = new AdvancedSortOptions
+            {
+                SortColumnIndex = 0,
+                HasHeaderRow = true,
+                Criterion = AdvancedSortCriterion.TextLengthAscending
+            };
+            var ascResult = AdvancedSorter.Sort(matrix, ascOptions);
+
+            Assert.AreEqual("Header", ascResult[0, 0]);
+            Assert.AreEqual("Fig", ascResult[1, 0]);
+            Assert.AreEqual("Banana", ascResult[2, 0]);
+            Assert.AreEqual("Pineapple", ascResult[3, 0]);
+            Assert.AreEqual("Watermelon", ascResult[4, 0]);
+
+            // Descending
+            var descOptions = new AdvancedSortOptions
+            {
+                SortColumnIndex = 0,
+                HasHeaderRow = true,
+                Criterion = AdvancedSortCriterion.TextLengthDescending
+            };
+            var descResult = AdvancedSorter.Sort(matrix, descOptions);
+
+            Assert.AreEqual("Header", descResult[0, 0]);
+            Assert.AreEqual("Watermelon", descResult[1, 0]);
+            Assert.AreEqual("Pineapple", descResult[2, 0]);
+            Assert.AreEqual("Banana", descResult[3, 0]);
+            Assert.AreEqual("Fig", descResult[4, 0]);
+        }
+
+        [TestMethod]
+        public void AdvancedSorter_SortsByMonthName()
+        {
+            object?[,] matrix = new object?[4, 1]
+            {
+                { "March" },
+                { "December" },
+                { "January" },
+                { "August" }
+            };
+
+            var options = new AdvancedSortOptions
+            {
+                SortColumnIndex = 0,
+                HasHeaderRow = false,
+                Criterion = AdvancedSortCriterion.MonthName
+            };
+            var result = AdvancedSorter.Sort(matrix, options);
+
+            Assert.AreEqual("January", result[0, 0]);
+            Assert.AreEqual("March", result[1, 0]);
+            Assert.AreEqual("August", result[2, 0]);
+            Assert.AreEqual("December", result[3, 0]);
+        }
+
+        [TestMethod]
+        public void AdvancedSorter_SortsByWeekdayName()
+        {
+            object?[,] matrix = new object?[4, 1]
+            {
+                { "Friday" },
+                { "Monday" },
+                { "Sunday" },
+                { "Wednesday" }
+            };
+
+            var options = new AdvancedSortOptions
+            {
+                SortColumnIndex = 0,
+                HasHeaderRow = false,
+                Criterion = AdvancedSortCriterion.WeekdayName
+            };
+            var result = AdvancedSorter.Sort(matrix, options);
+
+            Assert.AreEqual("Sunday", result[0, 0]);
+            Assert.AreEqual("Monday", result[1, 0]);
+            Assert.AreEqual("Wednesday", result[2, 0]);
+            Assert.AreEqual("Friday", result[3, 0]);
+        }
+
+        [TestMethod]
+        public void ColorAnalyzer_FiltersCellsByColor()
+        {
+            var cells = new List<CellColorInfo>
+            {
+                new CellColorInfo(1, 1, 0xFF0000, 0x000000, 100),
+                new CellColorInfo(1, 2, 0x00FF00, 0x000000, 200),
+                new CellColorInfo(2, 1, 0xFF0000, 0x000000, 300)
+            };
+
+            var redMatches = ColorAnalyzer.FilterCellsByColor(cells, 0xFF0000, isFillColor: true);
+            Assert.AreEqual(2, redMatches.Count);
+            Assert.IsTrue(redMatches.Contains((1, 1)));
+            Assert.IsTrue(redMatches.Contains((2, 1)));
+
+            var greenMatches = ColorAnalyzer.FilterCellsByColor(cells, 0x00FF00, isFillColor: true);
+            Assert.AreEqual(1, greenMatches.Count);
+            Assert.IsTrue(greenMatches.Contains((1, 2)));
+        }
+
+        [TestMethod]
+        public void ColorAnalyzer_CalculatesColorStatistics()
+        {
+            var cells = new List<CellColorInfo>
+            {
+                new CellColorInfo(1, 1, 0xFF0000, 0x000000, 100),
+                new CellColorInfo(1, 2, 0x00FF00, 0x000000, 200),
+                new CellColorInfo(2, 1, 0xFF0000, 0x000000, 300)
+            };
+
+            var stats = ColorAnalyzer.CalculateColorStatistics(cells, isFillColor: true);
+            Assert.AreEqual(2, stats.Count);
+
+            var redGroup = stats.Find(s => s.ColorRgb == 0xFF0000);
+            Assert.IsNotNull(redGroup);
+            Assert.AreEqual(2, redGroup.CellCount);
+            Assert.AreEqual(400.0, redGroup.Sum);
+            Assert.AreEqual(200.0, redGroup.Average);
+            Assert.AreEqual(100.0, redGroup.Min);
+            Assert.AreEqual(300.0, redGroup.Max);
+
+            var greenGroup = stats.Find(s => s.ColorRgb == 0x00FF00);
+            Assert.IsNotNull(greenGroup);
+            Assert.AreEqual(1, greenGroup.CellCount);
+            Assert.AreEqual(200.0, greenGroup.Sum);
+        }
+
+        [TestMethod]
+        public void TableMerger_JoinsOnKey_UpdatesColumns()
+        {
+            object?[,] primary = new object?[3, 2]
+            {
+                { "ID",  "Name" },
+                { 101,   "Alice" },
+                { 102,   "Bob" }
+            };
+
+            object?[,] lookup = new object?[4, 2]
+            {
+                { "ID",  "Department" },
+                { 101,   "HR" },
+                { 102,   "Finance" },
+                { 103,   "Engineering" }
+            };
+
+            var options = new TableMergeOptions
+            {
+                PrimaryKeyColumn = 0,
+                LookupKeyColumn = 0,
+                HasHeaders = true,
+                AppendUnmatchedRows = false
+            };
+
+            var merged = TableMerger.Merge(primary, lookup, options, out int matched, out int unmatched);
+
+            Assert.AreEqual(2, matched);
+            Assert.AreEqual(0, unmatched);
+            Assert.AreEqual(3, merged.GetLength(0)); // Header + 2 rows
+            Assert.AreEqual(3, merged.GetLength(1)); // ID, Name, Department
+
+            // Check header
+            Assert.AreEqual("Department", merged[0, 2]);
+
+            // Check matched data
+            Assert.AreEqual("HR", merged[1, 2]);
+            Assert.AreEqual("Finance", merged[2, 2]);
+        }
+
+        [TestMethod]
+        public void TableMerger_AppendUnmatchedRows_IncludesRemainingLookupRows()
+        {
+            object?[,] primary = new object?[2, 2]
+            {
+                { "ID",  "Name" },
+                { 101,   "Alice" }
+            };
+
+            object?[,] lookup = new object?[3, 2]
+            {
+                { "ID",  "Department" },
+                { 101,   "HR" },
+                { 102,   "Finance" }
+            };
+
+            var options = new TableMergeOptions
+            {
+                PrimaryKeyColumn = 0,
+                LookupKeyColumn = 0,
+                HasHeaders = true,
+                AppendUnmatchedRows = true
+            };
+
+            var merged = TableMerger.Merge(primary, lookup, options, out int matched, out int unmatched);
+
+            Assert.AreEqual(1, matched);
+            Assert.AreEqual(3, merged.GetLength(0)); // Header, row 101, appended row 102
+            Assert.AreEqual(102, merged[2, 0]);
+            Assert.AreEqual("Finance", merged[2, 2]);
+        }
+
+        [TestMethod]
+        public void DistinctExtractor_ExtractsUniqueRowsOnly()
+        {
+            object?[,] matrix = new object?[4, 2]
+            {
+                { "Category", "Item" },
+                { "Fruit",    "Apple" },
+                { "Fruit",    "Apple" }, // duplicate
+                { "Produce",  "Carrot" }
+            };
+
+            var options = new DistinctExtractOptions
+            {
+                HasHeaders = true,
+                KeyColumns = null, // entire row
+                MatchCase = false
+            };
+
+            var distinct = DistinctExtractor.ExtractDistinct(matrix, options, out int unique, out int duplicate);
+
+            Assert.AreEqual(2, unique);
+            Assert.AreEqual(1, duplicate);
+            Assert.AreEqual(3, distinct.GetLength(0)); // Header + 2 unique rows
+            Assert.AreEqual("Apple", distinct[1, 1]);
+            Assert.AreEqual("Carrot", distinct[2, 1]);
+        }
+
+        [TestMethod]
+        public void DuplicateValidationHelper_BuildsFormula()
+        {
+            string formula = DuplicateValidationHelper.BuildCountIfFormula("C", 5);
+            Assert.AreEqual("=COUNTIF(C:C, C5)<=1", formula);
+
+            string colLetter = DuplicateValidationHelper.IndexToColumnLetter(28);
+            Assert.AreEqual("AB", colLetter);
+        }
+
+        #endregion
     }
 }

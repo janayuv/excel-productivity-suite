@@ -1310,6 +1310,113 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
             return importedCount;
         }
 
+        public IReadOnlyList<CellColorInfo> GetSelectedCellColors(int maxCells = 5000)
+        {
+            var list = new List<CellColorInfo>();
+            try
+            {
+                if (!(_app.Selection is Excel.Range range)) return list;
+                int count = 0;
+
+                foreach (Excel.Range area in range.Areas)
+                {
+                    int rows = area.Rows.Count;
+                    int cols = area.Columns.Count;
+
+                    for (int r = 1; r <= rows; r++)
+                    {
+                        for (int c = 1; c <= cols; c++)
+                        {
+                            try
+                            {
+                                Excel.Range cell = area.Cells[r, c];
+                                int sheetRow = cell.Row;
+                                int sheetCol = cell.Column;
+                                object val = cell.Value2;
+
+                                int fillColor = 0xFFFFFF;
+                                if (cell.Interior != null && cell.Interior.Color is double fcd)
+                                {
+                                    fillColor = (int)fcd;
+                                }
+
+                                int fontColor = 0x000000;
+                                if (cell.Font != null && cell.Font.Color is double fnd)
+                                {
+                                    fontColor = (int)fnd;
+                                }
+
+                                list.Add(new CellColorInfo(sheetRow, sheetCol, fillColor, fontColor, val));
+                                count++;
+                                if (count >= maxCells) return list;
+                            }
+                            catch { }
+                        }
+                    }
+                }
+            }
+            catch { }
+            return list;
+        }
+
+        public bool ApplyPreventDuplicateValidation(string? customErrorMessage = null)
+        {
+            try
+            {
+                if (!(_app.Selection is Excel.Range range)) return false;
+                if (IsCurrentSheetProtected)
+                {
+                    ShowMessage("The active worksheet is protected. Cannot apply validation rules.", "Sheet Protected", isError: true);
+                    return false;
+                }
+
+                using (new ExcelStateScope(_app))
+                {
+                    int startCol = range.Column;
+                    string colLetter = GetColumnLetter(startCol);
+                    int startRow = range.Row;
+
+                    string formula = $"=COUNTIF({colLetter}:{colLetter}, {colLetter}{startRow})<=1";
+
+                    Excel.Validation val = range.Validation;
+                    val.Delete();
+                    val.Add(
+                        Excel.XlDVType.xlValidateCustom,
+                        Excel.XlDVAlertStyle.xlValidAlertStop,
+                        Excel.XlFormatConditionOperator.xlBetween,
+                        formula,
+                        Type.Missing);
+
+                    val.IgnoreBlank = true;
+                    val.ErrorTitle = "Duplicate Entry Prohibited";
+                    val.ErrorMessage = !string.IsNullOrWhiteSpace(customErrorMessage)
+                        ? customErrorMessage
+                        : "Duplicate entries are not permitted in this range.";
+                    val.ShowError = true;
+
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Error applying duplicate validation: {ex.Message}", "Validation Error", isError: true);
+                return false;
+            }
+        }
+
+        private static string GetColumnLetter(int colIndex)
+        {
+            int div = colIndex;
+            string colLetter = string.Empty;
+            while (div > 0)
+            {
+                int mod = (div - 1) % 26;
+                colLetter = (char)(65 + mod) + colLetter;
+                div = (div - mod) / 26;
+            }
+            return colLetter;
+        }
+
         public void ShowMessage(string message, string title, bool isError = false)
         {
             MessageBox.Show(message, title, MessageBoxButton.OK, isError ? MessageBoxImage.Error : MessageBoxImage.Information);

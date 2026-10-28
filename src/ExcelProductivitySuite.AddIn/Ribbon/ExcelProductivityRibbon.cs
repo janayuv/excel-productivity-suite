@@ -115,6 +115,12 @@ namespace ExcelProductivitySuite.AddIn.Ribbon
                 case "btnSelectSpecial": return "CMD_SELECT_SPECIAL";
                 case "btnMergeRanges": return "CMD_MERGE_RANGES";
                 case "btnRemoveDuplicates": return "CMD_DATA_REMOVE_DUPLICATES";
+                case "btnAdvancedSort": return "CMD_DATA_ADVANCED_SORT";
+                case "btnFilterByColor": return "CMD_DATA_FILTER_BY_COLOR";
+                case "btnCountByColor": return "CMD_DATA_COUNT_BY_COLOR";
+                case "btnMergeTables": return "CMD_DATA_MERGE_TABLES";
+                case "btnExtractDistinct": return "CMD_DATA_EXTRACT_DISTINCT";
+                case "btnPreventDuplicate": return "CMD_VALIDATION_PREVENT_DUPLICATE";
                 case "btnFindMissing": return "CMD_FIND_MISSING_RECORDS";
                 case "btnAdvancedFilter": return "CMD_ADVANCED_FILTER";
                 case "btnFormulaToValue": return "CMD_FORMULA_TO_VALUE";

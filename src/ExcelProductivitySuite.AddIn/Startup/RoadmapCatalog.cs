@@ -112,65 +112,35 @@ namespace ExcelProductivitySuite.AddIn.Startup
                 new[] { "workbook properties", "file info", "stats", "sheet count", "document metadata" }, "Info");
 
             // =========================================================================
-            // Module E: Data, Filtering, and Statistics (Batch 6)
+            // Module E: Data, Filtering, and Statistics (Remaining Future Roadmap)
             // =========================================================================
-            AddPlanned(registry, "CMD_DATA_ADVANCED_SORT", "Advanced Multi-Level Sort",
-                "Sort table by multiple custom criteria including text length, month/weekday name, and colors.",
-                CommandCategory.DataAndFiltering, "E", "Batch 6",
-                new[] { "advanced sort", "multi sort", "sort by length", "custom sort order" }, "SortDialog");
-
-            AddPlanned(registry, "CMD_DATA_FILTER_BY_COLOR", "Filter by Cell / Font Color",
-                "Filter tabular data based on specific background fill colors or font colors.",
-                CommandCategory.DataAndFiltering, "E", "Batch 6",
-                new[] { "filter by color", "color filter", "fill color filter", "highlight filter" }, "Filter");
-
-            AddPlanned(registry, "CMD_DATA_COUNT_BY_COLOR", "Count and Sum by Color",
-                "Calculate total counts, sums, and averages for cells sharing identical background or font colors.",
-                CommandCategory.DataAndFiltering, "E", "Batch 6",
-                new[] { "count by color", "sum by color", "color statistics", "color aggregation" }, "FunctionsStatisticalInsertGallery");
-
-            AddPlanned(registry, "CMD_DATA_MERGE_TABLES", "Merge / Update Tables on Keys",
-                "Upsert and update a target table using matched key columns from a secondary lookup table.",
-                CommandCategory.DataAndFiltering, "E", "Batch 6",
-                new[] { "merge tables", "vlookup merge", "table upsert", "join tables", "update records" }, "TableMergeCells");
-
             AddPlanned(registry, "CMD_DATA_QUICK_SUBTOTAL", "Generate Summaries & Subtotals",
                 "Insert grouping subtotals and summaries at every change in designated categorical columns.",
-                CommandCategory.DataAndFiltering, "E", "Batch 6",
+                CommandCategory.DataAndFiltering, "E", "Batch 6+",
                 new[] { "subtotals", "group summaries", "data subtotals", "category rollup" }, "PivotTableSubtotals");
 
             AddPlanned(registry, "CMD_DATA_FREQUENCY_STATS", "Value Frequency Distribution",
                 "Generate a statistical frequency table showing distinct values, occurrences, and percentages.",
-                CommandCategory.DataAndFiltering, "E", "Batch 6",
+                CommandCategory.DataAndFiltering, "E", "Batch 6+",
                 new[] { "frequency distribution", "value count", "histogram table", "occurrence stats" }, "FunctionsStatisticalInsertGallery");
 
-            AddPlanned(registry, "CMD_DATA_EXTRACT_DISTINCT", "Extract Unique Records",
-                "Extract distinct/unique records from a dataset and write to a clean destination table.",
-                CommandCategory.DataAndFiltering, "E", "Batch 6",
-                new[] { "extract unique", "distinct records", "filter unique", "isolate distinct" }, "TableDeleteRows");
-
             // =========================================================================
-            // Module F: Data Validation and Dropdown Lists (Batch 6)
+            // Module F: Data Validation and Dropdown Lists (Remaining Future Roadmap)
             // =========================================================================
             AddPlanned(registry, "CMD_VALIDATION_CREATE_DROPDOWN", "Create Standard Dropdown List",
                 "Create clean Excel in-cell dropdown validation lists from selected source items or ranges.",
-                CommandCategory.DataValidation, "F", "Batch 6",
+                CommandCategory.DataValidation, "F", "Batch 6+",
                 new[] { "create dropdown", "data validation list", "cell dropdown", "combo list" }, "DataValidation");
 
             AddPlanned(registry, "CMD_VALIDATION_SEARCHABLE_DROPDOWN", "Searchable Dropdown Interface",
                 "Provide an enhanced searchable popup list for fast data entry in cells with large validation lists.",
-                CommandCategory.DataValidation, "F", "Batch 6",
+                CommandCategory.DataValidation, "F", "Batch 6+",
                 new[] { "searchable dropdown", "autocomplete dropdown", "fast validation picker", "filter list" }, "FindDialog");
 
             AddPlanned(registry, "CMD_VALIDATION_MULTI_SELECT", "Multi-Selection Dropdown List",
                 "Allow selecting multiple items from a dropdown list separated by commas within a single cell.",
-                CommandCategory.DataValidation, "F", "Batch 6",
+                CommandCategory.DataValidation, "F", "Batch 6+",
                 new[] { "multi select dropdown", "multiple choices", "comma separated dropdown", "multi pick" }, "CheckMark");
-
-            AddPlanned(registry, "CMD_VALIDATION_PREVENT_DUPS", "Prevent Duplicate Entries Rule",
-                "Apply custom validation rules that reject duplicate entries in real-time during user input.",
-                CommandCategory.DataValidation, "F", "Batch 6",
-                new[] { "prevent duplicates", "unique validation", "reject dups", "restrict duplicates" }, "ShieldAlert");
 
             AddPlanned(registry, "CMD_VALIDATION_EMAIL_RULE", "Validate Email Format",
                 "Apply regex-based validation rules ensuring user input adheres to valid email address syntax.",

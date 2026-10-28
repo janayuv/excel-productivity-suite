@@ -1,0 +1,75 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.AdvancedSortDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Advanced Sort - Excel Productivity Suite"
+        Height="460" Width="520"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="📶" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Advanced Sort" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Sort rows by string length, month names, weekday names, or standard keys" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Column and Header selection -->
+        <GroupBox Grid.Row="1" Header="Sort Column &amp; Data Options" Style="{StaticResource ModernGroupBoxStyle}">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                    <TextBlock Text="Sort by Column:" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="11" />
+                    <ComboBox x:Name="ColumnCombo" Width="200" Style="{StaticResource ModernComboBoxStyle}" Margin="0,0,16,0" />
+                    <CheckBox x:Name="HasHeadersCheck" Content="Data has header row" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" VerticalAlignment="Center" Checked="HasHeaders_Changed" Unchecked="HasHeaders_Changed" />
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Sort Criterion -->
+        <GroupBox Grid.Row="2" Header="Sort Rule" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,10,0,10">
+            <StackPanel>
+                <RadioButton x:Name="LenAscRadio" Content="Text Length: Shortest to Longest" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" />
+                <RadioButton x:Name="LenDescRadio" Content="Text Length: Longest to Shortest" Style="{StaticResource ModernRadioButtonStyle}" />
+                <RadioButton x:Name="MonthRadio" Content="Month Name (January ... December)" Style="{StaticResource ModernRadioButtonStyle}" />
+                <RadioButton x:Name="WeekdayRadio" Content="Weekday Name (Sunday ... Saturday)" Style="{StaticResource ModernRadioButtonStyle}" />
+                <RadioButton x:Name="StdAscRadio" Content="Standard Ascending (A to Z / Smallest to Largest)" Style="{StaticResource ModernRadioButtonStyle}" />
+                <RadioButton x:Name="StdDescRadio" Content="Standard Descending (Z to A / Largest to Smallest)" Style="{StaticResource ModernRadioButtonStyle}" />
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Actions -->
+        <DockPanel Grid.Row="3">
+            <TextBlock x:Name="StatusLabel" Text="Ready to sort selection." VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Cancel" Width="85" Height="28" Margin="0,0,8,0" Style="{StaticResource ModernSecondaryButtonStyle}" Click="Cancel_Click" />
+                <Button Content="Sort Range" Width="100" Height="28" Style="{StaticResource ModernPrimaryButtonStyle}" Click="Sort_Click" />
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

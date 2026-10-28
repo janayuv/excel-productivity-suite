@@ -647,6 +647,118 @@ namespace ExcelProductivitySuite.AddIn.Startup
                 roadmapBatch: "Active"
             ));
 
+            // =========================================================================
+            // Module E & F: Data, Filtering, and Validation (Batch 6 Expansion)
+            // =========================================================================
+
+            // Advanced Multi-Level Sort
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_DATA_ADVANCED_SORT",
+                title: "Advanced Sort",
+                description: "Sort table by text string length, month names, weekday names, or standard criteria.",
+                category: CommandCategory.DataAndFiltering,
+                executeAction: ctx =>
+                {
+                    var dlg = new AdvancedSortDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "advanced sort", "sort by length", "month sort", "weekday sort", "custom sort" },
+                officeIconName: "CustomSort",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "E",
+                roadmapBatch: "Batch 6"
+            ));
+
+            // Filter by Cell / Font Color
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_DATA_FILTER_BY_COLOR",
+                title: "Filter by Color",
+                description: "Identify and select cells matching a specified background fill or font color.",
+                category: CommandCategory.DataAndFiltering,
+                executeAction: ctx =>
+                {
+                    var dlg = new FilterByColorDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "filter by color", "select by color", "fill color", "font color", "color filter" },
+                officeIconName: "ColorPicker",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "E",
+                roadmapBatch: "Batch 6"
+            ));
+
+            // Count and Sum by Color
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_DATA_COUNT_BY_COLOR",
+                title: "Count by Color",
+                description: "Calculate statistical aggregations (Count, Sum, Average) grouped by cell fill or font color.",
+                category: CommandCategory.DataAndFiltering,
+                executeAction: ctx =>
+                {
+                    var dlg = new CountByColorDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "count by color", "sum by color", "average by color", "color statistics", "color aggregation" },
+                officeIconName: "FunctionsStatisticalInsertGallery",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "E",
+                roadmapBatch: "Batch 6"
+            ));
+
+            // Merge / Update Tables on Keys
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_DATA_MERGE_TABLES",
+                title: "Merge Tables",
+                description: "Upsert and join secondary table records into primary table matching on a common key.",
+                category: CommandCategory.DataAndFiltering,
+                executeAction: ctx =>
+                {
+                    var dlg = new MergeTablesDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "merge tables", "join tables", "table upsert", "vlookup merge", "combine tables" },
+                officeIconName: "Relationship",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "E",
+                roadmapBatch: "Batch 6"
+            ));
+
+            // Extract Unique / Distinct Records
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_DATA_EXTRACT_DISTINCT",
+                title: "Extract Distinct",
+                description: "Filter and copy unique records to a new worksheet without modifying source data.",
+                category: CommandCategory.DataAndFiltering,
+                executeAction: ctx =>
+                {
+                    var dlg = new ExtractDistinctDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "extract distinct", "unique records", "filter unique", "copy distinct", "deduplicate export" },
+                officeIconName: "FilterByResource",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "E",
+                roadmapBatch: "Batch 6"
+            ));
+
+            // Prevent Duplicate Entries Rule (Data Validation)
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_VALIDATION_PREVENT_DUPLICATE",
+                title: "Prevent Duplicates",
+                description: "Apply dynamic Excel Data Validation to prevent duplicate inputs in the selected range.",
+                category: CommandCategory.DataValidation,
+                executeAction: ctx =>
+                {
+                    var dlg = new PreventDuplicateDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "prevent duplicates", "data validation", "unique validation", "reject dups", "prevent duplicate entry" },
+                officeIconName: "DataValidation",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "F",
+                roadmapBatch: "Batch 6"
+            ));
+
             // 15. Convert Formulas to Values - Module G: Formula and Calculation Utilities
             registry.RegisterCommand(new SuiteCommand(
                 id: "CMD_FORMULA_TO_VALUE",

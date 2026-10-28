@@ -1,0 +1,77 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.FilterByColorDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Filter &amp; Select by Color - Excel Productivity Suite"
+        Height="470" Width="520"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="🎨" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Filter &amp; Select by Color" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Scan selection and isolate cells matching a specific background fill or font color" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Color Type Choice -->
+        <GroupBox Grid.Row="1" Header="Color Target" Style="{StaticResource ModernGroupBoxStyle}">
+            <StackPanel Orientation="Horizontal">
+                <RadioButton x:Name="FillColorRadio" Content="Cell Fill (Background) Color" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,24,0" Checked="ColorTarget_Changed" />
+                <RadioButton x:Name="FontColorRadio" Content="Font Text Color" Style="{StaticResource ModernRadioButtonStyle}" Checked="ColorTarget_Changed" />
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Colors List -->
+        <GroupBox Grid.Row="2" Header="Available Colors in Selection" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,10,0,10">
+            <ListBox x:Name="ColorsListBox" Background="White" BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1" SelectionChanged="ColorsList_SelectionChanged">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal" Margin="4,2">
+                            <Border Width="24" Height="24" CornerRadius="3" BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1" Margin="0,0,12,0" Background="{Binding SwatchBrush}" />
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="{Binding ColorHex}" FontWeight="SemiBold" FontSize="11" />
+                                <TextBlock Text="{Binding CountText}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" />
+                            </StackPanel>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </GroupBox>
+
+        <!-- Actions -->
+        <DockPanel Grid.Row="3">
+            <TextBlock x:Name="StatusLabel" Text="Select a color swatch to isolate." VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Cancel" Width="85" Height="28" Margin="0,0,8,0" Style="{StaticResource ModernSecondaryButtonStyle}" Click="Cancel_Click" />
+                <Button x:Name="SelectCellsButton" Content="Select Matching Cells" Width="150" Height="28" Style="{StaticResource ModernPrimaryButtonStyle}" IsEnabled="False" Click="SelectMatching_Click" />
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

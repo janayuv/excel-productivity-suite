@@ -240,9 +240,37 @@ namespace ExcelProductivitySuite.Core.Abstractions
         int ImportSheetsFromWorkbook(string filePath, bool firstSheetOnly, bool prefixWithFileName);
 
         /// <summary>
+        /// Reads color information (fill and font color) and values for cells in the current selection.
+        /// </summary>
+        IReadOnlyList<CellColorInfo> GetSelectedCellColors(int maxCells = 5000);
+
+        /// <summary>
+        /// Applies an Excel Data Validation rule to prevent duplicate entries within the selection.
+        /// </summary>
+        bool ApplyPreventDuplicateValidation(string? customErrorMessage = null);
+
+        /// <summary>
         /// Shows an informational, warning, or error alert dialog in Excel.
         /// </summary>
         void ShowMessage(string message, string title, bool isError = false);
+    }
+
+    public class CellColorInfo
+    {
+        public int Row { get; }
+        public int Column { get; }
+        public int FillColorRgb { get; }
+        public int FontColorRgb { get; }
+        public object? Value { get; }
+
+        public CellColorInfo(int row, int col, int fillColorRgb, int fontColorRgb, object? value)
+        {
+            Row = row;
+            Column = col;
+            FillColorRgb = fillColorRgb;
+            FontColorRgb = fontColorRgb;
+            Value = value;
+        }
     }
 
     public enum SplitFileFormat

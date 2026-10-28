@@ -227,6 +227,12 @@ namespace ExcelProductivitySuite.UnitTests
             return 1;
         }
 
+        public List<CellColorInfo> MockCellColors { get; } = new();
+
+        public IReadOnlyList<CellColorInfo> GetSelectedCellColors(int maxCells = 5000) => MockCellColors;
+
+        public bool ApplyPreventDuplicateValidation(string? customErrorMessage = null) => true;
+
         public void ShowMessage(string message, string title, bool isError = false)
         {
             MessagesShown.Add($"[{title}] {message}");

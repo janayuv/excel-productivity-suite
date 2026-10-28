@@ -257,8 +257,15 @@
                   onAction="OnRibbonButtonClicked" />
         </group>
 
-        <!-- Group: Data Cleaning -->
-        <group id="grpCleaning" label="Data Cleaning">
+        <!-- Group: Data & Sorting -->
+        <group id="grpCleaning" label="Data &amp; Sorting">
+          <button id="btnAdvancedSort"
+                  label="Advanced Sort"
+                  size="large"
+                  imageMso="CustomSort"
+                  screentip="Advanced Sort Rules"
+                  supertip="Sort rows by text string length, month names, weekday names, or standard criteria."
+                  onAction="OnRibbonButtonClicked" />
           <button id="btnRemoveDuplicates"
                   label="Remove Duplicates"
                   size="large"
@@ -266,12 +273,27 @@
                   screentip="Remove Duplicates"
                   supertip="Identify and clear duplicate rows in selected data with keep-first or keep-last options."
                   onAction="OnRibbonButtonClicked" />
-          <button id="btnFindMissing"
-                  label="Find Missing"
-                  size="large"
-                  imageMso="FindDialog"
-                  screentip="Find Missing &amp; Matching Records"
-                  supertip="Reconcile two lists by key columns and isolate source-only, target-only, or matching items."
+          <separator id="sepClean1" />
+          <button id="btnExtractDistinct"
+                  label="Extract Distinct"
+                  size="normal"
+                  imageMso="FilterByResource"
+                  screentip="Extract Distinct Records"
+                  supertip="Filter and copy unique records to a new worksheet without modifying source data."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnFilterByColor"
+                  label="Filter by Color"
+                  size="normal"
+                  imageMso="ColorPicker"
+                  screentip="Filter &amp; Select by Color"
+                  supertip="Identify and select cells matching a specified background fill or font color."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnCountByColor"
+                  label="Count by Color"
+                  size="normal"
+                  imageMso="FunctionsStatisticalInsertGallery"
+                  screentip="Count, Sum &amp; Average by Color"
+                  supertip="Calculate statistical aggregations grouped by cell background or font color."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnAdvancedFilter"
                   label="Advanced Filter"
@@ -279,6 +301,31 @@
                   imageMso="Filter"
                   screentip="Advanced Multi-Condition Filter"
                   supertip="Filter rows with multiple AND/OR conditions and export or select matches."
+                  onAction="OnRibbonButtonClicked" />
+        </group>
+
+        <!-- Group: Tables & Validation -->
+        <group id="grpTablesValidation" label="Tables &amp; Validation">
+          <button id="btnMergeTables"
+                  label="Merge Tables"
+                  size="large"
+                  imageMso="Relationship"
+                  screentip="Merge / Join Tables by Key"
+                  supertip="Upsert and join secondary table records into primary table matching on a common key."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnPreventDuplicate"
+                  label="Prevent Duplicates"
+                  size="normal"
+                  imageMso="DataValidation"
+                  screentip="Prevent Duplicate Entries"
+                  supertip="Apply dynamic Excel Data Validation to prevent duplicate inputs in the selected range."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnFindMissing"
+                  label="Find Missing"
+                  size="normal"
+                  imageMso="FindDialog"
+                  screentip="Find Missing &amp; Matching Records"
+                  supertip="Reconcile two lists by key columns and isolate source-only, target-only, or matching items."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnFormulaToValue"
                   label="Formulas to Values"

@@ -4,7 +4,7 @@
 **Host Application:** Microsoft Excel 2016 / 2019 / 2021 / Microsoft 365 (32-bit & 64-bit Windows Desktop)  
 **Framework:** .NET Framework 4.8 & Visual Studio Tools for Office (VSTO)  
 **UI Subsystem:** Windows Presentation Foundation (WPF) / Modern Fluent Office Palette  
-**Version:** 4.5.0 (Batch 5 Worksheet & Workbook Management Milestone)  
+**Version:** 4.6.0 (Batch 6 Data, Filtering, Statistics & Validation Milestone)  
 **Last Audit Date:** 2026-10-28  
 
 ---
@@ -15,8 +15,8 @@ Following the mandatory codebase audit, the **Excel Productivity Suite** feature
 
 The current implementation comprises:
 - **Total Cataloged Capabilities:** 200+ features planned across 12 modules
-- **Active & Verified Tools:** 47 commands (45 core productivity utilities + 2 suite navigation/information utilities)
-- **Unit Test Coverage:** 153 passing automated unit & performance tests (100% pass rate in 1.0s)
+- **Active & Verified Tools:** 53 commands (51 core productivity utilities + 2 suite navigation/information utilities)
+- **Unit Test Coverage:** 164 passing automated unit & performance tests (100% pass rate in 1.0s)
 - **Real Excel COM Integration Tests:** 18 passing out-of-process Excel 2016+ scenarios (100% pass rate in 1.25s)
 - **Searchable Quick Tool Launcher (SuperSearch):** Integrated multi-category search, active/roadmap status filtering, module badges, and keyword scoring (`Ctrl+Shift+P` / KeyTip: `TL`)
 
@@ -46,7 +46,7 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 
 ---
 
-## 4. Complete Active Feature Inventory (27 Implemented & Verified Tools)
+## 4. Complete Active Feature Inventory (53 Implemented & Verified Tools)
 
 | ID | Title | Module | Category | Engine Class | UI Dialog / Action | Test Mapping | Status |
 | :--- | :--- | :---: | :--- | :--- | :--- | :--- | :--- |
@@ -86,6 +86,23 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 | `CMD_SHEET_BATCH_RENAME` | **Rename Worksheets** | D | Worksheet & Workbook | `WorksheetNameValidator.cs` | `BatchRenameWorksheetsDialog.xaml`| `RangeAndSheetTests`, Real Excel `T15` | Implemented and verified |
 | `CMD_SPLIT_DATA_TO_SHEETS` | **Split Data to Sheets**| D | Worksheet & Workbook | `DataSplitter.cs` | `SplitDataToSheetsDialog.xaml` | `DataSplitterTests`, `Benchmark_DataSplitter` | Implemented and verified |
 | `CMD_COMPARE_WORKBOOKS` | **Compare Workbooks** | D | Worksheet & Workbook | `WorkbookComparer.cs` | `CompareWorkbooksDialog.xaml` | `WorkbookComparerTests` | Implemented and verified |
+| `CMD_FIND_DUPLICATES` | **Find Duplicates** | C | Find, Select & Compare | `DuplicateAnalyzer.cs` | `FindDuplicatesDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_ADVANCED_FIND_REPLACE` | **Multi-Sheet Find/Replace** | C | Find, Select & Compare | `MultiSheetFindReplace.cs` | `AdvancedFindReplaceDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_SELECT_MAX_MIN` | **Select Max/Min** | C | Find, Select & Compare | `MaxMinSelector.cs` | `SelectMaxMinDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_SELECT_ROW_DIFFERENCES` | **Select Row Differences** | C | Find, Select & Compare | `RowDifferenceFinder.cs` | `SelectRowDifferencesDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_FIND_BY_COMMENT` | **Find by Comment** | C | Find, Select & Compare | `CommentFilter.cs` | `FindByCommentDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_SHEET_COMBINE` | **Combine Sheets** | D | Worksheet & Workbook | `SheetCombiner.cs` | `CombineSheetsDialog.xaml` | `RangeAndSheetTests`, `Benchmark_SheetCombiner` | Implemented and verified |
+| `CMD_WB_COMBINE_FILES` | **Combine Workbooks** | D | Worksheet & Workbook | `SheetCombiner.cs` | `CombineWorkbooksDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_WB_SPLIT_FILES` | **Split Workbook** | D | Worksheet & Workbook | `WorkbookSplitter.cs` | `SplitWorkbookDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_SHEET_SORT_TABS` | **Sort Sheet Tabs** | D | Worksheet & Workbook | `SheetTabSorter.cs` | `SortSheetTabsDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_SHEET_CREATE_INDEX` | **Create Sheet Index** | D | Worksheet & Workbook | `SheetIndexGenerator.cs` | `CreateSheetIndexDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_SHEET_DELETE_BLANKS` | **Delete Blank Sheets** | D | Worksheet & Workbook | `BlankSheetDetector.cs` | `DeleteBlankSheetsDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_DATA_ADVANCED_SORT` | **Advanced Sort** | E | Data & Filtering | `AdvancedSorter.cs` | `AdvancedSortDialog.xaml` | `RangeAndSheetTests`, `Benchmark_AdvancedSort` | Implemented and verified |
+| `CMD_DATA_FILTER_BY_COLOR` | **Filter by Color** | E | Data & Filtering | `ColorAnalyzer.cs` | `FilterByColorDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_DATA_COUNT_BY_COLOR` | **Count by Color** | E | Data & Filtering | `ColorAnalyzer.cs` | `CountByColorDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_DATA_MERGE_TABLES` | **Merge Tables** | E | Data & Filtering | `TableMerger.cs` | `MergeTablesDialog.xaml` | `RangeAndSheetTests`, `Benchmark_TableMerger` | Implemented and verified |
+| `CMD_DATA_EXTRACT_DISTINCT` | **Extract Distinct** | E | Data & Filtering | `DistinctExtractor.cs` | `ExtractDistinctDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_VALIDATION_PREVENT_DUPLICATE` | **Prevent Duplicates** | F | Data Validation | `DuplicateValidationHelper.cs` | `PreventDuplicateDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
 
 ---
 
@@ -166,25 +183,25 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 - [x] `CMD_DATA_REMOVE_DUPLICATES`: Remove duplicate rows with key-column selection and header preservation. *(Active)*
 - [x] `CMD_FIND_MISSING_RECORDS`: Reconcile two tables and classify into SourceOnly, TargetOnly, Matching. *(Active)*
 - [x] `CMD_ADVANCED_FILTER`: Multi-condition rule filtering with AND/OR logic and non-destructive export. *(Active)*
-- [ ] `CMD_DATA_ADVANCED_SORT`: Multi-level sorting by text length, month/weekday, or color. *(Planned - Batch 6)*
-- [ ] `CMD_DATA_FILTER_BY_COLOR`: Filter rows by background fill or font color. *(Planned - Batch 6)*
-- [ ] `CMD_DATA_COUNT_BY_COLOR`: Count, sum, and average cells by cell fill or font color. *(Planned - Batch 6)*
-- [ ] `CMD_DATA_MERGE_TABLES`: Upsert and update target table records matching secondary lookup keys. *(Planned - Batch 6)*
-- [ ] `CMD_DATA_QUICK_SUBTOTAL`: Automatically insert group subtotals and summaries at key changes. *(Planned - Batch 6)*
-- [ ] `CMD_DATA_FREQUENCY_STATS`: Calculate occurrence frequency distribution table for column values. *(Planned - Batch 6)*
-- [ ] `CMD_DATA_EXTRACT_DISTINCT`: Filter and copy distinct rows to a new destination worksheet. *(Planned - Batch 6)*
+- [x] `CMD_DATA_ADVANCED_SORT`: Multi-level sorting by text length, month/weekday, or custom keys with header preservation. *(Active - Batch 6)*
+- [x] `CMD_DATA_FILTER_BY_COLOR`: Filter rows by background fill or font color. *(Active - Batch 6)*
+- [x] `CMD_DATA_COUNT_BY_COLOR`: Count, sum, average, min, and max cells by cell fill or font color. *(Active - Batch 6)*
+- [x] `CMD_DATA_MERGE_TABLES`: Upsert and update target table records matching secondary lookup keys. *(Active - Batch 6)*
+- [x] `CMD_DATA_EXTRACT_DISTINCT`: Filter and copy distinct rows to a new destination worksheet. *(Active - Batch 6)*
+- [ ] `CMD_DATA_QUICK_SUBTOTAL`: Automatically insert group subtotals and summaries at key changes. *(Planned - Batch 6+)*
+- [ ] `CMD_DATA_FREQUENCY_STATS`: Calculate occurrence frequency distribution table for column values. *(Planned - Batch 6+)*
 
 ### Module F: Data Validation and Dropdown Lists (Target: 12 Tools)
-- [ ] `CMD_VALIDATION_CREATE_DROPDOWN`: Create standard Excel in-cell dropdown list from items/range. *(Planned - Batch 6)*
-- [ ] `CMD_VALIDATION_SEARCHABLE_DROPDOWN`: Floating searchable popup interface for large validation lists. *(Planned - Batch 6)*
-- [ ] `CMD_VALIDATION_MULTI_SELECT`: Allow multi-item selection in dropdown separated by commas. *(Planned - Batch 6)*
-- [ ] `CMD_VALIDATION_PREVENT_DUPS`: Apply validation rule that rejects duplicate entries in real-time. *(Planned - Batch 6)*
-- [ ] `CMD_VALIDATION_EMAIL_RULE`: Apply regex-based validation rule requiring valid email syntax. *(Planned - Batch 6)*
-- [ ] `CMD_VALIDATION_PHONE_RULE`: Apply validation rule enforcing phone number patterns. *(Planned - Batch 6)*
-- [ ] `CMD_VALIDATION_DATE_RANGE`: Restrict entry to dates within specified calendar boundaries. *(Planned - Batch 6)*
-- [ ] `CMD_VALIDATION_HIGHLIGHT_INVALID`: Scan range and highlight all cells with invalid validation data. *(Planned - Batch 6)*
-- [ ] `CMD_VALIDATION_BULK_REMOVE`: Remove data validation rules across selected ranges or sheets. *(Planned - Batch 6)*
-- [ ] `CMD_VALIDATION_COPY_RULES`: Copy validation rules from source range to target ranges. *(Planned - Batch 6)*
+- [x] `CMD_VALIDATION_PREVENT_DUPLICATE`: Apply validation rule that rejects duplicate entries in real-time. *(Active - Batch 6)*
+- [ ] `CMD_VALIDATION_CREATE_DROPDOWN`: Create standard Excel in-cell dropdown list from items/range. *(Planned - Batch 6+)*
+- [ ] `CMD_VALIDATION_SEARCHABLE_DROPDOWN`: Floating searchable popup interface for large validation lists. *(Planned - Batch 6+)*
+- [ ] `CMD_VALIDATION_MULTI_SELECT`: Allow multi-item selection in dropdown separated by commas. *(Planned - Batch 6+)*
+- [ ] `CMD_VALIDATION_EMAIL_RULE`: Apply regex-based validation rule requiring valid email syntax. *(Planned - Batch 6+)*
+- [ ] `CMD_VALIDATION_PHONE_RULE`: Apply validation rule enforcing phone number patterns. *(Planned - Batch 6+)*
+- [ ] `CMD_VALIDATION_DATE_RANGE`: Restrict entry to dates within specified calendar boundaries. *(Planned - Batch 6+)*
+- [ ] `CMD_VALIDATION_HIGHLIGHT_INVALID`: Scan range and highlight all cells with invalid validation data. *(Planned - Batch 6+)*
+- [ ] `CMD_VALIDATION_BULK_REMOVE`: Remove data validation rules across selected ranges or sheets. *(Planned - Batch 6+)*
+- [ ] `CMD_VALIDATION_COPY_RULES`: Copy validation rules from source range to target ranges. *(Planned - Batch 6+)*
 
 ### Module G: Formula and Calculation Utilities (Target: 14 Tools)
 - [x] `CMD_FORMULA_TO_VALUE`: Convert formulas to calculated values in-place with safeguards. *(Active)*
@@ -260,8 +277,8 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 | **Batch 3** | **Range & Cell Operations** | Transpose, Flip H/V, Swap Ranges, Non-Contiguous Copy, Paste Visible Only, Merge Keep Data, Sign/Round | **COMPLETED** |
 | **Batch 4** | **Find, Select, Duplicate Detection & Comparison** | Advanced Duplicate Finder, Select Duplicates, Multi-Sheet Find/Replace, Max/Min, Row Diff, Comments | **COMPLETED** |
 | **Batch 5** | **Worksheet & Workbook Management** | Combine Sheets, Combine Workbooks, Split Workbook to Files, Sort Tabs, Sheet Index TOC, Delete Blanks | **COMPLETED** |
-| **Batch 6** | **Filtering, Data Validation & Table Merge** | Advanced Multi-Sort, Color Filter/Count, Table Merge/Upsert, Dropdown Lists, Email/Phone Validation | **Next Up** |
-| **Batch 7** | **Formatting, Formulas & Printing** | Reference Conversion (Abs/Rel), Exact Copy, Locate Errors, Math Operations, Number/Date Formats, Page Setup | Planned |
+| **Batch 6** | **Filtering, Data Validation & Table Merge** | Advanced Multi-Sort, Color Filter/Count, Table Merge/Upsert, Dropdown Lists, Email/Phone Validation | **COMPLETED** |
+| **Batch 7** | **Formatting, Formulas & Printing** | Reference Conversion (Abs/Rel), Exact Copy, Locate Errors, Math Operations, Number/Date Formats, Page Setup | **Next Up** |
 | **Batch 8** | **Import, Export & Picture Utilities** | CSV Import/Export, PDF Export, Batch Format Convert, Folder Listing, Cell Pictures, Chart Image Export | Planned |
 | **Batch 9** | **Protection, Recovery, Charts & Analysis** | Batch Protect/Unprotect, Workbook Snapshots, Gantt/Waterfall Charts, Quick Statistics Dashboard | Planned |
 | **Batch 10** | **Navigation, UX Polish, Packaging & Release** | Navigation Pane, Grid-Focus Crosshair, Date Picker, Formula Editor, Release Installer Verification | Planned |

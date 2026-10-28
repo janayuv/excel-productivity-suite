@@ -526,5 +526,76 @@ namespace ExcelProductivitySuite.UnitTests
             Assert.AreEqual(11, combined.GetLength(1));
             Assert.IsTrue(sw.ElapsedMilliseconds < 500, $"SheetCombiner benchmark took {sw.ElapsedMilliseconds} ms, target is < 500 ms");
         }
+
+        [TestMethod]
+        public void Benchmark_AdvancedSorter_100K_Cells_CompletesUnder500ms()
+        {
+            int rows = 10000;
+            int cols = 10;
+            object?[,] matrix = new object?[rows, cols];
+
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    // Generate variable length strings
+                    matrix[r, c] = new string('X', (r * 7 + c * 3) % 50 + 1);
+                }
+            }
+
+            var options = new AdvancedSortOptions
+            {
+                SortColumnIndex = 0,
+                HasHeaderRow = false,
+                Criterion = AdvancedSortCriterion.TextLengthAscending
+            };
+
+            var sw = Stopwatch.StartNew();
+            var sorted = AdvancedSorter.Sort(matrix, options);
+            sw.Stop();
+
+            Assert.AreEqual(10000, sorted.GetLength(0));
+            Assert.IsTrue(sw.ElapsedMilliseconds < 500, $"AdvancedSorter benchmark took {sw.ElapsedMilliseconds} ms, target is < 500 ms");
+        }
+
+        [TestMethod]
+        public void Benchmark_TableMerger_100K_Cells_CompletesUnder500ms()
+        {
+            int pRows = 10000;
+            int pCols = 5;
+            object?[,] primary = new object?[pRows, pCols];
+
+            int lRows = 5000;
+            int lCols = 5;
+            object?[,] lookup = new object?[lRows, lCols];
+
+            for (int r = 0; r < pRows; r++)
+            {
+                primary[r, 0] = $"ID_{r}";
+                for (int c = 1; c < pCols; c++) primary[r, c] = $"ValP_{r}_{c}";
+            }
+
+            for (int r = 0; r < lRows; r++)
+            {
+                lookup[r, 0] = $"ID_{r * 2}"; // match half the rows
+                for (int c = 1; c < lCols; c++) lookup[r, c] = $"ValL_{r}_{c}";
+            }
+
+            var options = new TableMergeOptions
+            {
+                PrimaryKeyColumn = 0,
+                LookupKeyColumn = 0,
+                HasHeaders = false,
+                AppendUnmatchedRows = false
+            };
+
+            var sw = Stopwatch.StartNew();
+            var merged = TableMerger.Merge(primary, lookup, options, out int matched, out int unmatched);
+            sw.Stop();
+
+            Assert.AreEqual(5000, matched);
+            Assert.AreEqual(10000, merged.GetLength(0));
+            Assert.IsTrue(sw.ElapsedMilliseconds < 500, $"TableMerger benchmark took {sw.ElapsedMilliseconds} ms, target is < 500 ms");
+        }
     }
 }

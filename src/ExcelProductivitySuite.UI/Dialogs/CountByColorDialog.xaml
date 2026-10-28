@@ -1,0 +1,82 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.CountByColorDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Count &amp; Sum by Color - Excel Productivity Suite"
+        Height="500" Width="650"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="📊" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Count, Sum &amp; Average by Color" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Calculate comprehensive statistical aggregations grouped by cell background or font color" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Color Target -->
+        <GroupBox Grid.Row="1" Header="Color Grouping Mode" Style="{StaticResource ModernGroupBoxStyle}">
+            <StackPanel Orientation="Horizontal">
+                <RadioButton x:Name="FillColorRadio" Content="Group by Cell Fill (Background) Color" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,24,0" Checked="ColorTarget_Changed" />
+                <RadioButton x:Name="FontColorRadio" Content="Group by Font Text Color" Style="{StaticResource ModernRadioButtonStyle}" Checked="ColorTarget_Changed" />
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Statistics DataGrid -->
+        <GroupBox Grid.Row="2" Header="Color Statistical Breakdown" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,10,0,10">
+            <DataGrid x:Name="StatsDataGrid" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column" GridLinesVisibility="Horizontal" Background="White" RowHeight="26">
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Header="Color" Width="60">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border Width="20" Height="16" CornerRadius="2" BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1" Background="{Binding SwatchBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Header="RGB Hex" Binding="{Binding ColorHex}" Width="120" />
+                    <DataGridTextColumn Header="Cell Count" Binding="{Binding CellCount}" Width="80" />
+                    <DataGridTextColumn Header="Numbers" Binding="{Binding NumericCount}" Width="70" />
+                    <DataGridTextColumn Header="Sum" Binding="{Binding SumFormatted}" Width="95" />
+                    <DataGridTextColumn Header="Average" Binding="{Binding AverageFormatted}" Width="90" />
+                    <DataGridTextColumn Header="Min" Binding="{Binding MinFormatted}" Width="70" />
+                    <DataGridTextColumn Header="Max" Binding="{Binding MaxFormatted}" Width="70" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </GroupBox>
+
+        <!-- Actions -->
+        <DockPanel Grid.Row="3">
+            <TextBlock x:Name="StatusLabel" Text="Summary calculated." VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Close" Width="85" Height="28" Margin="0,0,8,0" Style="{StaticResource ModernSecondaryButtonStyle}" Click="Close_Click" />
+                <Button Content="Export to New Sheet" Width="150" Height="28" Style="{StaticResource ModernPrimaryButtonStyle}" Click="ExportSheet_Click" />
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>
