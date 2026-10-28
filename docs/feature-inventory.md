@@ -4,7 +4,7 @@
 **Host Application:** Microsoft Excel 2016 / 2019 / 2021 / Microsoft 365 (32-bit & 64-bit Windows Desktop)  
 **Framework:** .NET Framework 4.8 & Visual Studio Tools for Office (VSTO)  
 **UI Subsystem:** Windows Presentation Foundation (WPF) / Modern Fluent Office Palette  
-**Version:** 4.6.0 (Batch 6 Data, Filtering, Statistics & Validation Milestone)  
+**Version:** 4.7.0 (Batch 7 Formatting, Formulas & Printing Milestone)  
 **Last Audit Date:** 2026-10-28  
 
 ---
@@ -15,8 +15,8 @@ Following the mandatory codebase audit, the **Excel Productivity Suite** feature
 
 The current implementation comprises:
 - **Total Cataloged Capabilities:** 200+ features planned across 12 modules
-- **Active & Verified Tools:** 53 commands (51 core productivity utilities + 2 suite navigation/information utilities)
-- **Unit Test Coverage:** 164 passing automated unit & performance tests (100% pass rate in 1.0s)
+- **Active & Verified Tools:** 59 commands (57 core productivity utilities + 2 suite navigation/information utilities)
+- **Unit Test Coverage:** 176 passing automated unit & performance tests (100% pass rate in 1.0s)
 - **Real Excel COM Integration Tests:** 18 passing out-of-process Excel 2016+ scenarios (100% pass rate in 1.25s)
 - **Searchable Quick Tool Launcher (SuperSearch):** Integrated multi-category search, active/roadmap status filtering, module badges, and keyword scoring (`Ctrl+Shift+P` / KeyTip: `TL`)
 
@@ -46,7 +46,7 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 
 ---
 
-## 4. Complete Active Feature Inventory (53 Implemented & Verified Tools)
+## 4. Complete Active Feature Inventory (59 Implemented & Verified Tools)
 
 | ID | Title | Module | Category | Engine Class | UI Dialog / Action | Test Mapping | Status |
 | :--- | :--- | :---: | :--- | :--- | :--- | :--- | :--- |
@@ -103,6 +103,12 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 | `CMD_DATA_MERGE_TABLES` | **Merge Tables** | E | Data & Filtering | `TableMerger.cs` | `MergeTablesDialog.xaml` | `RangeAndSheetTests`, `Benchmark_TableMerger` | Implemented and verified |
 | `CMD_DATA_EXTRACT_DISTINCT` | **Extract Distinct** | E | Data & Filtering | `DistinctExtractor.cs` | `ExtractDistinctDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
 | `CMD_VALIDATION_PREVENT_DUPLICATE` | **Prevent Duplicates** | F | Data Validation | `DuplicateValidationHelper.cs` | `PreventDuplicateDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_FORMULA_CONVERT_REF` | **Convert References** | G | Formulas & Calculation | `FormulaReferenceConverter.cs` | `ConvertFormulaReferenceDialog.xaml` | `RangeAndSheetTests`, `Benchmark_FormulaReferenceConverter` | Implemented and verified |
+| `CMD_FORMULA_EXACT_COPY` | **Exact Copy Formulas** | G | Formulas & Calculation | `FormulaExactCopier.cs` | `ExactCopyFormulaDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_FORMULA_LOCATE_ERRORS` | **Locate Formula Errors** | G | Formulas & Calculation | `FormulaErrorLocator.cs` | `LocateFormulaErrorsDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_RANGE_MATH_OPERATIONS` | **Math Operations** | B | Range & Cells | `RangeMathOperations.cs` | `MathOperationsDialog.xaml` | `RangeAndSheetTests`, `Benchmark_RangeMathOperations` | Implemented and verified |
+| `CMD_FORMAT_PAGE_SETUP_COPY` | **Copy Page Setup** | H | Formatting & Design | `ExcelContextAdapter.cs` | `CopyPageSetupDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_FORMAT_FREEZE_PANES` | **Freeze Panes Multi** | H | Formatting & Design | `ExcelContextAdapter.cs` | `FreezePanesMultiDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
 
 ---
 
@@ -140,6 +146,7 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 - [x] `CMD_RANGE_MERGE_KEEP_DATA`: Merge cells while preserving all cell data using custom separators. *(Active - Batch 3)*
 - [x] `CMD_RANGE_INSERT_BLANK_ROWS`: Insert blank rows at regular intervals or value changes. *(Active - Batch 3)*
 - [x] `CMD_RANGE_DELETE_BLANK_ROWS`: Delete completely empty rows or columns safely. *(Active - Batch 3)*
+- [x] `CMD_RANGE_MATH_OPERATIONS`: Apply bulk arithmetic operations (+, -, *, /, ^, %) directly to numeric cells without formulas. *(Active - Batch 7)*
 - [ ] `CMD_RANGE_COPY_NONCONTIGUOUS`: Copy disjoint multi-area selection into contiguous target. *(Planned - Batch 3+)*
 - [ ] `CMD_RANGE_PASTE_VISIBLE_ONLY`: Paste clipboard data strictly into visible cells skipping hidden rows. *(Planned - Batch 3+)*
 - [ ] `CMD_RANGE_UNMERGE_FILL`: Unmerge composite cells and fill all constituent cells with value. *(Planned - Batch 3+)*
@@ -205,27 +212,27 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 
 ### Module G: Formula and Calculation Utilities (Target: 14 Tools)
 - [x] `CMD_FORMULA_TO_VALUE`: Convert formulas to calculated values in-place with safeguards. *(Active)*
-- [ ] `CMD_FORMULA_CONVERT_REF`: Convert cell references between Absolute, Row-Absolute, Col-Absolute, Relative. *(Planned - Batch 7)*
-- [ ] `CMD_FORMULA_EXACT_COPY`: Copy formulas to new ranges without shifting relative cell references. *(Planned - Batch 7)*
-- [ ] `CMD_FORMULA_AUDIT_PRECEDENTS`: Trace and visually navigate precedent cells contributing to formula. *(Planned - Batch 7)*
-- [ ] `CMD_FORMULA_AUDIT_DEPENDENTS`: Trace and visually navigate all dependent cells of active cell. *(Planned - Batch 7)*
-- [ ] `CMD_FORMULA_LOCATE_ERRORS`: Find and cycle through formula errors (#N/A, #VALUE!, #REF!, #DIV/0!). *(Planned - Batch 7)*
-- [ ] `CMD_FORMULA_BATCH_REPLACE_REF`: Replace sheet names or range addresses within formulas in bulk. *(Planned - Batch 7)*
-- [ ] `CMD_FORMULA_MATH_OPERATIONS`: Apply math calculation (+, -, *, /) directly to cell values in selection. *(Planned - Batch 7)*
-- [ ] `CMD_FORMULA_EXPLAIN`: Deconstruct and explain nested formulas with deterministic parser. *(Planned - Batch 7)*
-- [ ] `CMD_FORMULA_TEMPLATES`: Insert pre-built financial, date, and math formula templates. *(Planned - Batch 7)*
+- [x] `CMD_FORMULA_CONVERT_REF`: Convert cell references between Absolute, Row-Absolute, Col-Absolute, Relative. *(Active - Batch 7)*
+- [x] `CMD_FORMULA_EXACT_COPY`: Copy formulas to new ranges without shifting relative cell references. *(Active - Batch 7)*
+- [x] `CMD_FORMULA_LOCATE_ERRORS`: Find, select, and navigate through formula errors (#N/A, #VALUE!, #REF!, #DIV/0!). *(Active - Batch 7)*
+- [ ] `CMD_FORMULA_AUDIT_PRECEDENTS`: Trace and visually navigate precedent cells contributing to formula. *(Planned - Batch 7+)*
+- [ ] `CMD_FORMULA_AUDIT_DEPENDENTS`: Trace and visually navigate all dependent cells of active cell. *(Planned - Batch 7+)*
+- [ ] `CMD_FORMULA_BATCH_REPLACE_REF`: Replace sheet names or range addresses within formulas in bulk. *(Planned - Batch 7+)*
+- [ ] `CMD_FORMULA_EXPLAIN`: Deconstruct and explain nested formulas with deterministic parser. *(Planned - Batch 7+)*
+- [ ] `CMD_FORMULA_TEMPLATES`: Insert pre-built financial, date, and math formula templates. *(Planned - Batch 7+)*
 
 ### Module H: Formatting and Design (Target: 14 Tools)
-- [ ] `CMD_FORMAT_BATCH_NUMBERS`: Batch apply number, currency, decimal, and percent formats. *(Planned - Batch 7)*
-- [ ] `CMD_FORMAT_DATE_STANDARDS`: Standardize date cells to ISO 8601 (YYYY-MM-DD) or custom formats. *(Planned - Batch 7)*
-- [ ] `CMD_FORMAT_HIGHLIGHT_CELL_TYPES`: Color-code formulas, constants, locked cells, and errors. *(Planned - Batch 7)*
-- [ ] `CMD_FORMAT_BORDERS`: Apply accounting borders, double bottom lines, and header styling. *(Planned - Batch 7)*
-- [ ] `CMD_FORMAT_ROW_HEIGHT`: Set uniform row heights or smart auto-fit across multiple tables. *(Planned - Batch 7)*
-- [ ] `CMD_FORMAT_COL_WIDTH`: Set uniform column widths or padded auto-fit across selections. *(Planned - Batch 7)*
-- [ ] `CMD_PRINT_SET_PRINT_AREAS`: Configure multiple print areas across sheets simultaneously. *(Planned - Batch 7)*
-- [ ] `CMD_PRINT_INSERT_PAGE_BREAKS`: Insert horizontal page breaks every N rows or on category changes. *(Planned - Batch 7)*
-- [ ] `CMD_PRINT_REPEATING_HEADERS`: Configure rows and columns to repeat on every printed page. *(Planned - Batch 7)*
-- [ ] `CMD_PRINT_COPY_PAGE_SETUP`: Copy print orientation, margins, and paper size across sheets. *(Planned - Batch 7)*
+- [x] `CMD_FORMAT_PAGE_SETUP_COPY`: Copy print orientation, margins, paper size, and repeating headers across worksheets. *(Active - Batch 7)*
+- [x] `CMD_FORMAT_FREEZE_PANES`: Synchronize freeze panes across all worksheets simultaneously. *(Active - Batch 7)*
+- [ ] `CMD_FORMAT_BATCH_NUMBERS`: Batch apply number, currency, decimal, and percent formats. *(Planned - Batch 7+)*
+- [ ] `CMD_FORMAT_DATE_STANDARDS`: Standardize date cells to ISO 8601 (YYYY-MM-DD) or custom formats. *(Planned - Batch 7+)*
+- [ ] `CMD_FORMAT_HIGHLIGHT_CELL_TYPES`: Color-code formulas, constants, locked cells, and errors. *(Planned - Batch 7+)*
+- [ ] `CMD_FORMAT_BORDERS`: Apply accounting borders, double bottom lines, and header styling. *(Planned - Batch 7+)*
+- [ ] `CMD_FORMAT_ROW_HEIGHT`: Set uniform row heights or smart auto-fit across multiple tables. *(Planned - Batch 7+)*
+- [ ] `CMD_FORMAT_COL_WIDTH`: Set uniform column widths or padded auto-fit across selections. *(Planned - Batch 7+)*
+- [ ] `CMD_PRINT_SET_PRINT_AREAS`: Configure multiple print areas across sheets simultaneously. *(Planned - Batch 7+)*
+- [ ] `CMD_PRINT_INSERT_PAGE_BREAKS`: Insert horizontal page breaks every N rows or on category changes. *(Planned - Batch 7+)*
+- [ ] `CMD_PRINT_REPEATING_HEADERS`: Configure rows and columns to repeat on every printed page. *(Planned - Batch 7+)*
 
 ### Module I: Import, Export, and File Utilities (Target: 14 Tools)
 - [ ] `CMD_FILE_IMPORT_CSV`: Import delimited text and CSV files with custom encodings. *(Planned - Batch 8)*
@@ -278,8 +285,8 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 | **Batch 4** | **Find, Select, Duplicate Detection & Comparison** | Advanced Duplicate Finder, Select Duplicates, Multi-Sheet Find/Replace, Max/Min, Row Diff, Comments | **COMPLETED** |
 | **Batch 5** | **Worksheet & Workbook Management** | Combine Sheets, Combine Workbooks, Split Workbook to Files, Sort Tabs, Sheet Index TOC, Delete Blanks | **COMPLETED** |
 | **Batch 6** | **Filtering, Data Validation & Table Merge** | Advanced Multi-Sort, Color Filter/Count, Table Merge/Upsert, Dropdown Lists, Email/Phone Validation | **COMPLETED** |
-| **Batch 7** | **Formatting, Formulas & Printing** | Reference Conversion (Abs/Rel), Exact Copy, Locate Errors, Math Operations, Number/Date Formats, Page Setup | **Next Up** |
-| **Batch 8** | **Import, Export & Picture Utilities** | CSV Import/Export, PDF Export, Batch Format Convert, Folder Listing, Cell Pictures, Chart Image Export | Planned |
+| **Batch 7** | **Formatting, Formulas & Printing** | Reference Conversion (Abs/Rel), Exact Copy, Locate Errors, Math Operations, Number/Date Formats, Page Setup | **COMPLETED** |
+| **Batch 8** | **Import, Export & Picture Utilities** | CSV Import/Export, PDF Export, Batch Format Convert, Folder Listing, Cell Pictures, Chart Image Export | **Next Up** |
 | **Batch 9** | **Protection, Recovery, Charts & Analysis** | Batch Protect/Unprotect, Workbook Snapshots, Gantt/Waterfall Charts, Quick Statistics Dashboard | Planned |
 | **Batch 10** | **Navigation, UX Polish, Packaging & Release** | Navigation Pane, Grid-Focus Crosshair, Date Picker, Formula Editor, Release Installer Verification | Planned |
 

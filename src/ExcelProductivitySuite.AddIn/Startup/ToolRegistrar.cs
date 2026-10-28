@@ -794,6 +794,118 @@ namespace ExcelProductivitySuite.AddIn.Startup
                 roadmapBatch: "Active"
             ));
 
+            // =========================================================================
+            // Module G & H: Formulas, Formatting, and Page Setup (Batch 7 Expansion)
+            // =========================================================================
+
+            // Convert Formula References (Abs/Rel)
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_FORMULA_CONVERT_REF",
+                title: "Convert References",
+                description: "Batch convert formula cell references between Absolute ($A$1), Row-Absolute (A$1), Column-Absolute ($A1), and Relative (A1).",
+                category: CommandCategory.FormulasAndCalculation,
+                executeAction: ctx =>
+                {
+                    var dlg = new ConvertFormulaReferenceDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "convert references", "absolute reference", "relative reference", "dollar sign formula", "lock formula" },
+                officeIconName: "FormulaMoreFunctionsDialog",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "G",
+                roadmapBatch: "Batch 7"
+            ));
+
+            // Exact Copy Formulas
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_FORMULA_EXACT_COPY",
+                title: "Exact Copy Formulas",
+                description: "Copy formulas verbatim into new cells or ranges without adjusting relative references.",
+                category: CommandCategory.FormulasAndCalculation,
+                executeAction: ctx =>
+                {
+                    var dlg = new ExactCopyFormulaDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "exact copy", "copy formula exact", "duplicate formula", "copy without shifting", "formula copy" },
+                officeIconName: "Copy",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "G",
+                roadmapBatch: "Batch 7"
+            ));
+
+            // Locate Formula Errors
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_FORMULA_LOCATE_ERRORS",
+                title: "Locate Formula Errors",
+                description: "Detect, audit, navigate, and highlight formula calculation errors (#DIV/0!, #N/A, #VALUE!, etc.) across the worksheet.",
+                category: CommandCategory.FormulasAndCalculation,
+                executeAction: ctx =>
+                {
+                    var dlg = new LocateFormulaErrorsDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "locate errors", "find formula errors", "audit errors", "div0", "na error", "error highlighter" },
+                officeIconName: "TraceError",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "G",
+                roadmapBatch: "Batch 7"
+            ));
+
+            // Math Operations on Selected Cells
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_RANGE_MATH_OPERATIONS",
+                title: "Math Operations",
+                description: "Apply arithmetic operations (+, -, *, /, ^, %) directly to cell values in bulk without formula overhead.",
+                category: CommandCategory.RangeAndCells,
+                executeAction: ctx =>
+                {
+                    var dlg = new MathOperationsDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "math operations", "bulk calculate", "add to cells", "multiply cells", "operation tools", "arithmetic" },
+                officeIconName: "Calculator",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "B",
+                roadmapBatch: "Batch 7"
+            ));
+
+            // Copy Page Setup Across Sheets
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_FORMAT_PAGE_SETUP_COPY",
+                title: "Copy Page Setup",
+                description: "Copy page layout, print titles, margins, scaling, and headers/footers to other worksheets.",
+                category: CommandCategory.FormattingAndDesign,
+                executeAction: ctx =>
+                {
+                    var dlg = new CopyPageSetupDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "copy page setup", "page setup", "print margins", "repeat header rows", "paper size copy" },
+                officeIconName: "PageSetupDialog",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "H",
+                roadmapBatch: "Batch 7"
+            ));
+
+            // Synchronize Freeze Panes Across Sheets
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_FORMAT_FREEZE_PANES",
+                title: "Freeze Panes Multi",
+                description: "Apply uniform pane freezing or unfreezing across multiple worksheets simultaneously.",
+                category: CommandCategory.FormattingAndDesign,
+                executeAction: ctx =>
+                {
+                    var dlg = new FreezePanesMultiDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "freeze panes", "freeze top row", "freeze multiple sheets", "unfreeze all", "split panes" },
+                officeIconName: "FreezePanes",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "H",
+                roadmapBatch: "Batch 7"
+            ));
+
             // 16. Manage Worksheet Visibility - Module D: Worksheet and Workbook Management
             registry.RegisterCommand(new SuiteCommand(
                 id: "CMD_SHEET_VISIBILITY",

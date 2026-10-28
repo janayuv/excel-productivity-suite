@@ -76,16 +76,6 @@ namespace ExcelProductivitySuite.AddIn.Startup
             // =========================================================================
             // Module D: Worksheet and Workbook Management (Remaining Future Roadmap)
             // =========================================================================
-            AddPlanned(registry, "CMD_SHEET_COPY_PAGE_SETUP", "Copy Page Setup Across Sheets",
-                "Copy margins, orientation, headers/footers, and print scaling from active sheet to other sheets.",
-                CommandCategory.WorksheetAndWorkbook, "D", "Batch 5",
-                new[] { "copy page setup", "sync margins", "duplicate print settings", "header footer copy" }, "PageSetupPageDialog");
-
-            AddPlanned(registry, "CMD_SHEET_FREEZE_MULTI", "Freeze / Unfreeze Panes Across Sheets",
-                "Apply or remove Freeze Panes simultaneously across all or selected worksheets in the workbook.",
-                CommandCategory.WorksheetAndWorkbook, "D", "Batch 5",
-                new[] { "freeze multiple sheets", "unfreeze all", "sync freeze panes", "batch freeze" }, "WindowFreezePanes");
-
             AddPlanned(registry, "CMD_SHEET_SEQUENCE_NAMES", "Create Sequentially Named Sheets",
                 "Generate a series of new worksheets with sequential names (e.g. Month_01 to Month_12).",
                 CommandCategory.WorksheetAndWorkbook, "D", "Batch 5",
@@ -173,18 +163,8 @@ namespace ExcelProductivitySuite.AddIn.Startup
                 new[] { "copy validation", "duplicate validation rules", "sync dropdowns" }, "Copy");
 
             // =========================================================================
-            // Module G: Formula and Calculation Utilities (Batch 7)
+            // Module G: Formula and Calculation Utilities (Remaining Future Roadmap)
             // =========================================================================
-            AddPlanned(registry, "CMD_FORMULA_CONVERT_REF", "Convert References (Abs/Rel)",
-                "Toggle cell references between Absolute ($A$1), Row Absolute (A$1), Col Absolute ($A1), and Relative (A1).",
-                CommandCategory.FormulasAndCalculation, "G", "Batch 7",
-                new[] { "convert references", "absolute relative", "f4 convert", "toggle reference type", "fix references" }, "FormulaMoreFunctionsMenu");
-
-            AddPlanned(registry, "CMD_FORMULA_EXACT_COPY", "Exact Formula Copy",
-                "Copy formulas to new locations exactly without shifting relative cell references.",
-                CommandCategory.FormulasAndCalculation, "G", "Batch 7",
-                new[] { "exact copy", "copy formula without changing", "freeze references copy", "duplicate formula" }, "Copy");
-
             AddPlanned(registry, "CMD_FORMULA_AUDIT_PRECEDENTS", "Audit Precedents Visually",
                 "Navigate and inspect all precedent cells contributing to the active cell formula.",
                 CommandCategory.FormulasAndCalculation, "G", "Batch 7",
@@ -195,20 +175,10 @@ namespace ExcelProductivitySuite.AddIn.Startup
                 CommandCategory.FormulasAndCalculation, "G", "Batch 7",
                 new[] { "trace dependents", "dependent cells", "formula dependents", "what uses this cell" }, "TraceDependents");
 
-            AddPlanned(registry, "CMD_FORMULA_LOCATE_ERRORS", "Locate Formula Errors",
-                "Find, select, and navigate through all formula error cells (#N/A, #VALUE!, #REF!, #DIV/0!).",
-                CommandCategory.FormulasAndCalculation, "G", "Batch 7",
-                new[] { "locate errors", "find formula errors", "navigate errors", "fix #N/A", "error finder" }, "ErrorChecking");
-
             AddPlanned(registry, "CMD_FORMULA_BATCH_REPLACE_REF", "Batch Replace Formula References",
                 "Substitute sheet names or range addresses within formulas across all selected cells.",
-                CommandCategory.FormulasAndCalculation, "G", "Batch 7",
+                CommandCategory.FormulasAndCalculation, "G", "Batch 7+",
                 new[] { "replace references", "change formula sheet", "update formula ranges", "batch formula edit" }, "ReplaceDialog");
-
-            AddPlanned(registry, "CMD_FORMULA_MATH_OPERATIONS", "Apply Math Operation to Cells",
-                "Add, subtract, multiply, or divide a fixed constant across all selected numeric cells.",
-                CommandCategory.FormulasAndCalculation, "G", "Batch 7",
-                new[] { "math operation", "multiply range", "divide range", "add constant", "bulk calculation" }, "Calculator");
 
             AddPlanned(registry, "CMD_FORMULA_EXPLAIN", "Explain Formula Deterministically",
                 "Deconstruct and explain nested formulas in plain English using a local deterministic parser.",
@@ -265,13 +235,8 @@ namespace ExcelProductivitySuite.AddIn.Startup
 
             AddPlanned(registry, "CMD_PRINT_REPEATING_HEADERS", "Configure Repeating Print Headers",
                 "Set title rows and columns to repeat on every printed page across multiple sheets.",
-                CommandCategory.FormattingAndDesign, "H", "Batch 7",
+                CommandCategory.FormattingAndDesign, "H", "Batch 7+",
                 new[] { "repeating headers", "print titles", "rows to repeat at top", "print header rows" }, "PrintTitles");
-
-            AddPlanned(registry, "CMD_PRINT_COPY_PAGE_SETUP", "Batch Copy Page Settings",
-                "Synchronize orientation, paper size, margins, and scaling across all workbook sheets.",
-                CommandCategory.FormattingAndDesign, "H", "Batch 7",
-                new[] { "copy page settings", "sync page setup", "batch print configuration" }, "PageSetupPageDialog");
 
             // =========================================================================
             // Module I: Import, Export, and File Utilities (Batch 8)

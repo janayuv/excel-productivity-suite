@@ -233,6 +233,48 @@ namespace ExcelProductivitySuite.UnitTests
 
         public bool ApplyPreventDuplicateValidation(string? customErrorMessage = null) => true;
 
+        public object?[,]? CurrentFormulas { get; set; }
+        public List<FormulaErrorInfo> MockFormulaErrors { get; } = new();
+        public List<(string src, List<string> targets, PageSetupOptions opts)> CopiedPageSetups { get; } = new();
+        public (List<string> targets, FreezePanesSyncMode mode, int row, int col)? LastSynchronizedFreezePanes { get; set; }
+
+        public object?[,]? GetSelectedFormulas() => CurrentFormulas != null ? (object?[,])CurrentFormulas.Clone() : null;
+
+        public void SetSelectedFormulas(object?[,] formulas)
+        {
+            CurrentFormulas = (object?[,])formulas.Clone();
+        }
+
+        public object?[,]? GetRangeFormulas(int startRow, int startCol, int rowCount, int colCount) => CurrentFormulas;
+
+        public object?[,]? GetRangeFormulasByAddress(string address) => CurrentFormulas;
+
+        public void SetRangeFormulas(int startRow, int startCol, object?[,] formulas)
+        {
+            CurrentFormulas = (object?[,])formulas.Clone();
+        }
+
+        public void SetRangeFormulasByAddress(string address, object?[,] formulas)
+        {
+            CurrentFormulas = (object?[,])formulas.Clone();
+        }
+
+        public IReadOnlyList<FormulaErrorInfo> GetFormulaErrors(bool selectionOnly = false) => MockFormulaErrors;
+
+        public int CopyPageSetup(string sourceSheetName, IEnumerable<string> targetSheetNames, PageSetupOptions options)
+        {
+            var targets = new List<string>(targetSheetNames);
+            CopiedPageSetups.Add((sourceSheetName, targets, options));
+            return targets.Count;
+        }
+
+        public int SynchronizeFreezePanes(IEnumerable<string> targetSheetNames, FreezePanesSyncMode mode, int splitRow = 1, int splitCol = 1)
+        {
+            var targets = new List<string>(targetSheetNames);
+            LastSynchronizedFreezePanes = (targets, mode, splitRow, splitCol);
+            return targets.Count;
+        }
+
         public void ShowMessage(string message, string title, bool isError = false)
         {
             MessagesShown.Add($"[{title}] {message}");

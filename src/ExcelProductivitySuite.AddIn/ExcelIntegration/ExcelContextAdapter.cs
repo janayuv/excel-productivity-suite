@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Windows;
 using ExcelProductivitySuite.Core.Abstractions;
+using ExcelProductivitySuite.Engine.Formulas;
 using Excel = Microsoft.Office.Interop.Excel;
 
 namespace ExcelProductivitySuite.AddIn.ExcelIntegration
@@ -1415,6 +1416,393 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
                 div = (div - mod) / 26;
             }
             return colLetter;
+        }
+
+        public object?[,]? GetSelectedFormulas()
+        {
+            try
+            {
+                if (!(_app.Selection is Excel.Range range)) return null;
+
+                object raw = range.Formula;
+                if (raw is object[,] matrix)
+                {
+                    return (object?[,])matrix;
+                }
+
+                object?[,] single = new object?[1, 1];
+                single[0, 0] = raw;
+                return single;
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Error reading selection formulas: {ex.Message}", "Formula Error", isError: true);
+                return null;
+            }
+        }
+
+        public void SetSelectedFormulas(object?[,] formulas)
+        {
+            if (formulas == null) throw new ArgumentNullException(nameof(formulas));
+            if (!(_app.Selection is Excel.Range range)) return;
+
+            if (IsCurrentSheetProtected)
+            {
+                ShowMessage("The active worksheet is protected. Please unprotect the sheet before modifying formulas.", "Sheet Protected", isError: true);
+                return;
+            }
+
+            if (IsMultiAreaSelection)
+            {
+                ShowMessage("This operation does not support non-contiguous multi-area selections.", "Multi-Area Selection", isError: true);
+                return;
+            }
+
+            using (new ExcelStateScope(_app))
+            {
+                range.Formula = formulas;
+            }
+        }
+
+        public object?[,]? GetRangeFormulas(int startRow, int startCol, int rowCount, int colCount)
+        {
+            try
+            {
+                if (!(_app.ActiveSheet is Excel.Worksheet sheet)) return null;
+
+                Excel.Range topLeft = sheet.Cells[startRow, startCol];
+                Excel.Range bottomRight = sheet.Cells[startRow + rowCount - 1, startCol + colCount - 1];
+                Excel.Range targetRange = sheet.Range[topLeft, bottomRight];
+
+                object raw = targetRange.Formula;
+                if (raw is object[,] matrix)
+                {
+                    return (object?[,])matrix;
+                }
+
+                object?[,] single = new object?[1, 1];
+                single[0, 0] = raw;
+                return single;
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Error reading range formulas: {ex.Message}", "Formula Error", isError: true);
+                return null;
+            }
+        }
+
+        public object?[,]? GetRangeFormulasByAddress(string address)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(address)) return null;
+                Excel.Range targetRange = _app.Range[address];
+
+                object raw = targetRange.Formula;
+                if (raw is object[,] matrix)
+                {
+                    return (object?[,])matrix;
+                }
+
+                object?[,] single = new object?[1, 1];
+                single[0, 0] = raw;
+                return single;
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Error reading formulas by address '{address}': {ex.Message}", "Formula Error", isError: true);
+                return null;
+            }
+        }
+
+        public void SetRangeFormulas(int startRow, int startCol, object?[,] formulas)
+        {
+            if (formulas == null) throw new ArgumentNullException(nameof(formulas));
+            if (!(_app.ActiveSheet is Excel.Worksheet sheet)) return;
+
+            if (IsCurrentSheetProtected)
+            {
+                ShowMessage("The active worksheet is protected. Please unprotect the sheet before modifying formulas.", "Sheet Protected", isError: true);
+                return;
+            }
+
+            int rows = formulas.GetLength(0);
+            int cols = formulas.GetLength(1);
+            if (rows <= 0 || cols <= 0) return;
+
+            using (new ExcelStateScope(_app))
+            {
+                Excel.Range topLeft = sheet.Cells[startRow, startCol];
+                Excel.Range bottomRight = sheet.Cells[startRow + rows - 1, startCol + cols - 1];
+                Excel.Range targetRange = sheet.Range[topLeft, bottomRight];
+                targetRange.Formula = formulas;
+            }
+        }
+
+        public void SetRangeFormulasByAddress(string address, object?[,] formulas)
+        {
+            if (string.IsNullOrWhiteSpace(address)) return;
+            if (formulas == null) throw new ArgumentNullException(nameof(formulas));
+
+            if (IsCurrentSheetProtected)
+            {
+                ShowMessage("The active worksheet is protected. Please unprotect the sheet before modifying formulas.", "Sheet Protected", isError: true);
+                return;
+            }
+
+            using (new ExcelStateScope(_app))
+            {
+                Excel.Range targetRange = _app.Range[address];
+                targetRange.Formula = formulas;
+            }
+        }
+
+        public IReadOnlyList<FormulaErrorInfo> GetFormulaErrors(bool selectionOnly = false)
+        {
+            var results = new List<FormulaErrorInfo>();
+            try
+            {
+                if (!(_app.ActiveSheet is Excel.Worksheet sheet)) return results;
+
+                Excel.Range targetRange = selectionOnly && _app.Selection is Excel.Range sel ? sel : sheet.UsedRange;
+                if (targetRange == null) return results;
+
+                int startRow = targetRange.Row;
+                int startCol = targetRange.Column;
+                string sheetName = sheet.Name;
+
+                object rawValues = targetRange.Value2;
+                object rawFormulas = targetRange.Formula;
+
+                object?[,]? valMatrix = rawValues as object[,];
+                if (valMatrix == null && rawValues != null)
+                {
+                    valMatrix = new object?[1, 1] { { rawValues } };
+                }
+
+                object?[,]? formMatrix = rawFormulas as object[,];
+                if (formMatrix == null && rawFormulas != null)
+                {
+                    formMatrix = new object?[1, 1] { { rawFormulas } };
+                }
+
+                if (valMatrix != null)
+                {
+                    results.AddRange(FormulaErrorLocator.LocateErrors(valMatrix, formMatrix, startRow, startCol, sheetName));
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Error locating formula errors: {ex.Message}", "Formula Audit", isError: true);
+            }
+
+            return results;
+        }
+
+        public int CopyPageSetup(string sourceSheetName, IEnumerable<string> targetSheetNames, PageSetupOptions options)
+        {
+            if (string.IsNullOrWhiteSpace(sourceSheetName)) throw new ArgumentNullException(nameof(sourceSheetName));
+            if (targetSheetNames == null) throw new ArgumentNullException(nameof(targetSheetNames));
+            if (options == null) throw new ArgumentNullException(nameof(options));
+
+            try
+            {
+                if (!(_app.ActiveWorkbook is Excel.Workbook wb)) return 0;
+
+                Excel.Worksheet? srcWs = null;
+                foreach (Excel.Worksheet ws in wb.Worksheets)
+                {
+                    if (string.Equals(ws.Name, sourceSheetName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        srcWs = ws;
+                        break;
+                    }
+                }
+
+                if (srcWs == null)
+                {
+                    ShowMessage($"Source worksheet '{sourceSheetName}' not found.", "Page Setup Error", isError: true);
+                    return 0;
+                }
+
+                Excel.PageSetup src = srcWs.PageSetup;
+                int count = 0;
+
+                using (new ExcelStateScope(_app))
+                {
+                    foreach (string tName in targetSheetNames)
+                    {
+                        if (string.Equals(tName, sourceSheetName, StringComparison.OrdinalIgnoreCase)) continue;
+
+                        Excel.Worksheet? targetWs = null;
+                        foreach (Excel.Worksheet ws in wb.Worksheets)
+                        {
+                            if (string.Equals(ws.Name, tName, StringComparison.OrdinalIgnoreCase))
+                            {
+                                targetWs = ws;
+                                break;
+                            }
+                        }
+
+                        if (targetWs == null) continue;
+
+                        try
+                        {
+                            Excel.PageSetup dst = targetWs.PageSetup;
+
+                            if (options.CopyOrientationAndSize)
+                            {
+                                dst.Orientation = src.Orientation;
+                                dst.PaperSize = src.PaperSize;
+                            }
+
+                            if (options.CopyMargins)
+                            {
+                                dst.TopMargin = src.TopMargin;
+                                dst.BottomMargin = src.BottomMargin;
+                                dst.LeftMargin = src.LeftMargin;
+                                dst.RightMargin = src.RightMargin;
+                                dst.HeaderMargin = src.HeaderMargin;
+                                dst.FooterMargin = src.FooterMargin;
+                            }
+
+                            if (options.CopyPrintTitles)
+                            {
+                                dst.PrintTitleRows = src.PrintTitleRows;
+                                dst.PrintTitleColumns = src.PrintTitleColumns;
+                            }
+
+                            if (options.CopyScaling)
+                            {
+                                dst.Zoom = src.Zoom;
+                                dst.FitToPagesWide = src.FitToPagesWide;
+                                dst.FitToPagesTall = src.FitToPagesTall;
+                            }
+
+                            if (options.CopyHeadersFooters)
+                            {
+                                dst.LeftHeader = src.LeftHeader;
+                                dst.CenterHeader = src.CenterHeader;
+                                dst.RightHeader = src.RightHeader;
+                                dst.LeftFooter = src.LeftFooter;
+                                dst.CenterFooter = src.CenterFooter;
+                                dst.RightFooter = src.RightFooter;
+                            }
+
+                            if (options.CopySheetOptions)
+                            {
+                                dst.PrintGridlines = src.PrintGridlines;
+                                dst.CenterHorizontally = src.CenterHorizontally;
+                                dst.CenterVertically = src.CenterVertically;
+                                dst.BlackAndWhite = src.BlackAndWhite;
+                                dst.Draft = src.Draft;
+                            }
+
+                            count++;
+                        }
+                        catch
+                        {
+                            // Continue copying to next worksheet if one sheet is protected or restricted
+                        }
+                    }
+                }
+
+                return count;
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Error copying page setup: {ex.Message}", "Page Setup Error", isError: true);
+                return 0;
+            }
+        }
+
+        public int SynchronizeFreezePanes(IEnumerable<string> targetSheetNames, FreezePanesSyncMode mode, int splitRow = 1, int splitCol = 1)
+        {
+            if (targetSheetNames == null) throw new ArgumentNullException(nameof(targetSheetNames));
+
+            try
+            {
+                if (!(_app.ActiveWorkbook is Excel.Workbook wb)) return 0;
+                string? originalActiveSheet = ActiveWorksheetName;
+                int count = 0;
+
+                using (new ExcelStateScope(_app))
+                {
+                    foreach (string tName in targetSheetNames)
+                    {
+                        Excel.Worksheet? targetWs = null;
+                        foreach (Excel.Worksheet ws in wb.Worksheets)
+                        {
+                            if (string.Equals(ws.Name, tName, StringComparison.OrdinalIgnoreCase))
+                            {
+                                targetWs = ws;
+                                break;
+                            }
+                        }
+
+                        if (targetWs == null) continue;
+
+                        try
+                        {
+                            targetWs.Activate();
+                            Excel.Window win = _app.ActiveWindow;
+                            if (win == null) continue;
+
+                            win.FreezePanes = false;
+
+                            switch (mode)
+                            {
+                                case FreezePanesSyncMode.FreezeTopRow:
+                                    win.SplitRow = 1;
+                                    win.SplitColumn = 0;
+                                    win.FreezePanes = true;
+                                    break;
+                                case FreezePanesSyncMode.FreezeFirstColumn:
+                                    win.SplitRow = 0;
+                                    win.SplitColumn = 1;
+                                    win.FreezePanes = true;
+                                    break;
+                                case FreezePanesSyncMode.FreezeAtActiveCell:
+                                    win.SplitRow = Math.Max(0, splitRow - 1);
+                                    win.SplitColumn = Math.Max(0, splitCol - 1);
+                                    win.FreezePanes = true;
+                                    break;
+                                case FreezePanesSyncMode.UnfreezeAll:
+                                    win.FreezePanes = false;
+                                    win.SplitRow = 0;
+                                    win.SplitColumn = 0;
+                                    break;
+                            }
+
+                            count++;
+                        }
+                        catch
+                        {
+                            // Skip sheets that cannot be activated or frozen
+                        }
+                    }
+
+                    // Restore original sheet view
+                    if (!string.IsNullOrEmpty(originalActiveSheet))
+                    {
+                        foreach (Excel.Worksheet ws in wb.Worksheets)
+                        {
+                            if (string.Equals(ws.Name, originalActiveSheet, StringComparison.OrdinalIgnoreCase))
+                            {
+                                ws.Activate();
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                return count;
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Error synchronizing freeze panes: {ex.Message}", "Freeze Panes Error", isError: true);
+                return 0;
+            }
         }
 
         public void ShowMessage(string message, string title, bool isError = false)

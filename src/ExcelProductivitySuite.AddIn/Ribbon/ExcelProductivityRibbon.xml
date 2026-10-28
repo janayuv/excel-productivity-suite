@@ -216,6 +216,13 @@
                   screentip="Merge Compatible Ranges"
                   supertip="Combine two ranges by appending rows or side-by-side with header alignment."
                   onAction="OnRibbonButtonClicked" />
+          <button id="btnRangeMath"
+                  label="Math Operations"
+                  size="normal"
+                  imageMso="Calculator"
+                  screentip="Math Calculations on Range"
+                  supertip="Apply arithmetic operations (+, -, *, /, ^, %) directly to cell values in bulk without formula overhead."
+                  onAction="OnRibbonButtonClicked" />
         </group>
 
         <!-- Group: Find & Select -->
@@ -336,6 +343,31 @@
                   onAction="OnRibbonButtonClicked" />
         </group>
 
+        <!-- Group: Formulas & Auditing -->
+        <group id="grpFormulas" label="Formula Tools">
+          <button id="btnFormulaConvertRef"
+                  label="Convert Refs"
+                  size="large"
+                  imageMso="FormulaMoreFunctionsDialog"
+                  screentip="Convert Formula References"
+                  supertip="Batch convert formula cell references between Absolute ($A$1), Row-Absolute (A$1), Col-Absolute ($A1), and Relative (A1)."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnFormulaExactCopy"
+                  label="Exact Copy"
+                  size="normal"
+                  imageMso="Copy"
+                  screentip="Exact Copy Formulas"
+                  supertip="Copy formulas verbatim into new cells without adjusting relative references."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnFormulaLocateErrors"
+                  label="Locate Errors"
+                  size="normal"
+                  imageMso="TraceError"
+                  screentip="Locate Formula Errors"
+                  supertip="Audit, navigate, and highlight formula calculation errors (#DIV/0!, #N/A, #VALUE!, etc.) across the worksheet."
+                  onAction="OnRibbonButtonClicked" />
+        </group>
+
       </tab>
 
       <!-- Secondary Tab: Workbook & Sheets -->
@@ -416,6 +448,23 @@
                   imageMso="ViewSideBySide"
                   screentip="Compare Two Workbooks"
                   supertip="Audit differences in worksheet names, dimensions, and cell values across workbooks."
+                  onAction="OnRibbonButtonClicked" />
+        </group>
+
+        <group id="grpPageSetup" label="Page Setup &amp; View">
+          <button id="btnCopyPageSetup"
+                  label="Copy Page Setup"
+                  size="large"
+                  imageMso="PageSetupDialog"
+                  screentip="Copy Page Setup"
+                  supertip="Copy page layout, print titles, margins, and headers/footers to other worksheets."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnFreezePanesMulti"
+                  label="Freeze Panes Multi"
+                  size="large"
+                  imageMso="FreezePanes"
+                  screentip="Synchronize Freeze Panes"
+                  supertip="Apply uniform pane freezing or unfreezing across multiple worksheets."
                   onAction="OnRibbonButtonClicked" />
         </group>
 

@@ -1,0 +1,102 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.MathOperationsDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Math Operations - Excel Productivity Suite"
+        Height="490" Width="480"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="➕" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Math Operations" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Apply calculations directly to cell values in bulk without formula overhead" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Operation Selection -->
+        <GroupBox Grid.Row="1" Header="Operation &amp; Operand" Style="{StaticResource ModernGroupBoxStyle}">
+            <StackPanel Margin="4">
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <RadioButton x:Name="AddRadio" Grid.Row="0" Grid.Column="0" Content="Addition (+)" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Checked="Op_Changed" />
+                    <RadioButton x:Name="SubtractRadio" Grid.Row="0" Grid.Column="1" Content="Subtraction (-)" Style="{StaticResource ModernRadioButtonStyle}" Checked="Op_Changed" />
+                    <RadioButton x:Name="MultiplyRadio" Grid.Row="1" Grid.Column="0" Content="Multiplication (*)" Style="{StaticResource ModernRadioButtonStyle}" Checked="Op_Changed" />
+                    <RadioButton x:Name="DivideRadio" Grid.Row="1" Grid.Column="1" Content="Division (/)" Style="{StaticResource ModernRadioButtonStyle}" Checked="Op_Changed" />
+                    <RadioButton x:Name="PowerRadio" Grid.Row="2" Grid.Column="0" Content="Exponentiation (^)" Style="{StaticResource ModernRadioButtonStyle}" Checked="Op_Changed" />
+                    <RadioButton x:Name="PercentRadio" Grid.Row="2" Grid.Column="1" Content="Percentage Change (%)" Style="{StaticResource ModernRadioButtonStyle}" Checked="Op_Changed" />
+                </Grid>
+
+                <DockPanel Margin="0,4,0,0">
+                    <TextBlock Text="Value / Operand:" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="11" FontWeight="SemiBold" />
+                    <TextBox x:Name="OperandText" Text="10" Width="140" HorizontalAlignment="Left" Style="{StaticResource ModernTextBoxStyle}" TextChanged="Operand_TextChanged" />
+                </DockPanel>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Calculation Options -->
+        <GroupBox Grid.Row="2" Header="Options" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,10,0,10">
+            <StackPanel Margin="4">
+                <CheckBox x:Name="SkipBlanksCheck" Content="Skip blank cells" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" Margin="0,0,0,6" Checked="Op_Changed" Unchecked="Op_Changed" />
+                <CheckBox x:Name="TreatTextCheck" Content="Process numbers stored as text" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" Margin="0,0,0,6" Checked="Op_Changed" Unchecked="Op_Changed" />
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="RoundResultsCheck" Content="Round results to" Style="{StaticResource ModernCheckBoxStyle}" VerticalAlignment="Center" Margin="0,0,8,0" Checked="Op_Changed" Unchecked="Op_Changed" />
+                    <ComboBox x:Name="DecimalPlacesCombo" Width="60" Style="{StaticResource ModernComboBoxStyle}" SelectionChanged="Op_Changed" />
+                    <TextBlock Text="decimal places" VerticalAlignment="Center" Margin="8,0,0,0" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Live Sample Preview -->
+        <GroupBox Grid.Row="3" Header="Live Preview (First 4 Values)" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,0,0,12">
+            <Border Background="#E9ECEF" CornerRadius="4" Padding="8">
+                <TextBlock x:Name="PreviewLabel" FontFamily="Consolas" FontSize="11" Foreground="{StaticResource TextPrimaryBrush}" Text="100 -> 110&#x0a;250 -> 260" TextWrapping="Wrap" />
+            </Border>
+        </GroupBox>
+
+        <!-- Footer / Action Buttons -->
+        <DockPanel Grid.Row="4">
+            <TextBlock x:Name="StatusLabel" Text="Ready" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Apply Operation" Width="120" Margin="0,0,8,0" Style="{StaticResource ModernPrimaryButtonStyle}" Click="Apply_Click" />
+                <Button Content="Close" Width="75" Style="{StaticResource ModernSecondaryButtonStyle}" Click="Close_Click" />
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

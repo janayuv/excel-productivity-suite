@@ -1,0 +1,86 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.FreezePanesMultiDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Synchronize Freeze Panes - Excel Productivity Suite"
+        Height="470" Width="480"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="❄️" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Synchronize Freeze Panes" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Apply uniform pane freezing or unfreezing across multiple worksheets" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Freeze Modes -->
+        <GroupBox Grid.Row="1" Header="Freeze Mode" Style="{StaticResource ModernGroupBoxStyle}">
+            <StackPanel Margin="4">
+                <RadioButton x:Name="FreezeTopRowRadio" Content="Freeze Top Row (Row 1)" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,0,6" />
+                <RadioButton x:Name="FreezeFirstColRadio" Content="Freeze First Column (Column A)" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,0,6" />
+                <RadioButton x:Name="FreezeActiveCellRadio" Content="Freeze at Current Active Cell" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,0,6" />
+                <RadioButton x:Name="UnfreezeAllRadio" Content="Unfreeze Panes (Remove Freeze)" Style="{StaticResource ModernRadioButtonStyle}" />
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Target Worksheets -->
+        <GroupBox Grid.Row="2" Header="Target Worksheets" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,10,0,12">
+            <Grid Margin="4">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <DockPanel Grid.Row="0" Margin="0,0,0,6">
+                    <TextBlock Text="Select worksheets to synchronize:" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Select All" Width="70" Margin="0,0,6,0" Style="{StaticResource ModernSecondaryButtonStyle}" Click="SelectAll_Click" />
+                        <Button Content="Deselect All" Width="80" Style="{StaticResource ModernSecondaryButtonStyle}" Click="DeselectAll_Click" />
+                    </StackPanel>
+                </DockPanel>
+                <ListBox x:Name="SheetsList" Grid.Row="1" BorderBrush="#DEE2E6" BorderThickness="1" Background="White" MaxHeight="140">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <CheckBox Content="{Binding Name}" IsChecked="{Binding IsSelected}" Style="{StaticResource ModernCheckBoxStyle}" Margin="2" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+        </GroupBox>
+
+        <!-- Footer / Action Buttons -->
+        <DockPanel Grid.Row="3">
+            <TextBlock x:Name="StatusLabel" Text="Ready" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Apply to Sheets" Width="120" Margin="0,0,8,0" Style="{StaticResource ModernPrimaryButtonStyle}" Click="Apply_Click" />
+                <Button Content="Close" Width="75" Style="{StaticResource ModernSecondaryButtonStyle}" Click="Close_Click" />
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

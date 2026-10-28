@@ -134,6 +134,12 @@ namespace ExcelProductivitySuite.AddIn.Ribbon
                 case "btnSplitWorkbookFiles": return "CMD_WB_SPLIT_FILES";
                 case "btnSplitDataToSheets": return "CMD_SPLIT_DATA_TO_SHEETS";
                 case "btnCompareWorkbooks": return "CMD_COMPARE_WORKBOOKS";
+                case "btnFormulaConvertRef": return "CMD_FORMULA_CONVERT_REF";
+                case "btnFormulaExactCopy": return "CMD_FORMULA_EXACT_COPY";
+                case "btnFormulaLocateErrors": return "CMD_FORMULA_LOCATE_ERRORS";
+                case "btnRangeMath": return "CMD_RANGE_MATH_OPERATIONS";
+                case "btnCopyPageSetup": return "CMD_FORMAT_PAGE_SETUP_COPY";
+                case "btnFreezePanesMulti": return "CMD_FORMAT_FREEZE_PANES";
                 case "btnAbout": return "CMD_ABOUT";
                 default: return controlId;
             }

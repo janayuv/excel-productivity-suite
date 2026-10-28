@@ -250,9 +250,94 @@ namespace ExcelProductivitySuite.Core.Abstractions
         bool ApplyPreventDuplicateValidation(string? customErrorMessage = null);
 
         /// <summary>
+        /// Reads formula strings from the current selection into a 2D object array.
+        /// </summary>
+        object?[,]? GetSelectedFormulas();
+
+        /// <summary>
+        /// Writes formula strings back into the current selection in a single batch assignment.
+        /// </summary>
+        void SetSelectedFormulas(object?[,] formulas);
+
+        /// <summary>
+        /// Reads formula strings from an arbitrary range into a 2D object array.
+        /// </summary>
+        object?[,]? GetRangeFormulas(int startRow, int startCol, int rowCount, int colCount);
+
+        /// <summary>
+        /// Reads formula strings from a specified range address into a 2D object array.
+        /// </summary>
+        object?[,]? GetRangeFormulasByAddress(string address);
+
+        /// <summary>
+        /// Writes formula strings into a target range specified by row and column coordinates.
+        /// </summary>
+        void SetRangeFormulas(int startRow, int startCol, object?[,] formulas);
+
+        /// <summary>
+        /// Writes formula strings into a target range specified by an A1-style address.
+        /// </summary>
+        void SetRangeFormulasByAddress(string address, object?[,] formulas);
+
+        /// <summary>
+        /// Locates and audits formula error cells in the current worksheet or active selection.
+        /// </summary>
+        IReadOnlyList<FormulaErrorInfo> GetFormulaErrors(bool selectionOnly = false);
+
+        /// <summary>
+        /// Copies page setup configurations from a source worksheet to one or more target worksheets.
+        /// Returns the number of worksheets successfully updated.
+        /// </summary>
+        int CopyPageSetup(string sourceSheetName, IEnumerable<string> targetSheetNames, PageSetupOptions options);
+
+        /// <summary>
+        /// Synchronizes freeze panes settings across multiple target worksheets.
+        /// Returns the number of worksheets successfully synchronized.
+        /// </summary>
+        int SynchronizeFreezePanes(IEnumerable<string> targetSheetNames, FreezePanesSyncMode mode, int splitRow = 1, int splitCol = 1);
+
+        /// <summary>
         /// Shows an informational, warning, or error alert dialog in Excel.
         /// </summary>
         void ShowMessage(string message, string title, bool isError = false);
+    }
+
+    public class FormulaErrorInfo
+    {
+        public string SheetName { get; }
+        public string CellAddress { get; }
+        public int Row { get; }
+        public int Column { get; }
+        public string Formula { get; }
+        public string ErrorText { get; }
+
+        public FormulaErrorInfo(string sheetName, string cellAddress, int row, int col, string formula, string errorText)
+        {
+            SheetName = sheetName;
+            CellAddress = cellAddress;
+            Row = row;
+            Column = col;
+            Formula = formula;
+            ErrorText = errorText;
+        }
+    }
+
+    public class PageSetupOptions
+    {
+        public bool CopyOrientationAndSize { get; set; } = true;
+        public bool CopyMargins { get; set; } = true;
+        public bool CopyPrintTitles { get; set; } = true;
+        public bool CopyScaling { get; set; } = true;
+        public bool CopyHeadersFooters { get; set; } = true;
+        public bool CopySheetOptions { get; set; } = true;
+    }
+
+    public enum FreezePanesSyncMode
+    {
+        FreezeTopRow,
+        FreezeFirstColumn,
+        FreezeAtActiveCell,
+        UnfreezeAll
     }
 
     public class CellColorInfo

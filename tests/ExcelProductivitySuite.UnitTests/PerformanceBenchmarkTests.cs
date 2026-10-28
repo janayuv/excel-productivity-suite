@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using ExcelProductivitySuite.Engine.DataCleaning;
+using ExcelProductivitySuite.Engine.Formulas;
 using ExcelProductivitySuite.Engine.Ranges;
 using ExcelProductivitySuite.Engine.Text;
 using ExcelProductivitySuite.Engine.Worksheets;
@@ -596,6 +597,60 @@ namespace ExcelProductivitySuite.UnitTests
             Assert.AreEqual(5000, matched);
             Assert.AreEqual(10000, merged.GetLength(0));
             Assert.IsTrue(sw.ElapsedMilliseconds < 500, $"TableMerger benchmark took {sw.ElapsedMilliseconds} ms, target is < 500 ms");
+        }
+
+        [TestMethod]
+        public void Benchmark_RangeMathOperations_100K_Cells_CompletesUnder500ms()
+        {
+            int rows = 10000;
+            int cols = 10;
+            object?[,] matrix = new object?[rows, cols];
+
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    matrix[r, c] = (double)(r * 10 + c);
+                }
+            }
+
+            var options = new MathOperationOptions
+            {
+                RoundResults = true,
+                DecimalPlaces = 2,
+                TreatTextAsNumber = true,
+                SkipBlankCells = true
+            };
+
+            var sw = Stopwatch.StartNew();
+            var result = RangeMathOperations.Apply(matrix, MathOperationType.Multiply, 1.15, options);
+            sw.Stop();
+
+            Assert.AreEqual(100000, result.ProcessedCount);
+            Assert.IsTrue(sw.ElapsedMilliseconds < 500, $"RangeMathOperations benchmark took {sw.ElapsedMilliseconds} ms, target is < 500 ms");
+        }
+
+        [TestMethod]
+        public void Benchmark_FormulaReferenceConverter_10K_Formulas_CompletesUnder500ms()
+        {
+            int rows = 2000;
+            int cols = 5;
+            object?[,] matrix = new object?[rows, cols];
+
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    matrix[r, c] = $"=SUM(A{r + 1}:B{r + 10}) + C${r + 5} * $D$4";
+                }
+            }
+
+            var sw = Stopwatch.StartNew();
+            var (resMatrix, modified) = FormulaReferenceConverter.ConvertMatrix(matrix, ReferenceConversionMode.ToAbsolute);
+            sw.Stop();
+
+            Assert.AreEqual(10000, modified);
+            Assert.IsTrue(sw.ElapsedMilliseconds < 500, $"FormulaReferenceConverter benchmark took {sw.ElapsedMilliseconds} ms, target is < 500 ms");
         }
     }
 }

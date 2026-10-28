@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using ExcelProductivitySuite.Core.Abstractions;
 using ExcelProductivitySuite.Engine.DataCleaning;
+using ExcelProductivitySuite.Engine.Formulas;
 using ExcelProductivitySuite.Engine.Ranges;
 using ExcelProductivitySuite.Engine.Worksheets;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -1260,6 +1261,168 @@ namespace ExcelProductivitySuite.UnitTests
             string colLetter = DuplicateValidationHelper.IndexToColumnLetter(28);
             Assert.AreEqual("AB", colLetter);
         }
+
+        #region Batch 7: Formulas, Math Operations & Page Setup Tests
+
+        [TestMethod]
+        public void FormulaReferenceConverter_ToAbsolute_ConvertsCorrectly()
+        {
+            string formula = "=SUM(A1:B10) + C5 * $D$6";
+            string converted = FormulaReferenceConverter.ConvertFormulaReferences(formula, ReferenceConversionMode.ToAbsolute);
+            Assert.AreEqual("=SUM($A$1:$B$10) + $C$5 * $D$6", converted);
+
+            // Preserves sheet qualifier and string literal
+            string complex = "='Sales Data'!A1 + Sheet2!B2 & \" Address: A1 \"";
+            string resComplex = FormulaReferenceConverter.ConvertFormulaReferences(complex, ReferenceConversionMode.ToAbsolute);
+            Assert.AreEqual("='Sales Data'!$A$1 + Sheet2!$B$2 & \" Address: A1 \"", resComplex);
+        }
+
+        [TestMethod]
+        public void FormulaReferenceConverter_ToRowAbsolute_ConvertsCorrectly()
+        {
+            string formula = "=$A$1 + $B2 + C$3";
+            string converted = FormulaReferenceConverter.ConvertFormulaReferences(formula, ReferenceConversionMode.ToRowAbsolute);
+            Assert.AreEqual("=A$1 + B$2 + C$3", converted);
+        }
+
+        [TestMethod]
+        public void FormulaReferenceConverter_ToColumnAbsolute_ConvertsCorrectly()
+        {
+            string formula = "=A1 + B$2 + C3";
+            string converted = FormulaReferenceConverter.ConvertFormulaReferences(formula, ReferenceConversionMode.ToColumnAbsolute);
+            Assert.AreEqual("=$A1 + $B2 + $C3", converted);
+        }
+
+        [TestMethod]
+        public void FormulaReferenceConverter_ToRelative_ConvertsCorrectly()
+        {
+            string formula = "=SUM($A$1:$B$10) + $C$5 * D$6";
+            string converted = FormulaReferenceConverter.ConvertFormulaReferences(formula, ReferenceConversionMode.ToRelative);
+            Assert.AreEqual("=SUM(A1:B10) + C5 * D6", converted);
+        }
+
+        [TestMethod]
+        public void FormulaReferenceConverter_ConvertMatrix_BatchProcessesFormulas()
+        {
+            object?[,] matrix = new object?[2, 2]
+            {
+                { "=A1+B1", "Static Text" },
+                { 12345,    "=SUM(C1:D5)" }
+            };
+
+            var (res, modified) = FormulaReferenceConverter.ConvertMatrix(matrix, ReferenceConversionMode.ToAbsolute);
+            Assert.AreEqual(2, modified);
+            Assert.AreEqual("=$A$1+$B$1", res[0, 0]);
+            Assert.AreEqual("Static Text", res[0, 1]);
+            Assert.AreEqual(12345, res[1, 0]);
+            Assert.AreEqual("=SUM($C$1:$D$5)", res[1, 1]);
+        }
+
+        [TestMethod]
+        public void FormulaExactCopier_FillExactFormula_FillsVerbatim()
+        {
+            var result = FormulaExactCopier.FillExactFormula("=A1+B1", 2, 3);
+            Assert.AreEqual(2, result.GetLength(0));
+            Assert.AreEqual(3, result.GetLength(1));
+            Assert.AreEqual("=A1+B1", result[0, 0]);
+            Assert.AreEqual("=A1+B1", result[1, 2]);
+        }
+
+        [TestMethod]
+        public void FormulaExactCopier_CopyExactMatrix_PreservesAllReferences()
+        {
+            object?[,] source = new object?[2, 1]
+            {
+                { "=A1*2" },
+                { "=B1*2" }
+            };
+
+            var target = FormulaExactCopier.CopyExactMatrix(source, 2, 1);
+            Assert.AreEqual("=A1*2", target[0, 0]);
+            Assert.AreEqual("=B1*2", target[1, 0]);
+        }
+
+        [TestMethod]
+        public void FormulaErrorLocator_DetectsErrors()
+        {
+            object?[,] values = new object?[3, 2]
+            {
+                { 100, FormulaErrorLocator.CVErrDiv0 },
+                { "#VALUE!", "Valid Text" },
+                { FormulaErrorLocator.CVErrNA, "#REF!" }
+            };
+
+            object?[,] formulas = new object?[3, 2]
+            {
+                { null, "=10/0" },
+                { "=A1+B1", null },
+                { "=VLOOKUP(1,A:B,2,FALSE)", "=#REF!*2" }
+            };
+
+            var errors = FormulaErrorLocator.LocateErrors(values, formulas, 1, 1, "Sheet1");
+            Assert.AreEqual(4, errors.Count);
+            Assert.AreEqual("#DIV/0!", errors[0].ErrorText);
+            Assert.AreEqual("$B$1", errors[0].CellAddress);
+            Assert.AreEqual("=10/0", errors[0].Formula);
+            Assert.AreEqual("#VALUE!", errors[1].ErrorText);
+            Assert.AreEqual("#N/A", errors[2].ErrorText);
+            Assert.AreEqual("#REF!", errors[3].ErrorText);
+        }
+
+        [TestMethod]
+        public void RangeMathOperations_AppliesCalculationsAccurately()
+        {
+            object?[,] matrix = new object?[4, 2]
+            {
+                { 100.0, 50.0 },
+                { "200", null },
+                { "Text", 0.0 },
+                { -10.0, 25.5 }
+            };
+
+            // Test Addition
+            var addRes = RangeMathOperations.Apply(matrix, MathOperationType.Add, 15.0);
+            Assert.AreEqual(115.0, addRes.Matrix[0, 0]);
+            Assert.AreEqual(65.0, addRes.Matrix[0, 1]);
+            Assert.AreEqual(215.0, addRes.Matrix[1, 0]); // parsed string
+            Assert.IsNull(addRes.Matrix[1, 1]); // skipped blank
+            Assert.AreEqual("Text", addRes.Matrix[2, 0]); // skipped text
+            Assert.AreEqual(5.0, addRes.Matrix[3, 0]);
+
+            // Test Multiplication with rounding
+            var opts = new MathOperationOptions { RoundResults = true, DecimalPlaces = 1 };
+            var mulRes = RangeMathOperations.Apply(matrix, MathOperationType.Multiply, 1.333, opts);
+            Assert.AreEqual(133.3, mulRes.Matrix[0, 0]);
+
+            // Test Division by Zero safeguard
+            var divZero = RangeMathOperations.Apply(matrix, MathOperationType.Divide, 0.0);
+            Assert.AreEqual("#DIV/0!", divZero.Matrix[0, 0]);
+            Assert.IsTrue(divZero.ErrorCount > 0);
+        }
+
+        [TestMethod]
+        public void MockExcelContext_PageSetupAndFreezePanes()
+        {
+            var ctx = new MockExcelContext();
+            var options = new PageSetupOptions
+            {
+                CopyMargins = true,
+                CopyOrientationAndSize = true
+            };
+
+            int copied = ctx.CopyPageSetup("Sheet1", new[] { "Sheet2", "Sheet3" }, options);
+            Assert.AreEqual(2, copied);
+            Assert.AreEqual(1, ctx.CopiedPageSetups.Count);
+            Assert.AreEqual("Sheet1", ctx.CopiedPageSetups[0].src);
+            Assert.AreEqual(2, ctx.CopiedPageSetups[0].targets.Count);
+
+            int frozen = ctx.SynchronizeFreezePanes(new[] { "Sheet1", "Sheet2" }, FreezePanesSyncMode.FreezeTopRow, 2, 1);
+            Assert.AreEqual(2, frozen);
+            Assert.IsNotNull(ctx.LastSynchronizedFreezePanes);
+            Assert.AreEqual(FreezePanesSyncMode.FreezeTopRow, ctx.LastSynchronizedFreezePanes.Value.mode);
+        }
+
+        #endregion
 
         #endregion
     }
