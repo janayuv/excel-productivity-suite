@@ -48,6 +48,30 @@ namespace ExcelProductivitySuite.UnitTests
             LastSelectedRange = (startRow, startCol, rowCount, colCount);
         }
 
+        public List<(int row, int col)> LastSelectedCells { get; } = new();
+        public List<(int row, int col, int color)> LastHighlightedCells { get; } = new();
+        public List<CommentInfo> MockComments { get; } = new();
+
+        public void SelectCells(IEnumerable<(int row, int col)> cells)
+        {
+            LastSelectedCells.Clear();
+            if (cells != null) LastSelectedCells.AddRange(cells);
+        }
+
+        public void HighlightCells(IEnumerable<(int row, int col)> cells, int colorRgb)
+        {
+            LastHighlightedCells.Clear();
+            if (cells != null)
+            {
+                foreach (var c in cells)
+                {
+                    LastHighlightedCells.Add((c.row, c.col, colorRgb));
+                }
+            }
+        }
+
+        public IReadOnlyList<CommentInfo> GetWorksheetComments(string? sheetName = null) => MockComments;
+
         public bool Confirm(string message, string title) => ConfirmResponse;
 
         public object?[,]? GetSelectedValues()
@@ -79,6 +103,30 @@ namespace ExcelProductivitySuite.UnitTests
         public void SetRangeValues(int startRow, int startCol, object?[,] values)
         {
             CurrentValues = (object?[,])values.Clone();
+        }
+
+        public void SetRangeValuesByAddress(string address, object?[,] values)
+        {
+            CurrentValues = (object?[,])values.Clone();
+        }
+
+        public IReadOnlyList<string> GetSelectedAreaAddresses()
+        {
+            return new List<string> { SelectionAddress ?? "$A$1:$B$10" };
+        }
+
+        public void ClearSelection()
+        {
+            if (CurrentValues != null)
+            {
+                int rStart = CurrentValues.GetLowerBound(0);
+                int rEnd = CurrentValues.GetUpperBound(0);
+                int cStart = CurrentValues.GetLowerBound(1);
+                int cEnd = CurrentValues.GetUpperBound(1);
+                for (int r = rStart; r <= rEnd; r++)
+                    for (int c = cStart; c <= cEnd; c++)
+                        CurrentValues[r, c] = null;
+            }
         }
 
         public int ConvertSelectionFormulasToValues()

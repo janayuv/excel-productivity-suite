@@ -10,6 +10,7 @@ namespace ExcelProductivitySuite.Core.Abstractions
         SuiteCommand? GetCommand(string id);
         IReadOnlyList<SuiteCommand> GetAllCommands();
         IReadOnlyList<SuiteCommand> SearchCommands(string query, CommandCategory? categoryFilter = null);
+        IReadOnlyList<SuiteCommand> SearchCommands(string query, CommandCategory? categoryFilter, FeatureStatus? statusFilter);
         void Execute(string commandId, IExcelContext context);
     }
 

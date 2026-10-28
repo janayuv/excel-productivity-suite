@@ -126,6 +126,21 @@ namespace ExcelProductivitySuite.Core.Abstractions
         void SetRangeValues(int startRow, int startCol, object?[,] values);
 
         /// <summary>
+        /// Writes values into a range identified by address (e.g. "$A$1" or "Sheet2!$C$5:$F$10").
+        /// </summary>
+        void SetRangeValuesByAddress(string address, object?[,] values);
+
+        /// <summary>
+        /// Gets the individual addresses of all discontinuous areas in a multi-area selection.
+        /// </summary>
+        IReadOnlyList<string> GetSelectedAreaAddresses();
+
+        /// <summary>
+        /// Clears all cell contents from the current selection.
+        /// </summary>
+        void ClearSelection();
+
+        /// <summary>
         /// Converts all formula cells in the selected range to static values.
         /// </summary>
         int ConvertSelectionFormulasToValues();
@@ -172,9 +187,44 @@ namespace ExcelProductivitySuite.Core.Abstractions
         object?[,]? GetWorkbookRangeValues(string workbookName, string sheetName, string? rangeAddress = null);
 
         /// <summary>
+        /// Selects disparate individual cells on the active worksheet.
+        /// </summary>
+        void SelectCells(IEnumerable<(int row, int col)> cells);
+
+        /// <summary>
+        /// Applies a background fill color to specified cells on the active worksheet.
+        /// </summary>
+        void HighlightCells(IEnumerable<(int row, int col)> cells, int colorRgb);
+
+        /// <summary>
+        /// Retrieves all cell comments from the specified worksheet (or active sheet if null).
+        /// </summary>
+        IReadOnlyList<CommentInfo> GetWorksheetComments(string? sheetName = null);
+
+        /// <summary>
         /// Shows an informational, warning, or error alert dialog in Excel.
         /// </summary>
         void ShowMessage(string message, string title, bool isError = false);
+    }
+
+    public class CommentInfo
+    {
+        public string SheetName { get; }
+        public string CellAddress { get; }
+        public int Row { get; }
+        public int Column { get; }
+        public string Author { get; }
+        public string Text { get; }
+
+        public CommentInfo(string sheetName, string cellAddress, int row, int col, string author, string text)
+        {
+            SheetName = sheetName;
+            CellAddress = cellAddress;
+            Row = row;
+            Column = col;
+            Author = author;
+            Text = text;
+        }
     }
 
     public class SheetVisibilityInfo

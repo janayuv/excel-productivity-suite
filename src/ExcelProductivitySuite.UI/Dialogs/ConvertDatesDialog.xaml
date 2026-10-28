@@ -1,0 +1,93 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.ConvertDatesDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Convert Text to Dates - Excel Productivity Suite"
+        Height="500" Width="580"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="📅" Foreground="White" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Convert Text to Dates" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Parse date strings and standardize them into proper Excel date formats" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Options -->
+        <GroupBox Grid.Row="1" Header="Date Formatting Settings" Style="{StaticResource ModernGroupBoxStyle}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Margin="0,0,0,6">
+                    <TextBlock Text="Output Format:" VerticalAlignment="Center" Width="95" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                    <ComboBox x:Name="FormatComboBox" Width="140" SelectionChanged="OptionChanged" FontSize="11">
+                        <ComboBoxItem Content="ISO 8601 (YYYY-MM-DD)" Tag="Iso8601" IsSelected="True" />
+                        <ComboBoxItem Content="US (MM/DD/YYYY)" Tag="ShortDateUS" />
+                        <ComboBoxItem Content="EU / UK (DD/MM/YYYY)" Tag="ShortDateEU" />
+                        <ComboBoxItem Content="Long (Month DD, YYYY)" Tag="LongDate" />
+                    </ComboBox>
+                </StackPanel>
+
+                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,6">
+                    <TextBlock Text="Date Order:" VerticalAlignment="Center" Width="75" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                    <ComboBox x:Name="CultureComboBox" Width="140" SelectionChanged="OptionChanged" FontSize="11">
+                        <ComboBoxItem Content="Auto Detect" Tag="Auto" IsSelected="True" />
+                        <ComboBoxItem Content="Month/Day/Year (US)" Tag="MonthDayYear" />
+                        <ComboBoxItem Content="Day/Month/Year (EU)" Tag="DayMonthYear" />
+                    </ComboBox>
+                </StackPanel>
+
+                <CheckBox Grid.Row="1" Grid.Column="0" x:Name="SkipUnparseableCheck" Content="Skip unparseable text cells" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" Checked="OptionChanged" Unchecked="OptionChanged" />
+            </Grid>
+        </GroupBox>
+
+        <!-- Live Preview -->
+        <DockPanel Grid.Row="2" Margin="0,8,0,0">
+            <TextBlock DockPanel.Dock="Top" Text="Live Preview (First 10 Cells):" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,4" />
+            <controls:LivePreviewTable x:Name="PreviewTable" />
+        </DockPanel>
+
+        <!-- Footer -->
+        <DockPanel Grid.Row="3" Margin="0,12,0,0">
+            <TextBlock Text="Standardizes date entries in-place" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Cancel" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,8,0" Click="CancelButton_Click" IsCancel="True" />
+                <Button Content="Convert Dates" Style="{StaticResource PrimaryButtonStyle}" Click="ApplyButton_Click" IsDefault="True" />
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

@@ -1,0 +1,82 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.SelectMaxMinDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Select Max / Min Cells - Excel Productivity Suite"
+        Height="480" Width="560"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="▲" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Select Maximum / Minimum Cells" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Locate and select the highest or lowest numeric values across selection, rows, or columns" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Options -->
+        <GroupBox Grid.Row="1" Header="Target &amp; Scope" Style="{StaticResource ModernGroupBoxStyle}">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,2,0,6">
+                    <RadioButton x:Name="MaxRadio" Content="Maximum Value (Highest)" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,16,0" Checked="OptionChanged" />
+                    <RadioButton x:Name="MinRadio" Content="Minimum Value (Lowest)" Style="{StaticResource ModernRadioButtonStyle}" Checked="OptionChanged" />
+                </StackPanel>
+
+                <Separator Margin="0,4,0,6" Background="{StaticResource BorderLightBrush}" />
+
+                <RadioButton x:Name="EntireSelectionRadio" Content="Across Entire Selection" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Checked="OptionChanged" />
+                <RadioButton x:Name="EachRowRadio" Content="For Each Row independently (e.g. highest item in each row)" Style="{StaticResource ModernRadioButtonStyle}" Checked="OptionChanged" />
+                <RadioButton x:Name="EachColRadio" Content="For Each Column independently (e.g. peak value in each column)" Style="{StaticResource ModernRadioButtonStyle}" Checked="OptionChanged" />
+
+                <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                    <TextBlock Text="Number of cells to select:" VerticalAlignment="Center" Margin="0,0,8,0" FontWeight="SemiBold" />
+                    <TextBox x:Name="CountBox" Width="50" Style="{StaticResource ModernTextBoxStyle}" Text="1" TextChanged="OptionChanged" />
+                    <TextBlock Text="cell(s) (Top / Bottom N)" VerticalAlignment="Center" Margin="6,0,0,0" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Summary -->
+        <Border Grid.Row="2" Background="White" BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1" CornerRadius="4" Padding="14" Margin="0,8,0,0">
+            <StackPanel VerticalAlignment="Center">
+                <TextBlock x:Name="SummaryText" Text="Calculating extreme cells..." FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource BrandPrimaryBrush}" />
+                <TextBlock Text="Cells matching criteria will be added to the active Excel selection for immediate inspection or styling." FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" />
+            </StackPanel>
+        </Border>
+
+        <!-- Footer -->
+        <DockPanel Grid.Row="3" Margin="0,12,0,0">
+            <TextBlock Text="Non-destructive cell selection" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Cancel" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,8,0" Click="CancelButton_Click" IsCancel="True" />
+                <Button Content="Select Cells" Style="{StaticResource PrimaryButtonStyle}" Click="SelectButton_Click" IsDefault="True" />
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

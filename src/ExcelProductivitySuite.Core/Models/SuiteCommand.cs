@@ -2,16 +2,38 @@ using System;
 
 namespace ExcelProductivitySuite.Core.Models
 {
+    public enum FeatureStatus
+    {
+        ImplementedAndVerified,
+        ImplementedNeedsVerification,
+        PartiallyImplemented,
+        Planned,
+        Blocked
+    }
+
     public enum CommandCategory
     {
-        General,
-        Text,
-        RangeAndCells,
-        DataCleaning,
-        Worksheet,
-        Workbook,
-        Formulas,
-        Settings
+        General = 0,
+        TextTools = 1,                  // Module A: Text Tools
+        RangeAndCells = 2,              // Module B: Range and Cell Operations
+        FindSelectCompare = 3,          // Module C: Find, Select, and Compare
+        WorksheetAndWorkbook = 4,       // Module D: Worksheet and Workbook Management
+        DataAndFiltering = 5,           // Module E: Data, Filtering, and Statistics
+        DataValidation = 6,             // Module F: Data Validation and Dropdown Lists
+        FormulasAndCalculation = 7,     // Module G: Formula and Calculation Utilities
+        FormattingAndDesign = 8,        // Module H: Formatting and Design
+        ImportExportAndFiles = 9,       // Module I: Import, Export, and File Utilities
+        ProtectionAndRecovery = 10,     // Module J: Protection and Recovery
+        ChartsAndAnalysis = 11,         // Module K: Charts and Analysis
+        NavigationAndProductivity = 12, // Module L: Navigation and User Productivity
+
+        // Backward compatibility aliases
+        Text = TextTools,
+        DataCleaning = DataAndFiltering,
+        Worksheet = WorksheetAndWorkbook,
+        Workbook = WorksheetAndWorkbook,
+        Formulas = FormulasAndCalculation,
+        Settings = General
     }
 
     /// <summary>
@@ -31,6 +53,23 @@ namespace ExcelProductivitySuite.Core.Models
         public Action<Abstractions.IExcelContext> ExecuteAction { get; }
         public Func<Abstractions.IExcelContext, bool>? CanExecutePredicate { get; }
 
+        public FeatureStatus Status { get; set; }
+        public string ModuleCode { get; set; }
+        public string RoadmapBatch { get; set; }
+
+        public bool IsImplemented =>
+            Status == FeatureStatus.ImplementedAndVerified ||
+            Status == FeatureStatus.ImplementedNeedsVerification;
+
+        public string StatusDisplay => Status switch
+        {
+            FeatureStatus.ImplementedAndVerified => "Active",
+            FeatureStatus.ImplementedNeedsVerification => "Verify",
+            FeatureStatus.PartiallyImplemented => "Partial",
+            FeatureStatus.Blocked => "Blocked",
+            _ => "Roadmap"
+        };
+
         public SuiteCommand(
             string id,
             string title,
@@ -41,7 +80,10 @@ namespace ExcelProductivitySuite.Core.Models
             string? subCategory = null,
             string[]? keywords = null,
             string? shortcutHint = null,
-            string? officeIconName = null)
+            string? officeIconName = null,
+            FeatureStatus status = FeatureStatus.ImplementedAndVerified,
+            string? moduleCode = null,
+            string? roadmapBatch = null)
         {
             Id = id ?? throw new ArgumentNullException(nameof(id));
             Title = title ?? throw new ArgumentNullException(nameof(title));
@@ -53,6 +95,9 @@ namespace ExcelProductivitySuite.Core.Models
             Keywords = keywords ?? Array.Empty<string>();
             ShortcutHint = shortcutHint;
             OfficeIconName = officeIconName;
+            Status = status;
+            ModuleCode = moduleCode ?? GetDefaultModuleCode(category);
+            RoadmapBatch = roadmapBatch ?? (status == FeatureStatus.ImplementedAndVerified ? "Active" : "Batch 1");
         }
 
         public bool CanExecute(Abstractions.IExcelContext context) =>
@@ -63,6 +108,26 @@ namespace ExcelProductivitySuite.Core.Models
             if (CanExecute(context))
             {
                 ExecuteAction(context);
+            }
+        }
+
+        private static string GetDefaultModuleCode(CommandCategory category)
+        {
+            switch (category)
+            {
+                case CommandCategory.TextTools: return "A";
+                case CommandCategory.RangeAndCells: return "B";
+                case CommandCategory.FindSelectCompare: return "C";
+                case CommandCategory.WorksheetAndWorkbook: return "D";
+                case CommandCategory.DataAndFiltering: return "E";
+                case CommandCategory.DataValidation: return "F";
+                case CommandCategory.FormulasAndCalculation: return "G";
+                case CommandCategory.FormattingAndDesign: return "H";
+                case CommandCategory.ImportExportAndFiles: return "I";
+                case CommandCategory.ProtectionAndRecovery: return "J";
+                case CommandCategory.ChartsAndAnalysis: return "K";
+                case CommandCategory.NavigationAndProductivity: return "L";
+                default: return "General";
             }
         }
     }

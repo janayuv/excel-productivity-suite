@@ -1,0 +1,74 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.TransposeRangeDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Transpose Range - Excel Productivity Suite"
+        Height="490" Width="580"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="⤹" Foreground="White" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Transpose Range" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Convert rows to columns and columns to rows while preserving cell values and formatting" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Options -->
+        <GroupBox Grid.Row="1" Header="Destination &amp; Placement" Style="{StaticResource ModernGroupBoxStyle}">
+            <StackPanel>
+                <RadioButton x:Name="InPlaceRadio" Content="Transpose in-place (overwrites active selection starting at top-left cell)" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Checked="OptionChanged" />
+                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                    <RadioButton x:Name="TargetAddressRadio" Content="Paste transposed at target cell:" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,8,0" Checked="OptionChanged" />
+                    <TextBox x:Name="TargetAddressBox" Width="120" Style="{StaticResource ModernTextBoxStyle}" Text="$E$1" TextChanged="OptionChanged" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                    <RadioButton x:Name="NewSheetRadio" Content="Transpose into new worksheet:" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,8,0" Checked="OptionChanged" />
+                    <TextBox x:Name="SheetNameBox" Width="140" Style="{StaticResource ModernTextBoxStyle}" Text="Transposed" TextChanged="OptionChanged" />
+                </StackPanel>
+                <TextBlock x:Name="DimensionInfoText" Text="Current Selection: 0 rows × 0 cols ➔ Transposed: 0 rows × 0 cols" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource BrandPrimaryBrush}" Margin="0,8,0,0" />
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Live Preview -->
+        <DockPanel Grid.Row="2" Margin="0,8,0,0">
+            <TextBlock DockPanel.Dock="Top" Text="Live Preview (First 10 Cells Transposed):" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,4" />
+            <controls:LivePreviewTable x:Name="PreviewTable" />
+        </DockPanel>
+
+        <!-- Footer -->
+        <DockPanel Grid.Row="3" Margin="0,12,0,0">
+            <TextBlock Text="Safe in-memory batch processing" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Cancel" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,8,0" Click="CancelButton_Click" IsCancel="True" />
+                <Button Content="Transpose" Style="{StaticResource PrimaryButtonStyle}" Click="ApplyButton_Click" IsDefault="True" />
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

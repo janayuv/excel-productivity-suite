@@ -29,11 +29,21 @@ namespace ExcelProductivitySuite.Core.Services
 
         public IReadOnlyList<SuiteCommand> SearchCommands(string query, CommandCategory? categoryFilter = null)
         {
+            return SearchCommands(query, categoryFilter, null);
+        }
+
+        public IReadOnlyList<SuiteCommand> SearchCommands(string query, CommandCategory? categoryFilter, FeatureStatus? statusFilter)
+        {
             var source = _commands.Values.AsEnumerable();
 
             if (categoryFilter.HasValue)
             {
                 source = source.Where(c => c.Category == categoryFilter.Value);
+            }
+
+            if (statusFilter.HasValue)
+            {
+                source = source.Where(c => c.Status == statusFilter.Value);
             }
 
             if (string.IsNullOrWhiteSpace(query))
@@ -65,6 +75,7 @@ namespace ExcelProductivitySuite.Core.Services
             if (cmd.Title.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0) return true;
             if (cmd.Description.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0) return true;
             if (cmd.Category.ToString().IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0) return true;
+            if (!string.IsNullOrEmpty(cmd.ModuleCode) && cmd.ModuleCode.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0) return true;
             if (cmd.Keywords.Any(k => k.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0)) return true;
             return false;
         }
@@ -75,7 +86,9 @@ namespace ExcelProductivitySuite.Core.Services
             if (cmd.Title.StartsWith(query, StringComparison.OrdinalIgnoreCase)) return 80;
             if (cmd.Title.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0) return 60;
             if (cmd.Keywords.Any(k => k.Equals(query, StringComparison.OrdinalIgnoreCase))) return 50;
+            if (cmd.Keywords.Any(k => k.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0)) return 40;
             if (cmd.Description.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0) return 30;
+            if (cmd.Category.ToString().IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0) return 20;
             return 10;
         }
     }

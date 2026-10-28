@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
         mc:Ignorable="d"
-        Title="Excel Productivity Suite - Tool Launcher"
-        Height="540" Width="680"
+        Title="Excel Productivity Suite - Tool Launcher &amp; Command Catalog"
+        Height="580" Width="760"
         WindowStartupLocation="CenterOwner"
         Background="#F8F9FA"
         FocusManager.FocusedElement="{Binding ElementName=SearchTextBox}">
@@ -25,7 +25,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" /> <!-- Header -->
             <RowDefinition Height="Auto" /> <!-- Search Box -->
-            <RowDefinition Height="Auto" /> <!-- Category Filter Tabs -->
+            <RowDefinition Height="Auto" /> <!-- Filter Tabs & Module Dropdown -->
             <RowDefinition Height="*" />    <!-- Commands List -->
             <RowDefinition Height="Auto" /> <!-- Footer Action Bar -->
         </Grid.RowDefinitions>
@@ -37,11 +37,11 @@
                     <TextBlock Text="⚡" Foreground="White" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Border>
                 <StackPanel>
-                    <TextBlock Text="Quick Tool Launcher" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
-                    <TextBlock Text="Search, browse, and instantly execute any suite utility" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                    <TextBlock Text="Searchable Tool Catalog (SuperSearch)" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Instant discovery and execution across all 12 suite modules and 200+ features" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
                 </StackPanel>
             </StackPanel>
-            <TextBlock Text="Press Enter to Run • Esc to Close" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextDisabledBrush}" />
+            <TextBlock Text="Enter: Run/Inspect • Esc: Close" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextDisabledBrush}" />
         </DockPanel>
 
         <!-- Search Box -->
@@ -58,39 +58,96 @@
             </Grid>
         </Border>
 
-        <!-- Category Filters -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,10">
-            <RadioButton x:Name="CatAll" Content="All Tools" IsChecked="True" Checked="CategoryFilter_Checked" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,10,0" FontWeight="SemiBold" />
-            <RadioButton x:Name="CatRecent" Content="Recent" Checked="CategoryFilter_Checked" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,10,0" />
-            <RadioButton x:Name="CatFavorites" Content="★ Favorites" Checked="CategoryFilter_Checked" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,10,0" />
-            <RadioButton x:Name="CatText" Content="Text" Checked="CategoryFilter_Checked" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,10,0" />
-            <RadioButton x:Name="CatRange" Content="Range &amp; Cells" Checked="CategoryFilter_Checked" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,10,0" />
-            <RadioButton x:Name="CatCleaning" Content="Data Cleaning" Checked="CategoryFilter_Checked" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,10,0" />
-            <RadioButton x:Name="CatSheets" Content="Worksheets" Checked="CategoryFilter_Checked" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,10,0" />
-            <RadioButton x:Name="CatFormulas" Content="Formulas" Checked="CategoryFilter_Checked" Style="{StaticResource ModernRadioButtonStyle}" />
-        </StackPanel>
+        <!-- Filter Controls (Status Tabs + Category ComboBox) -->
+        <Grid Grid.Row="2" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Status Tabs -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <RadioButton x:Name="FilterAll" Content="All Tools" IsChecked="True" Checked="Filter_Checked" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,10,0" FontWeight="SemiBold" />
+                <RadioButton x:Name="FilterActive" Content="Active (Verified)" Checked="Filter_Checked" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,10,0" />
+                <RadioButton x:Name="FilterRoadmap" Content="Roadmap (Planned)" Checked="Filter_Checked" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,10,0" />
+                <RadioButton x:Name="FilterFavorites" Content="★ Favorites" Checked="Filter_Checked" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,10,0" />
+                <RadioButton x:Name="FilterRecent" Content="Recent" Checked="Filter_Checked" Style="{StaticResource ModernRadioButtonStyle}" />
+            </StackPanel>
+
+            <!-- Module / Category Dropdown -->
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="Module:" VerticalAlignment="Center" Margin="0,0,6,0" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                <ComboBox x:Name="CategoryComboBox" Width="200" Height="26" SelectionChanged="CategoryComboBox_SelectionChanged" FontSize="11">
+                    <ComboBoxItem Content="All Modules (A - L)" IsSelected="True" />
+                    <ComboBoxItem Content="Module A: Text Tools" Tag="TextTools" />
+                    <ComboBoxItem Content="Module B: Range &amp; Cells" Tag="RangeAndCells" />
+                    <ComboBoxItem Content="Module C: Find, Select &amp; Compare" Tag="FindSelectCompare" />
+                    <ComboBoxItem Content="Module D: Worksheets &amp; Workbooks" Tag="WorksheetAndWorkbook" />
+                    <ComboBoxItem Content="Module E: Data, Filtering &amp; Stats" Tag="DataAndFiltering" />
+                    <ComboBoxItem Content="Module F: Data Validation" Tag="DataValidation" />
+                    <ComboBoxItem Content="Module G: Formulas &amp; Calculations" Tag="FormulasAndCalculation" />
+                    <ComboBoxItem Content="Module H: Formatting &amp; Design" Tag="FormattingAndDesign" />
+                    <ComboBoxItem Content="Module I: Import, Export &amp; Files" Tag="ImportExportAndFiles" />
+                    <ComboBoxItem Content="Module J: Protection &amp; Recovery" Tag="ProtectionAndRecovery" />
+                    <ComboBoxItem Content="Module K: Charts &amp; Analysis" Tag="ChartsAndAnalysis" />
+                    <ComboBoxItem Content="Module L: Navigation &amp; Productivity" Tag="NavigationAndProductivity" />
+                </ComboBox>
+            </StackPanel>
+        </Grid>
 
         <!-- Commands List -->
         <Border Grid.Row="3" Background="White" BorderBrush="{StaticResource SurfaceBorderBrush}" BorderThickness="1" CornerRadius="6">
             <ListBox x:Name="CommandsListBox" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled" MouseDoubleClick="CommandsListBox_MouseDoubleClick" KeyDown="CommandsListBox_KeyDown">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Border Padding="8,6" BorderBrush="{StaticResource SurfaceDividerBrush}" BorderThickness="0,0,0,1">
+                        <Border Padding="10,7" BorderBrush="{StaticResource SurfaceDividerBrush}" BorderThickness="0,0,0,1">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
-                                    <StackPanel Orientation="Horizontal">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                         <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="13" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,8,0" />
-                                        <Border Background="{StaticResource BrandLightBrush}" CornerRadius="3" Padding="6,1" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Category}" FontSize="10" Foreground="{StaticResource BrandPrimaryBrush}" FontWeight="SemiBold" />
+                                        
+                                        <!-- Module Code Badge -->
+                                        <Border Background="{StaticResource BrandLightBrush}" CornerRadius="3" Padding="5,1" VerticalAlignment="Center" Margin="0,0,6,0">
+                                            <TextBlock Text="{Binding ModuleCode, StringFormat='Mod {0}'}" FontSize="10" Foreground="{StaticResource BrandPrimaryBrush}" FontWeight="SemiBold" />
+                                        </Border>
+
+                                        <!-- Status Badge -->
+                                        <Border CornerRadius="3" Padding="6,1" VerticalAlignment="Center">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="#E8F5E9" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsImplemented}" Value="False">
+                                                            <Setter Property="Background" Value="#E3F2FD" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock FontSize="10" FontWeight="SemiBold">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Text" Value="Active" />
+                                                        <Setter Property="Foreground" Value="#2E7D32" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsImplemented}" Value="False">
+                                                                <Setter Property="Text" Value="{Binding RoadmapBatch}" />
+                                                                <Setter Property="Foreground" Value="#1565C0" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
                                         </Border>
                                     </StackPanel>
-                                    <TextBlock Text="{Binding Description}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Margin="0,2,0,0" />
+                                    <TextBlock Text="{Binding Description}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Margin="0,3,0,0" />
                                 </StackPanel>
-                                <TextBlock Grid.Column="1" Text="{Binding ShortcutHint}" FontSize="11" Foreground="{StaticResource TextDisabledBrush}" VerticalAlignment="Center" Margin="8,0,0,0" />
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                    <TextBlock Text="{Binding ShortcutHint}" FontSize="11" Foreground="{StaticResource TextDisabledBrush}" HorizontalAlignment="Right" />
+                                </StackPanel>
                             </Grid>
                         </Border>
                     </DataTemplate>
@@ -100,10 +157,10 @@
 
         <!-- Footer -->
         <DockPanel Grid.Row="4" Margin="0,12,0,0">
-            <TextBlock x:Name="StatusCountText" Text="15 tools available" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+            <TextBlock x:Name="StatusCountText" Text="Loading tools..." VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button x:Name="CancelButton" Content="Cancel" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,8,0" Click="CancelButton_Click" IsCancel="True" />
-                <Button x:Name="RunButton" Content="Run Selected Tool" Style="{StaticResource PrimaryButtonStyle}" Click="RunButton_Click" IsDefault="True" />
+                <Button x:Name="RunButton" Content="Run Tool" Style="{StaticResource PrimaryButtonStyle}" Click="RunButton_Click" IsDefault="True" />
             </StackPanel>
         </DockPanel>
     </Grid>

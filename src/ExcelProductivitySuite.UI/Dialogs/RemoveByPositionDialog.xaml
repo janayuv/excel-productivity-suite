@@ -1,0 +1,96 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.RemoveByPositionDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Remove Characters by Position - Excel Productivity Suite"
+        Height="540" Width="600"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="✂" Foreground="White" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Remove Characters by Position" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Truncate characters from the left, right, middle, or relative to delimiters" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Options -->
+        <GroupBox Grid.Row="1" Header="Position Rules" Style="{StaticResource ModernGroupBoxStyle}">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                    <RadioButton x:Name="FromLeftRadio" Content="From beginning (left):" Width="160" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Checked="OptionChanged" />
+                    <TextBlock Text="Remove" VerticalAlignment="Center" Margin="0,0,6,0" FontSize="11" />
+                    <TextBox x:Name="LeftCountTextBox" Width="50" Style="{StaticResource ModernTextBoxStyle}" Text="1" TextChanged="OptionChanged" />
+                    <TextBlock Text="characters" VerticalAlignment="Center" Margin="6,0,0,0" FontSize="11" />
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                    <RadioButton x:Name="FromRightRadio" Content="From end (right):" Width="160" Style="{StaticResource ModernRadioButtonStyle}" Checked="OptionChanged" />
+                    <TextBlock Text="Remove" VerticalAlignment="Center" Margin="0,0,6,0" FontSize="11" />
+                    <TextBox x:Name="RightCountTextBox" Width="50" Style="{StaticResource ModernTextBoxStyle}" Text="1" TextChanged="OptionChanged" IsEnabled="False" />
+                    <TextBlock Text="characters" VerticalAlignment="Center" Margin="6,0,0,0" FontSize="11" />
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                    <RadioButton x:Name="FromMiddleRadio" Content="From middle range:" Width="160" Style="{StaticResource ModernRadioButtonStyle}" Checked="OptionChanged" />
+                    <TextBlock Text="Start at position" VerticalAlignment="Center" Margin="0,0,6,0" FontSize="11" />
+                    <TextBox x:Name="MidStartTextBox" Width="40" Style="{StaticResource ModernTextBoxStyle}" Text="1" TextChanged="OptionChanged" IsEnabled="False" />
+                    <TextBlock Text=", remove" VerticalAlignment="Center" Margin="6,0,6,0" FontSize="11" />
+                    <TextBox x:Name="MidCountTextBox" Width="40" Style="{StaticResource ModernTextBoxStyle}" Text="2" TextChanged="OptionChanged" IsEnabled="False" />
+                    <TextBlock Text="characters" VerticalAlignment="Center" Margin="6,0,0,0" FontSize="11" />
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <RadioButton x:Name="DelimiterRadio" Content="Relative to delimiter:" Width="160" Style="{StaticResource ModernRadioButtonStyle}" Checked="OptionChanged" />
+                    <ComboBox x:Name="DelimModeComboBox" Width="130" SelectionChanged="OptionChanged" FontSize="11" IsEnabled="False" Margin="0,0,8,0">
+                        <ComboBoxItem Content="Remove before" Tag="Before" IsSelected="True" />
+                        <ComboBoxItem Content="Remove after" Tag="After" />
+                    </ComboBox>
+                    <TextBlock Text="Delimiter:" VerticalAlignment="Center" Margin="0,0,6,0" FontSize="11" />
+                    <TextBox x:Name="DelimiterTextBox" Width="60" Style="{StaticResource ModernTextBoxStyle}" Text="-" TextChanged="OptionChanged" IsEnabled="False" />
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Live Preview -->
+        <DockPanel Grid.Row="2" Margin="0,8,0,0">
+            <TextBlock DockPanel.Dock="Top" Text="Live Preview (First 10 Cells):" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,4" />
+            <controls:LivePreviewTable x:Name="PreviewTable" />
+        </DockPanel>
+
+        <!-- Footer -->
+        <DockPanel Grid.Row="3" Margin="0,12,0,0">
+            <TextBlock Text="Safe in-memory character removal" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Cancel" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,8,0" Click="CancelButton_Click" IsCancel="True" />
+                <Button Content="Remove Characters" Style="{StaticResource PrimaryButtonStyle}" Click="ApplyButton_Click" IsDefault="True" />
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

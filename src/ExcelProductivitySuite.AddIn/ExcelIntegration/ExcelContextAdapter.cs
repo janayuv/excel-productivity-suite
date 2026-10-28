@@ -324,6 +324,78 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
             }
         }
 
+        public void SetRangeValuesByAddress(string address, object?[,] values)
+        {
+            if (string.IsNullOrWhiteSpace(address)) return;
+            if (values == null) throw new ArgumentNullException(nameof(values));
+            if (IsCurrentSheetProtected)
+            {
+                ShowMessage("The active worksheet is protected. Please unprotect the sheet before modifying cell values.", "Sheet Protected", isError: true);
+                return;
+            }
+
+            int rows = values.GetLength(0);
+            int cols = values.GetLength(1);
+            if (rows <= 0 || cols <= 0) return;
+
+            using (new ExcelStateScope(_app))
+            {
+                Excel.Range target;
+                if (address.Contains("!"))
+                {
+                    target = _app.Range[address];
+                }
+                else if (_app.ActiveSheet is Excel.Worksheet sheet)
+                {
+                    target = sheet.Range[address];
+                }
+                else
+                {
+                    target = _app.Range[address];
+                }
+
+                if (target != null)
+                {
+                    if (target.Rows.Count != rows || target.Columns.Count != cols)
+                    {
+                        target = target.Resize[rows, cols];
+                    }
+                    target.Value2 = values;
+                }
+            }
+        }
+
+        public IReadOnlyList<string> GetSelectedAreaAddresses()
+        {
+            var list = new List<string>();
+            try
+            {
+                if (_app.Selection is Excel.Range range)
+                {
+                    foreach (Excel.Range area in range.Areas)
+                    {
+                        list.Add(area.get_Address());
+                    }
+                }
+            }
+            catch { }
+            return list;
+        }
+
+        public void ClearSelection()
+        {
+            try
+            {
+                if (!(_app.Selection is Excel.Range range)) return;
+                if (IsCurrentSheetProtected) return;
+                using (new ExcelStateScope(_app))
+                {
+                    range.ClearContents();
+                }
+            }
+            catch { }
+        }
+
         public bool CheckRangeHasData(int startRow, int startCol, int rowCount, int colCount)
         {
             try
@@ -437,6 +509,95 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
                 target.Select();
             }
             catch { }
+        }
+
+        public void SelectCells(IEnumerable<(int row, int col)> cells)
+        {
+            if (cells == null || !(_app.ActiveSheet is Excel.Worksheet sheet)) return;
+            try
+            {
+                Excel.Range? unionRange = null;
+                int count = 0;
+                foreach (var (r, c) in cells)
+                {
+                    Excel.Range cell = sheet.Cells[r, c];
+                    unionRange = unionRange == null ? cell : _app.Union(unionRange, cell);
+                    count++;
+                    if (count >= 1500) break;
+                }
+                unionRange?.Select();
+            }
+            catch { }
+        }
+
+        public void HighlightCells(IEnumerable<(int row, int col)> cells, int colorRgb)
+        {
+            if (cells == null || !(_app.ActiveSheet is Excel.Worksheet sheet)) return;
+            if (IsCurrentSheetProtected)
+            {
+                ShowMessage("The active worksheet is protected. Please unprotect the sheet before highlighting.", "Sheet Protected", isError: true);
+                return;
+            }
+
+            try
+            {
+                using (new ExcelStateScope(_app))
+                {
+                    Excel.Range? unionRange = null;
+                    int count = 0;
+                    foreach (var (r, c) in cells)
+                    {
+                        Excel.Range cell = sheet.Cells[r, c];
+                        unionRange = unionRange == null ? cell : _app.Union(unionRange, cell);
+                        count++;
+                        if (count % 200 == 0 && unionRange != null)
+                        {
+                            unionRange.Interior.Color = colorRgb;
+                            unionRange = null;
+                        }
+                    }
+                    if (unionRange != null) unionRange.Interior.Color = colorRgb;
+                }
+            }
+            catch { }
+        }
+
+        public IReadOnlyList<CommentInfo> GetWorksheetComments(string? sheetName = null)
+        {
+            var list = new List<CommentInfo>();
+            try
+            {
+                Excel.Worksheet? sheet = null;
+                if (!string.IsNullOrEmpty(sheetName))
+                {
+                    sheet = _app.Sheets[sheetName] as Excel.Worksheet;
+                }
+                else
+                {
+                    sheet = _app.ActiveSheet as Excel.Worksheet;
+                }
+
+                if (sheet == null) return list;
+
+                string targetSheetName = sheet.Name;
+                foreach (Excel.Comment c in sheet.Comments)
+                {
+                    try
+                    {
+                        var cell = c.Parent as Excel.Range;
+                        string addr = cell?.get_Address() ?? "";
+                        int row = cell?.Row ?? 0;
+                        int col = cell?.Column ?? 0;
+                        string author = c.Author ?? "";
+                        string text = c.Text() ?? "";
+
+                        list.Add(new CommentInfo(targetSheetName, addr, row, col, author, text));
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+            return list;
         }
 
         public bool Confirm(string message, string title)

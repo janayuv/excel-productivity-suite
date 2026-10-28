@@ -18,6 +18,8 @@ namespace ExcelProductivitySuite.UI.Dialogs
         private readonly ICommandRegistry _registry;
         private readonly IExcelContext _context;
         private CommandCategory? _selectedCategory = null;
+        private bool _filterActiveOnly = false;
+        private bool _filterRoadmapOnly = false;
         private bool _filterRecent = false;
         private bool _filterFavorites = false;
 
@@ -34,8 +36,14 @@ namespace ExcelProductivitySuite.UI.Dialogs
 
         private void RefreshList()
         {
-            string query = SearchTextBox.Text;
-            var commands = _registry.SearchCommands(query, _selectedCategory);
+            if (CommandsListBox == null) return;
+
+            string query = SearchTextBox?.Text ?? string.Empty;
+            FeatureStatus? statusFilter = null;
+            if (_filterActiveOnly) statusFilter = FeatureStatus.ImplementedAndVerified;
+            else if (_filterRoadmapOnly) statusFilter = FeatureStatus.Planned;
+
+            var commands = _registry.SearchCommands(query, _selectedCategory, statusFilter);
 
             if (_filterRecent)
             {
@@ -47,14 +55,24 @@ namespace ExcelProductivitySuite.UI.Dialogs
             }
 
             CommandsListBox.ItemsSource = commands;
-            StatusCountText.Text = $"{commands.Count} tools available";
+
+            int activeCount = commands.Count(c => c.IsImplemented);
+            int roadmapCount = commands.Count - activeCount;
+
+            if (StatusCountText != null)
+            {
+                StatusCountText.Text = $"{commands.Count} tools displayed ({activeCount} active, {roadmapCount} in roadmap)";
+            }
 
             if (commands.Count > 0)
             {
                 CommandsListBox.SelectedIndex = 0;
             }
 
-            ClearButton.Visibility = string.IsNullOrEmpty(query) ? Visibility.Collapsed : Visibility.Visible;
+            if (ClearButton != null)
+            {
+                ClearButton.Visibility = string.IsNullOrEmpty(query) ? Visibility.Collapsed : Visibility.Visible;
+            }
         }
 
         private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -68,22 +86,39 @@ namespace ExcelProductivitySuite.UI.Dialogs
             SearchTextBox.Focus();
         }
 
-        private void CategoryFilter_Checked(object sender, RoutedEventArgs e)
+        private void Filter_Checked(object sender, RoutedEventArgs e)
         {
-            if (CatAll == null) return;
-
+            _filterActiveOnly = false;
+            _filterRoadmapOnly = false;
             _filterRecent = false;
             _filterFavorites = false;
-            _selectedCategory = null;
 
-            if (CatAll.IsChecked == true) { }
-            else if (CatRecent.IsChecked == true) _filterRecent = true;
-            else if (CatFavorites.IsChecked == true) _filterFavorites = true;
-            else if (CatText.IsChecked == true) _selectedCategory = CommandCategory.Text;
-            else if (CatRange.IsChecked == true) _selectedCategory = CommandCategory.RangeAndCells;
-            else if (CatCleaning.IsChecked == true) _selectedCategory = CommandCategory.DataCleaning;
-            else if (CatSheets.IsChecked == true) _selectedCategory = CommandCategory.Worksheet;
-            else if (CatFormulas.IsChecked == true) _selectedCategory = CommandCategory.Formulas;
+            if (FilterAll?.IsChecked == true) { }
+            else if (FilterActive?.IsChecked == true) _filterActiveOnly = true;
+            else if (FilterRoadmap?.IsChecked == true) _filterRoadmapOnly = true;
+            else if (FilterRecent?.IsChecked == true) _filterRecent = true;
+            else if (FilterFavorites?.IsChecked == true) _filterFavorites = true;
+
+            RefreshList();
+        }
+
+        private void CategoryComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (CategoryComboBox?.SelectedItem is ComboBoxItem item)
+            {
+                if (item.Tag is string tag && Enum.TryParse<CommandCategory>(tag, out var cat))
+                {
+                    _selectedCategory = cat;
+                }
+                else
+                {
+                    _selectedCategory = null;
+                }
+            }
+            else
+            {
+                _selectedCategory = null;
+            }
 
             RefreshList();
         }
@@ -129,12 +164,21 @@ namespace ExcelProductivitySuite.UI.Dialogs
             {
                 RecentCommandIds.Remove(cmd.Id);
                 RecentCommandIds.Insert(0, cmd.Id);
-                if (RecentCommandIds.Count > 10) RecentCommandIds.RemoveAt(10);
+                if (RecentCommandIds.Count > 15) RecentCommandIds.RemoveAt(15);
 
                 SelectedCommand = cmd;
-                DialogResult = true;
-                Close();
-                cmd.Execute(_context);
+
+                if (cmd.IsImplemented)
+                {
+                    DialogResult = true;
+                    Close();
+                    cmd.Execute(_context);
+                }
+                else
+                {
+                    // For roadmap commands, display roadmap information modal without closing launcher
+                    cmd.Execute(_context);
+                }
             }
         }
     }

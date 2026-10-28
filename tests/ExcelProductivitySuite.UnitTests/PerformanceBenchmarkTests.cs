@@ -281,5 +281,211 @@ namespace ExcelProductivitySuite.UnitTests
             Assert.IsTrue(result.MatchCount > 0);
             Assert.IsTrue(sw.ElapsedMilliseconds < 500, $"AdvancedFilter benchmark took {sw.ElapsedMilliseconds} ms, target is < 500 ms");
         }
+
+        [TestMethod]
+        public void Benchmark_TextReverser_100K_Cells_CompletesUnder500ms()
+        {
+            int rows = 10000;
+            int cols = 10;
+            object?[,] matrix = new object?[rows, cols];
+
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    matrix[r, c] = $"Row_{r}-Col_{c}-PayloadData";
+                }
+            }
+
+            var options = new TextReverseOptions
+            {
+                Mode = TextReverseMode.ByCharacter
+            };
+
+            var sw = Stopwatch.StartNew();
+            var result = TextReverser.ReverseRange(matrix, options);
+            sw.Stop();
+
+            Assert.AreEqual(10000, result.GetLength(0));
+            Assert.AreEqual(10, result.GetLength(1));
+            Assert.IsNotNull(result[0, 0]);
+            Assert.IsTrue(sw.ElapsedMilliseconds < 500, $"TextReverser benchmark took {sw.ElapsedMilliseconds} ms, target is < 500 ms");
+        }
+
+        [TestMethod]
+        public void Benchmark_TextCombiner_100K_Cells_CompletesUnder500ms()
+        {
+            int rows = 10000;
+            int cols = 10;
+            object?[,] matrix = new object?[rows, cols];
+
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    matrix[r, c] = $"Part{c}";
+                }
+            }
+
+            var options = new CombineOptions
+            {
+                Direction = CombineDirection.AcrossColumns,
+                Delimiter = " | "
+            };
+
+            var sw = Stopwatch.StartNew();
+            var result = TextCombiner.CombineMatrix(matrix, options);
+            sw.Stop();
+
+            Assert.AreEqual(10000, result.GetLength(0));
+            Assert.AreEqual(1, result.GetLength(1));
+            Assert.IsNotNull(result[0, 0]);
+            Assert.IsTrue(sw.ElapsedMilliseconds < 500, $"TextCombiner benchmark took {sw.ElapsedMilliseconds} ms, target is < 500 ms");
+        }
+
+        [TestMethod]
+        public void Benchmark_RangeTransposer_100K_Cells_CompletesUnder500ms()
+        {
+            int rows = 10000;
+            int cols = 10;
+            object?[,] matrix = new object?[rows, cols];
+
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    matrix[r, c] = r * 10 + c;
+                }
+            }
+
+            var sw = Stopwatch.StartNew();
+            var transposed = RangeTransposer.Transpose(matrix);
+            sw.Stop();
+
+            Assert.AreEqual(10, transposed.GetLength(0));
+            Assert.AreEqual(10000, transposed.GetLength(1));
+            Assert.IsTrue(sw.ElapsedMilliseconds < 500, $"RangeTransposer benchmark took {sw.ElapsedMilliseconds} ms, target is < 500 ms");
+        }
+
+        [TestMethod]
+        public void Benchmark_RangeRandomizer_100K_Cells_CompletesUnder500ms()
+        {
+            int rows = 10000;
+            int cols = 10;
+            object?[,] matrix = new object?[rows, cols];
+
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    matrix[r, c] = $"Cell_{r}_{c}";
+                }
+            }
+
+            var options = new RandomSortOptions
+            {
+                Mode = RandomSortMode.EntireRows,
+                HasHeaderRow = true
+            };
+
+            var sw = Stopwatch.StartNew();
+            var shuffled = RangeRandomizer.Randomize(matrix, options, new Random(42));
+            sw.Stop();
+
+            Assert.AreEqual(10000, shuffled.GetLength(0));
+            Assert.AreEqual(10, shuffled.GetLength(1));
+            Assert.IsTrue(sw.ElapsedMilliseconds < 500, $"RangeRandomizer benchmark took {sw.ElapsedMilliseconds} ms, target is < 500 ms");
+        }
+
+        [TestMethod]
+        public void Benchmark_ValueRounder_100K_Cells_CompletesUnder500ms()
+        {
+            int rows = 10000;
+            int cols = 10;
+            object?[,] matrix = new object?[rows, cols];
+
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    matrix[r, c] = (r * 1.234567) + (c * 0.987654);
+                }
+            }
+
+            var options = new ValueRoundOptions
+            {
+                Mode = RoundingMode.Standard,
+                DecimalPlaces = 2
+            };
+
+            var sw = Stopwatch.StartNew();
+            var rounded = ValueRounder.RoundRange(matrix, options, out int affected);
+            sw.Stop();
+
+            Assert.AreEqual(100000, affected);
+            Assert.IsTrue(sw.ElapsedMilliseconds < 500, $"ValueRounder benchmark took {sw.ElapsedMilliseconds} ms, target is < 500 ms");
+        }
+
+        [TestMethod]
+        public void Benchmark_DuplicateAnalyzer_100K_Cells_CompletesUnder500ms()
+        {
+            int rows = 10000;
+            int cols = 10;
+            object?[,] matrix = new object?[rows, cols];
+
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    // Introduce duplicates every 5 rows
+                    matrix[r, c] = $"Item_{r % 2000}_{c}";
+                }
+            }
+
+            var options = new DuplicateAnalysisOptions
+            {
+                MatchRule = DuplicateMatchRule.DuplicatesExcludingFirst,
+                Scope = DuplicateAnalysisScope.CellByCell,
+                MatchCase = false
+            };
+
+            var sw = Stopwatch.StartNew();
+            var result = DuplicateAnalyzer.Analyze(matrix, 1, 1, options);
+            sw.Stop();
+
+            Assert.AreEqual(100000, result.TotalCellsAnalyzed);
+            Assert.IsTrue(result.MatchingCells.Count > 0);
+            Assert.IsTrue(sw.ElapsedMilliseconds < 500, $"DuplicateAnalyzer benchmark took {sw.ElapsedMilliseconds} ms, target is < 500 ms");
+        }
+
+        [TestMethod]
+        public void Benchmark_MultiSheetFindReplace_100K_Cells_CompletesUnder500ms()
+        {
+            int rows = 10000;
+            int cols = 10;
+            object?[,] matrix = new object?[rows, cols];
+
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    matrix[r, c] = $"Sample string value {r}-{c} with target token in text";
+                }
+            }
+
+            var options = new FindReplaceOptions
+            {
+                SearchText = "target token",
+                ReplaceText = "replacement token",
+                MatchCase = true
+            };
+
+            var sw = Stopwatch.StartNew();
+            var matches = MultiSheetFindReplace.FindMatches("Sheet1", 1, 1, matrix, options);
+            sw.Stop();
+
+            Assert.AreEqual(100000, matches.Count);
+            Assert.IsTrue(sw.ElapsedMilliseconds < 500, $"MultiSheetFindReplace benchmark took {sw.ElapsedMilliseconds} ms, target is < 500 ms");
+        }
     }
 }

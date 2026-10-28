@@ -1,0 +1,81 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.CleanTextDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Clean Characters - Excel Productivity Suite"
+        Height="500" Width="580"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="🧹" Foreground="White" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Clean Characters &amp; Web Entities" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Strip unprintable control codes, zero-width spaces, and decode HTML entities" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Options -->
+        <GroupBox Grid.Row="1" Header="Cleaning Rules" Style="{StaticResource ModernGroupBoxStyle}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <CheckBox Grid.Row="0" Grid.Column="0" x:Name="RemoveControlCheck" Content="Remove ASCII control codes (0-31, 127)" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" Checked="OptionChanged" Unchecked="OptionChanged" />
+                <CheckBox Grid.Row="0" Grid.Column="1" x:Name="RemoveZeroWidthCheck" Content="Remove invisible zero-width spaces" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" Checked="OptionChanged" Unchecked="OptionChanged" />
+
+                <CheckBox Grid.Row="1" Grid.Column="0" x:Name="DecodeHtmlCheck" Content="Decode HTML entities (&amp;amp;, &amp;nbsp;)" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" Checked="OptionChanged" Unchecked="OptionChanged" />
+                <CheckBox Grid.Row="1" Grid.Column="1" x:Name="PreserveLineBreaksCheck" Content="Preserve line breaks (\r, \n)" IsChecked="False" Style="{StaticResource ModernCheckBoxStyle}" Checked="OptionChanged" Unchecked="OptionChanged" />
+
+                <CheckBox Grid.Row="2" Grid.Column="0" x:Name="PreserveTabsCheck" Content="Preserve tab stops (\t)" IsChecked="False" Style="{StaticResource ModernCheckBoxStyle}" Checked="OptionChanged" Unchecked="OptionChanged" />
+            </Grid>
+        </GroupBox>
+
+        <!-- Live Preview -->
+        <DockPanel Grid.Row="2" Margin="0,8,0,0">
+            <TextBlock DockPanel.Dock="Top" Text="Live Preview (First 10 Cells):" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,4" />
+            <controls:LivePreviewTable x:Name="PreviewTable" />
+        </DockPanel>
+
+        <!-- Footer -->
+        <DockPanel Grid.Row="3" Margin="0,12,0,0">
+            <TextBlock Text="Safe in-memory batch cleaning" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Cancel" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,8,0" Click="CancelButton_Click" IsCancel="True" />
+                <Button Content="Clean Characters" Style="{StaticResource PrimaryButtonStyle}" Click="ApplyButton_Click" IsDefault="True" />
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

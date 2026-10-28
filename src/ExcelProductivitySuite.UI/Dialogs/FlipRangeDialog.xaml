@@ -1,0 +1,66 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.FlipRangeDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Flip Range - Excel Productivity Suite"
+        Height="480" Width="580"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="⇄" Foreground="White" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Flip Range" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Reverse column order horizontally or reverse row order vertically in the active selection" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Options -->
+        <GroupBox Grid.Row="1" Header="Flip Direction" Style="{StaticResource ModernGroupBoxStyle}">
+            <StackPanel>
+                <RadioButton x:Name="HorizontalRadio" Content="Flip Horizontally (reverse column order left-to-right: Col A ↔ Col Z)" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Checked="OptionChanged" />
+                <RadioButton x:Name="VerticalRadio" Content="Flip Vertically (reverse row order top-to-bottom: Row 1 ↔ Row N)" Style="{StaticResource ModernRadioButtonStyle}" Checked="OptionChanged" />
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Live Preview -->
+        <DockPanel Grid.Row="2" Margin="0,8,0,0">
+            <TextBlock DockPanel.Dock="Top" Text="Live Preview (First 10 Cells in Leading Vector):" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,4" />
+            <controls:LivePreviewTable x:Name="PreviewTable" />
+        </DockPanel>
+
+        <!-- Footer -->
+        <DockPanel Grid.Row="3" Margin="0,12,0,0">
+            <TextBlock Text="Safe in-memory batch processing" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Cancel" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,8,0" Click="CancelButton_Click" IsCancel="True" />
+                <Button Content="Flip Range" Style="{StaticResource PrimaryButtonStyle}" Click="ApplyButton_Click" IsDefault="True" />
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

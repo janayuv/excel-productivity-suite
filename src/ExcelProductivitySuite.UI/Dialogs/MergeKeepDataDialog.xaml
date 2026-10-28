@@ -1,0 +1,82 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.MergeKeepDataDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Merge Cells (Keep Data) - Excel Productivity Suite"
+        Height="510" Width="580"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="⊞" Foreground="White" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Merge Cells (Keep All Data)" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Combine all cell values with a delimiter into anchor cells without Excel's destructive data loss" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Options -->
+        <GroupBox Grid.Row="1" Header="Merge Direction &amp; Delimiter" Style="{StaticResource ModernGroupBoxStyle}">
+            <StackPanel>
+                <RadioButton x:Name="RowByRowRadio" Content="Merge Row-by-Row across columns (e.g. combine each row's cells)" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Checked="OptionChanged" />
+                <RadioButton x:Name="ColByColRadio" Content="Merge Column-by-Column down rows" Style="{StaticResource ModernRadioButtonStyle}" Checked="OptionChanged" />
+                <RadioButton x:Name="EntireSelectionRadio" Content="Merge Entire Selection into top-left cell" Style="{StaticResource ModernRadioButtonStyle}" Checked="OptionChanged" />
+
+                <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                    <TextBlock Text="Separator:" VerticalAlignment="Center" Margin="0,0,8,0" FontWeight="SemiBold" />
+                    <ComboBox x:Name="SeparatorCombo" Width="140" Style="{StaticResource ModernComboBoxStyle}" SelectionChanged="SeparatorCombo_SelectionChanged">
+                        <ComboBoxItem Content="Space (&quot; &quot;)" IsSelected="True" Tag=" " />
+                        <ComboBoxItem Content="Comma (&quot;, &quot;)" Tag=", " />
+                        <ComboBoxItem Content="Semicolon (&quot;; &quot;)" Tag="; " />
+                        <ComboBoxItem Content="Line Break (\n)" Tag="&#x0a;" />
+                        <ComboBoxItem Content="Hyphen (&quot; - &quot;)" Tag=" - " />
+                        <ComboBoxItem Content="Custom Delimiter" Tag="CUSTOM" />
+                    </ComboBox>
+                    <TextBox x:Name="CustomSeparatorBox" Width="80" Style="{StaticResource ModernTextBoxStyle}" Margin="8,0,0,0" Visibility="Collapsed" Text="|" TextChanged="OptionChanged" />
+                </StackPanel>
+
+                <CheckBox x:Name="SkipBlankCellsCheck" Content="Skip blank cells when concatenating" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" Margin="0,6,0,0" Checked="OptionChanged" Unchecked="OptionChanged" />
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Live Preview -->
+        <DockPanel Grid.Row="2" Margin="0,8,0,0">
+            <TextBlock DockPanel.Dock="Top" Text="Live Preview (First 10 Rows):" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,4" />
+            <controls:LivePreviewTable x:Name="PreviewTable" />
+        </DockPanel>
+
+        <!-- Footer -->
+        <DockPanel Grid.Row="3" Margin="0,12,0,0">
+            <TextBlock Text="Retains all cell information safely" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Cancel" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,8,0" Click="CancelButton_Click" IsCancel="True" />
+                <Button Content="Merge (Keep Data)" Style="{StaticResource PrimaryButtonStyle}" Click="ApplyButton_Click" IsDefault="True" />
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>
