@@ -386,6 +386,53 @@
                   onAction="OnRibbonButtonClicked" />
         </group>
 
+        <!-- Group: Navigation & Productivity -->
+        <group id="grpNavigation" label="Navigation &amp; Productivity">
+          <button id="btnNamedRanges"
+                  label="Named Ranges"
+                  size="large"
+                  imageMso="NameDefine"
+                  screentip="Named Range Manager"
+                  supertip="Inspect, audit, filter, navigate, and manage all defined names in the workbook."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnColumnNav"
+                  label="Column Nav"
+                  size="large"
+                  imageMso="AdpColumns"
+                  screentip="Column Navigator"
+                  supertip="Fast navigation, inspection, and visibility toggling across wide worksheets."
+                  onAction="OnRibbonButtonClicked" />
+          <separator id="sepNav1" />
+          <button id="btnCellPreview"
+                  label="Cell Inspector"
+                  size="normal"
+                  imageMso="ZoomPrint"
+                  screentip="Cell Content Inspector"
+                  supertip="Inspect complete unclipped contents, text metrics, formula expressions, and formatting."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnDatePicker"
+                  label="Date Picker"
+                  size="normal"
+                  imageMso="AppointmentColorDialog"
+                  screentip="Date Picker Insertion"
+                  supertip="Select a calendar date and insert formatted text into the active cell cursor."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnGridFocus"
+                  label="Grid Focus"
+                  size="normal"
+                  imageMso="TableSelectRowAndColumn"
+                  screentip="Reading Grid Focus"
+                  supertip="Row &amp; column crosshair tracking assistant for effortlessly navigating wide tables."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnDataEntryForm"
+                  label="Data Form"
+                  size="normal"
+                  imageMso="FormNew"
+                  screentip="Table Data Entry Form"
+                  supertip="Dynamic structured data entry and record navigation for active worksheet tables."
+                  onAction="OnRibbonButtonClicked" />
+        </group>
+
       </tab>
 
       <!-- Secondary Tab: Workbook & Sheets -->

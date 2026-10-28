@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using ExcelProductivitySuite.Core.Abstractions;
 using ExcelProductivitySuite.Engine.DataCleaning;
 using ExcelProductivitySuite.Engine.Analysis;
 using ExcelProductivitySuite.Engine.Files;
 using ExcelProductivitySuite.Engine.Formulas;
+using ExcelProductivitySuite.Engine.Navigation;
 using ExcelProductivitySuite.Engine.Ranges;
 using ExcelProductivitySuite.Engine.Recovery;
 using ExcelProductivitySuite.Engine.Worksheets;
@@ -1753,6 +1755,133 @@ namespace ExcelProductivitySuite.UnitTests
             Assert.IsTrue(charted);
             Assert.IsNotNull(ctx.LastCreatedChart);
             Assert.AreEqual("Q1-Q4 Review", ctx.LastCreatedChart.Value.title);
+        }
+
+        #endregion
+
+        #region Batch 10: Navigation & User Productivity Tests
+
+        [TestMethod]
+        public void ColumnLetterConverter_IndexToLetter_ConvertsProperly()
+        {
+            Assert.AreEqual("A", ColumnLetterConverter.IndexToLetter(1));
+            Assert.AreEqual("Z", ColumnLetterConverter.IndexToLetter(26));
+            Assert.AreEqual("AA", ColumnLetterConverter.IndexToLetter(27));
+            Assert.AreEqual("AB", ColumnLetterConverter.IndexToLetter(28));
+            Assert.AreEqual("AZ", ColumnLetterConverter.IndexToLetter(52));
+            Assert.AreEqual("BA", ColumnLetterConverter.IndexToLetter(53));
+            Assert.AreEqual("ZZ", ColumnLetterConverter.IndexToLetter(702));
+            Assert.AreEqual("AAA", ColumnLetterConverter.IndexToLetter(703));
+        }
+
+        [TestMethod]
+        public void ColumnLetterConverter_LetterToIndex_ConvertsProperly()
+        {
+            Assert.AreEqual(1, ColumnLetterConverter.LetterToIndex("A"));
+            Assert.AreEqual(26, ColumnLetterConverter.LetterToIndex("Z"));
+            Assert.AreEqual(27, ColumnLetterConverter.LetterToIndex("AA"));
+            Assert.AreEqual(28, ColumnLetterConverter.LetterToIndex("AB"));
+            Assert.AreEqual(52, ColumnLetterConverter.LetterToIndex("AZ"));
+            Assert.AreEqual(53, ColumnLetterConverter.LetterToIndex("BA"));
+            Assert.AreEqual(702, ColumnLetterConverter.LetterToIndex("ZZ"));
+            Assert.AreEqual(703, ColumnLetterConverter.LetterToIndex("AAA"));
+        }
+
+        [TestMethod]
+        public void DateFormatPresets_GetStandardPresets_ReturnsValidFormattedDates()
+        {
+            var testDate = new DateTime(2026, 10, 28, 15, 30, 45);
+            var presets = DateFormatPresets.GetStandardPresets(testDate);
+
+            Assert.IsTrue(presets.Count >= 6);
+            Assert.AreEqual("2026-10-28", DateFormatPresets.Format(testDate, "yyyy-MM-dd"));
+            Assert.AreEqual("10/28/2026", DateFormatPresets.Format(testDate, "MM/dd/yyyy"));
+            Assert.AreEqual("28/10/2026", DateFormatPresets.Format(testDate, "dd/MM/yyyy"));
+            Assert.IsTrue(DateFormatPresets.Format(testDate, "MMMM dd, yyyy").Contains("October"));
+        }
+
+        [TestMethod]
+        public void MockExcelContext_NamedRanges()
+        {
+            var ctx = new MockExcelContext();
+            var names = ctx.GetNamedRanges();
+
+            Assert.AreEqual(3, names.Count);
+            Assert.IsTrue(names.Any(n => n.Name == "SalesTotal" && n.IsValid));
+            Assert.IsTrue(names.Any(n => n.Name == "BrokenRef" && !n.IsValid));
+
+            bool navigated = ctx.GoToNamedRange("SalesTotal");
+            Assert.IsTrue(navigated);
+            Assert.AreEqual("SalesTotal", ctx.LastNavigatedNamedRange);
+
+            bool deleted = ctx.DeleteNamedRange("BrokenRef");
+            Assert.IsTrue(deleted);
+            Assert.AreEqual("BrokenRef", ctx.LastDeletedNamedRange);
+        }
+
+        [TestMethod]
+        public void MockExcelContext_ColumnsManagement()
+        {
+            var ctx = new MockExcelContext();
+            var cols = ctx.GetWorksheetColumns();
+
+            Assert.AreEqual(4, cols.Count);
+            Assert.AreEqual("A", cols[0].ColumnLetter);
+            Assert.AreEqual("ID", cols[0].Header);
+            Assert.IsFalse(cols[0].IsHidden);
+            Assert.IsTrue(cols[2].IsHidden); // Department column
+
+            ctx.SelectColumn(2);
+            Assert.AreEqual(2, ctx.LastSelectedColumn);
+
+            ctx.SetColumnsVisibility(new[] { 1, 2 }, true);
+            Assert.AreEqual(1, ctx.ColumnVisibilityHistory.Count);
+            Assert.IsTrue(ctx.ColumnVisibilityHistory[0].hidden);
+
+            ctx.AutoFitColumns(new[] { 1, 2, 3 });
+            Assert.AreEqual(1, ctx.AutoFittedColumnsHistory.Count);
+            Assert.AreEqual(3, ctx.AutoFittedColumnsHistory[0].Count);
+        }
+
+        [TestMethod]
+        public void MockExcelContext_CellDetailsAndContext()
+        {
+            var ctx = new MockExcelContext();
+            var details = ctx.GetActiveCellDetails();
+
+            Assert.IsNotNull(details);
+            Assert.AreEqual("$B$5", details.Address);
+            Assert.AreEqual("Sheet1", details.SheetName);
+            Assert.AreEqual(2, details.LineCount); // Multi-line test string
+            Assert.IsTrue(details.WordCount >= 5);
+            Assert.AreEqual("Numeric", details.DataType);
+
+            var cellCtx = ctx.GetActiveCellContext();
+            Assert.AreEqual(1, cellCtx.row);
+            Assert.AreEqual(1, cellCtx.col);
+
+            ctx.HighlightActiveRowAndColumn(5, 3);
+            Assert.AreEqual((5, 3), ctx.LastHighlightedRowAndCol);
+        }
+
+        [TestMethod]
+        public void MockExcelContext_TableDataAndAppendRow()
+        {
+            var ctx = new MockExcelContext();
+            var table = ctx.GetActiveTableData();
+
+            Assert.IsNotNull(table);
+            Assert.AreEqual(4, table.ColumnCount);
+            Assert.AreEqual(2, table.RowCount);
+            Assert.AreEqual("ID", table.Headers[0]);
+            Assert.AreEqual("Salary", table.Headers[3]);
+
+            var newRow = new object?[] { 103, "Charlie", "Marketing", 75000 };
+            bool appended = ctx.AppendTableRow(newRow, table.StartRow, table.StartCol, table.ColumnCount);
+
+            Assert.IsTrue(appended);
+            Assert.AreEqual(1, ctx.AppendedRowsHistory.Count);
+            Assert.AreEqual(103, ctx.AppendedRowsHistory[0].row[0]);
         }
 
         #endregion

@@ -1,0 +1,97 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.CellContentInspectorDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Cell Content Inspector - Excel Productivity Suite"
+        Height="540" Width="680"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="🔍" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Cell Content Inspector" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Inspect complete unclipped contents, text metrics, formula expressions, and formatting" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Cell Metadata Bar -->
+        <Border Grid.Row="1" Background="White" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="4" Padding="10" Margin="0,0,0,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <Border Background="#E0F2FE" BorderBrush="#BAE6FD" BorderThickness="1" CornerRadius="3" Padding="8,3" Margin="0,0,8,0">
+                        <TextBlock x:Name="AddressBadge" Text="$A$1" FontWeight="Bold" Foreground="#0284C7" FontSize="12" />
+                    </Border>
+                    <Border Background="#F3F4F6" CornerRadius="3" Padding="8,3" Margin="0,0,8,0">
+                        <TextBlock x:Name="SheetBadge" Text="Sheet1" Foreground="#4B5563" FontSize="11" />
+                    </Border>
+                    <Border Background="#FEF3C7" BorderBrush="#FDE68A" BorderThickness="1" CornerRadius="3" Padding="8,3">
+                        <TextBlock x:Name="TypeBadge" Text="Text" Foreground="#B45309" FontSize="11" />
+                    </Border>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <TextBlock x:Name="CharCountText" Text="Chars: 0" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,12,0" VerticalAlignment="Center" />
+                    <TextBlock x:Name="WordCountText" Text="Words: 0" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,12,0" VerticalAlignment="Center" />
+                    <TextBlock x:Name="LineCountText" Text="Lines: 1" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Main Content Viewer -->
+        <GroupBox Grid.Row="2" Header="Unclipped Cell Value" Style="{StaticResource ModernGroupBoxStyle}">
+            <TextBox x:Name="ContentBox" Style="{StaticResource ModernTextBoxStyle}"
+                     IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap"
+                     VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                     FontFamily="Consolas" FontSize="12"
+                     BorderThickness="1" BorderBrush="#D1D5DB" Background="White" Padding="6" />
+        </GroupBox>
+
+        <!-- Formula Expression (if any) -->
+        <GroupBox x:Name="FormulaGroup" Grid.Row="3" Header="Formula" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,8,0,10">
+            <TextBox x:Name="FormulaBox" Style="{StaticResource ModernTextBoxStyle}"
+                     IsReadOnly="True" FontFamily="Consolas" FontSize="11"
+                     Background="#F9FAFB" Foreground="#0078D4" FontWeight="SemiBold" Margin="2" />
+        </GroupBox>
+
+        <!-- Footer Actions -->
+        <DockPanel Grid.Row="4">
+            <Button Content="Close" Style="{StaticResource ModernSecondaryButtonStyle}" DockPanel.Dock="Right" Width="80" Click="Close_Click" />
+            <Button Content="Refresh" Style="{StaticResource ModernSecondaryButtonStyle}" DockPanel.Dock="Right" Width="80" Margin="0,0,8,0" Click="Refresh_Click" />
+            <Button Content="Copy Content" Style="{StaticResource ModernPrimaryButtonStyle}" DockPanel.Dock="Left" Width="110" Margin="0,0,6,0" Click="CopyContent_Click" />
+            <Button x:Name="CopyFormulaBtn" Content="Copy Formula" Style="{StaticResource ModernSecondaryButtonStyle}" DockPanel.Dock="Left" Width="110" Click="CopyFormula_Click" />
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

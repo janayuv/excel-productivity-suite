@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Windows;
 using ExcelProductivitySuite.Core.Abstractions;
 using ExcelProductivitySuite.Engine.Formulas;
+using ExcelProductivitySuite.Engine.Navigation;
 using Excel = Microsoft.Office.Interop.Excel;
 
 namespace ExcelProductivitySuite.AddIn.ExcelIntegration
@@ -2128,6 +2129,330 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
             catch (Exception ex)
             {
                 ShowMessage($"Failed to create chart: {ex.Message}", "Chart Error", isError: true);
+                return false;
+            }
+        }
+
+        public IReadOnlyList<NamedRangeInfo> GetNamedRanges()
+        {
+            var list = new List<NamedRangeInfo>();
+            if (!HasActiveWorkbook) return list;
+            try
+            {
+                foreach (Excel.Name name in _app.ActiveWorkbook.Names)
+                {
+                    try
+                    {
+                        string n = name.Name;
+                        string refersTo = name.RefersTo?.ToString() ?? "";
+                        string comment = "";
+                        try { comment = name.Comment ?? ""; } catch { }
+
+                        string scope = "Workbook";
+                        try
+                        {
+                            if (name.Parent is Excel.Worksheet ws)
+                            {
+                                scope = ws.Name;
+                            }
+                        }
+                        catch { }
+
+                        bool isValid = !refersTo.Contains("#REF!");
+                        string targetAddress = refersTo.TrimStart('=');
+                        list.Add(new NamedRangeInfo(n, refersTo, scope, comment, isValid, targetAddress));
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+            return list;
+        }
+
+        public bool GoToNamedRange(string name)
+        {
+            if (!HasActiveWorkbook || string.IsNullOrWhiteSpace(name)) return false;
+            try
+            {
+                _app.Goto(name, true);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Could not navigate to named range '{name}': {ex.Message}", "Navigation Error", isError: true);
+                return false;
+            }
+        }
+
+        public bool DeleteNamedRange(string name)
+        {
+            if (!HasActiveWorkbook || string.IsNullOrWhiteSpace(name)) return false;
+            try
+            {
+                var n = _app.ActiveWorkbook.Names.Item(name);
+                n.Delete();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Could not delete named range '{name}': {ex.Message}", "Delete Error", isError: true);
+                return false;
+            }
+        }
+
+        public IReadOnlyList<WorksheetColumnInfo> GetWorksheetColumns(int maxCols = 100)
+        {
+            var list = new List<WorksheetColumnInfo>();
+            if (!HasActiveWorksheet) return list;
+            try
+            {
+                var ws = (Excel.Worksheet)_app.ActiveSheet;
+                var used = ws.UsedRange;
+                int startCol = 1;
+                int endCol = 1;
+                try
+                {
+                    startCol = used.Column;
+                    endCol = startCol + used.Columns.Count - 1;
+                }
+                catch { }
+
+                if (endCol > maxCols) endCol = maxCols;
+
+                for (int col = startCol; col <= endCol; col++)
+                {
+                    string colLetter = ColumnLetterConverter.IndexToLetter(col);
+                    string header = "";
+                    try
+                    {
+                        var cell = (Excel.Range)ws.Cells[1, col];
+                        header = cell.Value2?.ToString()?.Trim() ?? "";
+                    }
+                    catch { }
+
+                    double width = 8.43;
+                    bool isHidden = false;
+                    try
+                    {
+                        var colRange = (Excel.Range)ws.Columns[col];
+                        width = Convert.ToDouble(colRange.ColumnWidth);
+                        isHidden = (bool)colRange.Hidden;
+                    }
+                    catch { }
+
+                    list.Add(new WorksheetColumnInfo(col, colLetter, header, width, isHidden));
+                }
+            }
+            catch { }
+            return list;
+        }
+
+        public void SelectColumn(int columnIndex)
+        {
+            if (!HasActiveWorksheet || columnIndex < 1) return;
+            try
+            {
+                var ws = (Excel.Worksheet)_app.ActiveSheet;
+                ((Excel.Range)ws.Columns[columnIndex]).Select();
+            }
+            catch { }
+        }
+
+        public void SetColumnsVisibility(IEnumerable<int> columnIndices, bool isHidden)
+        {
+            if (!HasActiveWorksheet) return;
+            try
+            {
+                var ws = (Excel.Worksheet)_app.ActiveSheet;
+                foreach (int c in columnIndices)
+                {
+                    try
+                    {
+                        ((Excel.Range)ws.Columns[c]).Hidden = isHidden;
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+        }
+
+        public void AutoFitColumns(IEnumerable<int> columnIndices)
+        {
+            if (!HasActiveWorksheet) return;
+            try
+            {
+                var ws = (Excel.Worksheet)_app.ActiveSheet;
+                foreach (int c in columnIndices)
+                {
+                    try
+                    {
+                        ((Excel.Range)ws.Columns[c]).AutoFit();
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+        }
+
+        public CellContentDetails? GetActiveCellDetails()
+        {
+            if (!HasActiveWorksheet) return null;
+            try
+            {
+                var cell = _app.ActiveCell;
+                if (cell == null) return null;
+
+                string address = cell.get_Address();
+                string sheetName = ((Excel.Worksheet)_app.ActiveSheet).Name;
+                string valText = cell.Value2?.ToString() ?? "";
+                string formulaText = "";
+                try { formulaText = cell.Formula?.ToString() ?? ""; } catch { }
+                string numFmt = "";
+                try { numFmt = cell.NumberFormat?.ToString() ?? ""; } catch { }
+
+                string dataType = "String";
+                object? raw = cell.Value2;
+                if (raw == null) dataType = "Empty / Blank";
+                else if (raw is double || raw is int || raw is float || raw is decimal) dataType = "Numeric";
+                else if (raw is bool) dataType = "Boolean";
+                else if (valText.StartsWith("#")) dataType = "Error";
+                else if (raw is DateTime) dataType = "Date";
+
+                return new CellContentDetails(address, sheetName, valText, formulaText, numFmt, dataType);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public (int row, int col, string rowHeader, string colHeader, string address) GetActiveCellContext()
+        {
+            if (!HasActiveWorksheet) return (1, 1, "", "", "$A$1");
+            try
+            {
+                var cell = _app.ActiveCell;
+                if (cell == null) return (1, 1, "", "", "$A$1");
+
+                int row = cell.Row;
+                int col = cell.Column;
+                string addr = cell.get_Address();
+                var ws = (Excel.Worksheet)_app.ActiveSheet;
+
+                string colHeader = "";
+                try
+                {
+                    colHeader = ((Excel.Range)ws.Cells[1, col]).Value2?.ToString()?.Trim() ?? "";
+                }
+                catch { }
+
+                string rowHeader = "";
+                try
+                {
+                    rowHeader = ((Excel.Range)ws.Cells[row, 1]).Value2?.ToString()?.Trim() ?? "";
+                }
+                catch { }
+
+                return (row, col, rowHeader, colHeader, addr);
+            }
+            catch
+            {
+                return (1, 1, "", "", "$A$1");
+            }
+        }
+
+        public void HighlightActiveRowAndColumn(int row, int col)
+        {
+            if (!HasActiveWorksheet) return;
+            try
+            {
+                var ws = (Excel.Worksheet)_app.ActiveSheet;
+                var rowRange = (Excel.Range)ws.Rows[row];
+                var colRange = (Excel.Range)ws.Columns[col];
+                var unionRange = _app.Union(rowRange, colRange);
+                unionRange.Select();
+            }
+            catch { }
+        }
+
+        public TableDataModel? GetActiveTableData(int maxSampleRows = 500)
+        {
+            if (!HasActiveWorksheet) return null;
+            try
+            {
+                var ws = (Excel.Worksheet)_app.ActiveSheet;
+                Excel.Range targetRange = _app.Selection as Excel.Range ?? ws.UsedRange;
+                if (targetRange == null) return null;
+
+                int startRow = targetRange.Row;
+                int startCol = targetRange.Column;
+                int rowCount = targetRange.Rows.Count;
+                int colCount = targetRange.Columns.Count;
+
+                if (rowCount < 1 || colCount < 1) return null;
+
+                var headers = new List<string>();
+                for (int c = 1; c <= colCount; c++)
+                {
+                    var cell = (Excel.Range)ws.Cells[startRow, startCol + c - 1];
+                    string h = cell.Value2?.ToString()?.Trim() ?? "";
+                    if (string.IsNullOrWhiteSpace(h)) h = ColumnLetterConverter.IndexToLetter(startCol + c - 1);
+                    headers.Add(h);
+                }
+
+                var rows = new List<object?[]>();
+                int dataRows = Math.Min(rowCount - 1, maxSampleRows);
+                if (dataRows > 0)
+                {
+                    var dataRange = ws.Range[ws.Cells[startRow + 1, startCol], ws.Cells[startRow + dataRows, startCol + colCount - 1]];
+                    object[,] vals = (object[,])dataRange.Value2;
+                    if (vals != null)
+                    {
+                        int rStart = vals.GetLowerBound(0);
+                        int rEnd = vals.GetUpperBound(0);
+                        int cStart = vals.GetLowerBound(1);
+
+                        for (int r = rStart; r <= rEnd; r++)
+                        {
+                            var rowVals = new object?[colCount];
+                            for (int c = 0; c < colCount; c++)
+                            {
+                                rowVals[c] = vals[r, cStart + c];
+                            }
+                            rows.Add(rowVals);
+                        }
+                    }
+                }
+
+                return new TableDataModel(headers, rows, startRow, startCol);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public bool AppendTableRow(object?[] rowData, int tableStartRow, int tableStartCol, int colCount)
+        {
+            if (!HasActiveWorksheet || rowData == null || rowData.Length == 0) return false;
+            try
+            {
+                var ws = (Excel.Worksheet)_app.ActiveSheet;
+                int lastRow = ws.Cells[ws.Rows.Count, tableStartCol].End(Excel.XlDirection.xlUp).Row;
+                int newRow = Math.Max(tableStartRow + 1, lastRow + 1);
+
+                var destRange = ws.Range[ws.Cells[newRow, tableStartCol], ws.Cells[newRow, tableStartCol + colCount - 1]];
+                var matrix = new object[1, colCount];
+                for (int c = 0; c < colCount; c++)
+                {
+                    matrix[0, c] = (c < rowData.Length && rowData[c] != null) ? rowData[c]! : "";
+                }
+                destRange.Value2 = matrix;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Failed to append record: {ex.Message}", "Append Error", isError: true);
                 return false;
             }
         }

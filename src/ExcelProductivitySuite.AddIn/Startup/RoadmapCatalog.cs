@@ -293,47 +293,17 @@ namespace ExcelProductivitySuite.AddIn.Startup
                 new[] { "pivot table helpers", "refresh pivot tables", "pivot formatting", "classic pivot" }, "PivotTableInsert");
 
             // =========================================================================
-            // Module L: Navigation and User Productivity (Batch 10)
+            // Module L: Navigation and User Productivity (Batch 10 Expansion)
             // =========================================================================
             AddPlanned(registry, "CMD_NAV_PANE", "Workbook & Sheet Navigation Pane",
                 "Docked task pane providing rapid navigation across workbooks, sheets, and tables.",
-                CommandCategory.NavigationAndProductivity, "L", "Batch 10",
+                CommandCategory.NavigationAndProductivity, "L", "Batch 10+",
                 new[] { "navigation pane", "sheet sidebar", "fast navigation", "sheet list panel" }, "ViewNormalViewExcel");
-
-            AddPlanned(registry, "CMD_NAV_NAMED_RANGES", "Named Range Navigator",
-                "Search, inspect, navigate, and edit named ranges across the entire workbook.",
-                CommandCategory.NavigationAndProductivity, "L", "Batch 10",
-                new[] { "named ranges", "name manager", "locate named range", "inspect names" }, "NameManager");
-
-            AddPlanned(registry, "CMD_NAV_COLUMNS", "Column Navigator & Visibility",
-                "Quickly locate, hide, unhide, and navigate across wide spreadsheets with 50+ columns.",
-                CommandCategory.NavigationAndProductivity, "L", "Batch 10",
-                new[] { "column navigator", "find column", "wide sheet navigation", "hide columns list" }, "TableColumnsInsertLeft");
-
-            AddPlanned(registry, "CMD_NAV_CELL_PREVIEW", "Expanded Cell Content Viewer",
-                "View and scroll long multiline text or formulas in a dedicated modal inspection card.",
-                CommandCategory.NavigationAndProductivity, "L", "Batch 10",
-                new[] { "cell preview", "view long cell", "multiline viewer", "inspect text" }, "ReviewShowOrHideMarkup");
 
             AddPlanned(registry, "CMD_NAV_FORMULA_EDITOR", "Expanded Multi-Line Formula Editor",
                 "Edit long, complex nested formulas with syntax highlighting, indentation, and formatting.",
-                CommandCategory.NavigationAndProductivity, "L", "Batch 10",
+                CommandCategory.NavigationAndProductivity, "L", "Batch 10+",
                 new[] { "expanded formula editor", "multiline formula", "big formula editor", "format formula" }, "FormulaMoreFunctionsMenu");
-
-            AddPlanned(registry, "CMD_NAV_DATE_PICKER", "Interactive Date Picker",
-                "Insert dates into cells using a floating calendar date picker interface.",
-                CommandCategory.NavigationAndProductivity, "L", "Batch 10",
-                new[] { "date picker", "calendar picker", "insert date popup", "cell calendar" }, "FormatDate");
-
-            AddPlanned(registry, "CMD_NAV_GRID_FOCUS", "Grid-Focus Reading Crosshair",
-                "Highlight the active row and column dynamically to prevent row reading errors in wide tables.",
-                CommandCategory.NavigationAndProductivity, "L", "Batch 10",
-                new[] { "grid focus", "crosshair highlighting", "reading mode", "highlight active row" }, "SelectCell");
-
-            AddPlanned(registry, "CMD_NAV_DATA_ENTRY_FORM", "Structured Record Entry Form",
-                "Display a dynamic modal form for structured row-by-row data entry with validation.",
-                CommandCategory.NavigationAndProductivity, "L", "Batch 10",
-                new[] { "data entry form", "record form", "add row dialog", "structured input" }, "FormMenu");
         }
 
         private static void AddPlanned(

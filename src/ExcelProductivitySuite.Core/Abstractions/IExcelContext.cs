@@ -350,6 +350,66 @@ namespace ExcelProductivitySuite.Core.Abstractions
         bool CreateTargetVsActualChart(string title, int startRow, int startCol, int rowCount, int colCount, int categoryColIndex, int actualColIndex, int targetColIndex);
 
         /// <summary>
+        /// Retrieves all named ranges defined in the active workbook and its worksheets.
+        /// </summary>
+        IReadOnlyList<NamedRangeInfo> GetNamedRanges();
+
+        /// <summary>
+        /// Navigates and selects the specified named range.
+        /// </summary>
+        bool GoToNamedRange(string name);
+
+        /// <summary>
+        /// Deletes the specified named range from the active workbook.
+        /// </summary>
+        bool DeleteNamedRange(string name);
+
+        /// <summary>
+        /// Retrieves column information (letter, header, width, visibility) for the active worksheet.
+        /// </summary>
+        IReadOnlyList<WorksheetColumnInfo> GetWorksheetColumns(int maxCols = 100);
+
+        /// <summary>
+        /// Selects the specified column on the active worksheet.
+        /// </summary>
+        void SelectColumn(int columnIndex);
+
+        /// <summary>
+        /// Sets the visibility (hidden / visible) of the specified columns.
+        /// </summary>
+        void SetColumnsVisibility(IEnumerable<int> columnIndices, bool isHidden);
+
+        /// <summary>
+        /// Auto-fits column widths for the specified columns.
+        /// </summary>
+        void AutoFitColumns(IEnumerable<int> columnIndices);
+
+        /// <summary>
+        /// Retrieves rich inspection details for the current active cell (text, formula, formatting, metrics).
+        /// </summary>
+        CellContentDetails? GetActiveCellDetails();
+
+        /// <summary>
+        /// Retrieves header and coordinate context for the current active cell (for grid focus).
+        /// </summary>
+        (int row, int col, string rowHeader, string colHeader, string address) GetActiveCellContext();
+
+        /// <summary>
+        /// Selects the entire row and column of the given coordinates (crosshair focus).
+        /// </summary>
+        void HighlightActiveRowAndColumn(int row, int col);
+
+        /// <summary>
+        /// Retrieves structured tabular data from the active selection or UsedRange for a dynamic form.
+        /// </summary>
+        TableDataModel? GetActiveTableData(int maxSampleRows = 500);
+
+        /// <summary>
+        /// Appends a new data row to the bottom of the active table or dataset.
+        /// </summary>
+        bool AppendTableRow(object?[] rowData, int tableStartRow, int tableStartCol, int colCount);
+
+        /// <summary>
         /// Shows an informational, warning, or error alert dialog in Excel.
         /// </summary>
         void ShowMessage(string message, string title, bool isError = false);
@@ -479,5 +539,88 @@ namespace ExcelProductivitySuite.Core.Abstractions
         public bool Sort { get; set; } = false;
         public bool AutoFilter { get; set; } = false;
         public bool UsePivotTables { get; set; } = false;
+    }
+
+    public class NamedRangeInfo
+    {
+        public string Name { get; }
+        public string RefersTo { get; }
+        public string Scope { get; }
+        public string Comment { get; }
+        public bool IsValid { get; }
+        public string TargetAddress { get; }
+
+        public NamedRangeInfo(string name, string refersTo, string scope, string comment, bool isValid, string targetAddress)
+        {
+            Name = name;
+            RefersTo = refersTo;
+            Scope = scope;
+            Comment = comment;
+            IsValid = isValid;
+            TargetAddress = targetAddress;
+        }
+    }
+
+    public class WorksheetColumnInfo
+    {
+        public int Index { get; }
+        public string ColumnLetter { get; }
+        public string Header { get; }
+        public double Width { get; }
+        public bool IsHidden { get; }
+        public string DisplayName => $"{ColumnLetter}: {(string.IsNullOrWhiteSpace(Header) ? "(Empty)" : Header)}";
+
+        public WorksheetColumnInfo(int index, string columnLetter, string header, double width, bool isHidden)
+        {
+            Index = index;
+            ColumnLetter = columnLetter;
+            Header = header;
+            Width = width;
+            IsHidden = isHidden;
+        }
+    }
+
+    public class CellContentDetails
+    {
+        public string Address { get; }
+        public string SheetName { get; }
+        public string ValueText { get; }
+        public string FormulaText { get; }
+        public string NumberFormat { get; }
+        public int CharCount { get; }
+        public int WordCount { get; }
+        public int LineCount { get; }
+        public string DataType { get; }
+
+        public CellContentDetails(string address, string sheetName, string valueText, string formulaText, string numberFormat, string dataType)
+        {
+            Address = address;
+            SheetName = sheetName;
+            ValueText = valueText;
+            FormulaText = formulaText;
+            NumberFormat = numberFormat;
+            DataType = dataType;
+            CharCount = valueText.Length;
+            WordCount = string.IsNullOrWhiteSpace(valueText) ? 0 : valueText.Split(new[] { ' ', '\r', '\n', '\t' }, StringSplitOptions.RemoveEmptyEntries).Length;
+            LineCount = string.IsNullOrWhiteSpace(valueText) ? 0 : valueText.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None).Length;
+        }
+    }
+
+    public class TableDataModel
+    {
+        public IReadOnlyList<string> Headers { get; }
+        public List<object?[]> Rows { get; }
+        public int StartRow { get; }
+        public int StartCol { get; }
+        public int RowCount => Rows.Count;
+        public int ColumnCount => Headers.Count;
+
+        public TableDataModel(IReadOnlyList<string> headers, List<object?[]> rows, int startRow, int startCol)
+        {
+            Headers = headers;
+            Rows = rows;
+            StartRow = startRow;
+            StartCol = startCol;
+        }
     }
 }

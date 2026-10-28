@@ -4,7 +4,7 @@
 **Host Application:** Microsoft Excel 2016 / 2019 / 2021 / Microsoft 365 (32-bit & 64-bit Windows Desktop)  
 **Framework:** .NET Framework 4.8 & Visual Studio Tools for Office (VSTO)  
 **UI Subsystem:** Windows Presentation Foundation (WPF) / Modern Fluent Office Palette  
-**Version:** 4.9.0 (Batch 9 Protection, Recovery, Charts & Analysis Milestone)  
+**Version:** 5.0.0 (Batch 10 Navigation, UX Polish, Packaging & Release Milestone)  
 **Last Audit Date:** 2026-10-28  
 
 ---
@@ -15,9 +15,9 @@ Following the mandatory codebase audit, the **Excel Productivity Suite** feature
 
 The current implementation comprises:
 - **Total Cataloged Capabilities:** 200+ features planned across 12 modules
-- **Active & Verified Tools:** 71 commands (69 core productivity utilities + 2 suite navigation/information utilities)
-- **Unit Test Coverage:** 195 passing automated unit & performance tests (100% pass rate in 2.0s)
-- **Real Excel COM Integration Tests:** 18 passing out-of-process Excel 2016+ scenarios (100% pass rate in 1.25s)
+- **Active & Verified Tools:** 77 commands (75 core productivity utilities + 2 suite navigation/information utilities)
+- **Unit Test Coverage:** 202 passing automated unit & performance tests (100% pass rate in 2.0s)
+- **Real Excel COM Integration Tests:** 18 passing out-of-process Excel 2016+ scenarios (100% pass rate in 1.23s)
 - **Searchable Quick Tool Launcher (SuperSearch):** Integrated multi-category search, active/roadmap status filtering, module badges, and keyword scoring (`Ctrl+Shift+P` / KeyTip: `TL`)
 
 ---
@@ -46,7 +46,7 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 
 ---
 
-## 4. Complete Active Feature Inventory (71 Implemented & Verified Tools)
+## 4. Complete Active Feature Inventory (77 Implemented & Verified Tools)
 
 | ID | Title | Module | Category | Engine Class | UI Dialog / Action | Test Mapping | Status |
 | :--- | :--- | :---: | :--- | :--- | :--- | :--- | :--- |
@@ -121,6 +121,12 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 | `CMD_RECOVERY_RESTORE_SNAPSHOT` | **Restore Snapshot** | J | Protection & Recovery | `WorkbookSnapshotManager.cs` | `RestoreSnapshotDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
 | `CMD_ANALYSIS_QUICK_STATS` | **Quick Statistics** | K | Charts & Analysis | `QuickStatisticsEngine.cs` | `QuickStatisticsDialog.xaml` | `RangeAndSheetTests`, `Benchmark_QuickStatisticsEngine` | Implemented and verified |
 | `CMD_CHART_TARGET_VS_ACTUAL` | **Target vs. Actual Chart** | K | Charts & Analysis | `ExcelContextAdapter.cs`, `TargetVsActualDetector.cs` | `TargetVsActualChartDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_NAV_NAMED_RANGES` | **Named Range Manager** | L | Navigation & Productivity | `ExcelContextAdapter.cs` | `NamedRangeManagerDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_NAV_COLUMNS` | **Column Navigator** | L | Navigation & Productivity | `ExcelContextAdapter.cs`, `ColumnLetterConverter.cs` | `ColumnNavigatorDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_NAV_CELL_PREVIEW` | **Cell Content Inspector** | L | Navigation & Productivity | `ExcelContextAdapter.cs` | `CellContentInspectorDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_NAV_DATE_PICKER` | **Date Picker Insertion** | L | Navigation & Productivity | `DateFormatPresets.cs` | `DatePickerDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_NAV_GRID_FOCUS` | **Reading Grid Focus** | L | Navigation & Productivity | `ExcelContextAdapter.cs` | `ReadingGridFocusDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_NAV_DATA_ENTRY_FORM` | **Table Data Entry Form** | L | Navigation & Productivity | `ExcelContextAdapter.cs` | `DataEntryFormDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
 
 ---
 
@@ -276,14 +282,14 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 ### Module L: Navigation and User Productivity (Target: 12 Tools)
 - [x] `CMD_LAUNCHER`: Searchable Tool Catalog (SuperSearch) with instant keyword matching. *(Active)*
 - [x] `CMD_ABOUT`: Product version, environment diagnostics, and build configuration. *(Active)*
-- [ ] `CMD_NAV_PANE`: Docked task pane for rapid navigation across sheets, tables, and names. *(Planned - Batch 10)*
-- [ ] `CMD_NAV_NAMED_RANGES`: Named range inspector, search, and navigation tool. *(Planned - Batch 10)*
-- [ ] `CMD_NAV_COLUMNS`: Column navigator and fast visibility toggler for wide tables. *(Planned - Batch 10)*
-- [ ] `CMD_NAV_CELL_PREVIEW`: Dedicated inspection card for viewing long cell contents. *(Planned - Batch 10)*
-- [ ] `CMD_NAV_FORMULA_EDITOR`: Multi-line expanded formula editing window with syntax layout. *(Planned - Batch 10)*
-- [ ] `CMD_NAV_DATE_PICKER`: Floating calendar date picker for rapid date entry. *(Planned - Batch 10)*
-- [ ] `CMD_NAV_GRID_FOCUS`: Row and column crosshair focus highlighting for reading wide datasets. *(Planned - Batch 10)*
-- [ ] `CMD_NAV_DATA_ENTRY_FORM`: Dynamic modal data entry form for structured tables. *(Planned - Batch 10)*
+- [x] `CMD_NAV_NAMED_RANGES`: Named range inspector, search, and navigation tool. *(Active - Batch 10)*
+- [x] `CMD_NAV_COLUMNS`: Column navigator and fast visibility toggler for wide tables. *(Active - Batch 10)*
+- [x] `CMD_NAV_CELL_PREVIEW`: Dedicated inspection card for viewing long cell contents. *(Active - Batch 10)*
+- [x] `CMD_NAV_DATE_PICKER`: Floating calendar date picker for rapid date entry. *(Active - Batch 10)*
+- [x] `CMD_NAV_GRID_FOCUS`: Row and column crosshair focus highlighting for reading wide datasets. *(Active - Batch 10)*
+- [x] `CMD_NAV_DATA_ENTRY_FORM`: Dynamic modal data entry form for structured tables. *(Active - Batch 10)*
+- [ ] `CMD_NAV_PANE`: Docked task pane for rapid navigation across sheets, tables, and names. *(Planned - Batch 10+)*
+- [ ] `CMD_NAV_FORMULA_EDITOR`: Multi-line expanded formula editing window with syntax layout. *(Planned - Batch 10+)*
 
 ---
 
@@ -300,7 +306,7 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 | **Batch 7** | **Formatting, Formulas & Printing** | Reference Conversion (Abs/Rel), Exact Copy, Locate Errors, Math Operations, Number/Date Formats, Page Setup | **COMPLETED** |
 | **Batch 8** | **Import, Export & Picture Utilities** | CSV Import/Export, PDF Export, Batch Format Convert, Folder Listing, Cell Pictures, Chart Image Export | **COMPLETED** |
 | **Batch 9** | **Protection, Recovery, Charts & Analysis** | Batch Protect/Unprotect, Workbook Snapshots, Gantt/Waterfall Charts, Quick Statistics Dashboard | **COMPLETED** |
-| **Batch 10** | **Navigation, UX Polish, Packaging & Release** | Navigation Pane, Grid-Focus Crosshair, Date Picker, Formula Editor, Release Installer Verification | **Next Up** |
+| **Batch 10** | **Navigation, UX Polish, Packaging & Release** | Navigation Pane, Grid-Focus Crosshair, Date Picker, Formula Editor, Release Installer Verification | **COMPLETED** |
 
 ---
 

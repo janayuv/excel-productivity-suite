@@ -1,0 +1,87 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.NamedRangeManagerDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Named Range Manager - Excel Productivity Suite"
+        Height="540" Width="720"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="🏷️" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Named Range Manager" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Inspect, filter, audit, navigate, and manage all defined names in the workbook" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Filter Bar -->
+        <Border Grid.Row="1" Background="White" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="4" Padding="8" Margin="0,0,0,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="150" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBox x:Name="SearchBox" Grid.Column="0" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,8,0" TextChanged="Filter_Changed" ToolTip="Search by name or formula address" />
+                <ComboBox x:Name="ScopeCombo" Grid.Column="1" Style="{StaticResource ModernComboBoxStyle}" Margin="0,0,8,0" SelectionChanged="Filter_Changed" />
+                <CheckBox x:Name="BrokenOnlyCheck" Grid.Column="2" Content="Broken (#REF!) Only" VerticalAlignment="Center" Click="Filter_Changed" />
+            </Grid>
+        </Border>
+
+        <!-- Names Grid -->
+        <GroupBox Grid.Row="2" Header="Defined Names" Style="{StaticResource ModernGroupBoxStyle}">
+            <DataGrid x:Name="NamesGrid" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True"
+                      SelectionMode="Single" SelectionUnit="FullRow"
+                      BorderThickness="1" BorderBrush="#D1D5DB" Background="White"
+                      SelectionChanged="NamesGrid_SelectionChanged"
+                      MouseDoubleClick="NamesGrid_MouseDoubleClick">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="160" FontWeight="SemiBold" />
+                    <DataGridTextColumn Header="Scope" Binding="{Binding Scope}" Width="100" />
+                    <DataGridTextColumn Header="Refers To" Binding="{Binding RefersTo}" Width="200" FontFamily="Consolas" />
+                    <DataGridTextColumn Header="Status" Binding="{Binding StatusDisplay}" Width="85" />
+                    <DataGridTextColumn Header="Comment" Binding="{Binding Comment}" Width="*" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </GroupBox>
+
+        <!-- Status -->
+        <TextBlock x:Name="StatusText" Grid.Row="3" Text="" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,6,0,10" />
+
+        <!-- Footer Actions -->
+        <DockPanel Grid.Row="4">
+            <Button Content="Close" Style="{StaticResource ModernSecondaryButtonStyle}" DockPanel.Dock="Right" Width="80" Click="Close_Click" />
+            <Button x:Name="GoToBtn" Content="Go to Range" Style="{StaticResource ModernPrimaryButtonStyle}" DockPanel.Dock="Right" Width="110" Margin="0,0,8,0" IsEnabled="False" Click="GoTo_Click" />
+            <Button x:Name="DeleteBtn" Content="Delete Name" Style="{StaticResource ModernSecondaryButtonStyle}" Width="100" Margin="0,0,6,0" IsEnabled="False" Click="Delete_Click" />
+            <Button x:Name="CopyAddrBtn" Content="Copy Address" Style="{StaticResource ModernSecondaryButtonStyle}" Width="100" IsEnabled="False" Click="CopyAddress_Click" />
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

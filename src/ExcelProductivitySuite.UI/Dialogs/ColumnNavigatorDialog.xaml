@@ -1,0 +1,90 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.ColumnNavigatorDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Column Navigator - Excel Productivity Suite"
+        Height="540" Width="640"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="📑" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Column Navigator &amp; Manager" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Fast navigation, inspection, and visibility management across wide worksheets" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Filter Bar -->
+        <Border Grid.Row="1" Background="White" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="4" Padding="8" Margin="0,0,0,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="150" />
+                </Grid.ColumnDefinitions>
+
+                <TextBox x:Name="SearchBox" Grid.Column="0" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,8,0" TextChanged="Filter_Changed" ToolTip="Search by column header or letter" />
+                <ComboBox x:Name="FilterCombo" Grid.Column="1" Style="{StaticResource ModernComboBoxStyle}" SelectionChanged="Filter_Changed">
+                    <ComboBoxItem Content="All Columns" IsSelected="True" />
+                    <ComboBoxItem Content="Visible Only" />
+                    <ComboBoxItem Content="Hidden Only" />
+                </ComboBox>
+            </Grid>
+        </Border>
+
+        <!-- Columns Grid -->
+        <GroupBox Grid.Row="2" Header="Worksheet Columns" Style="{StaticResource ModernGroupBoxStyle}">
+            <DataGrid x:Name="ColumnsGrid" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True"
+                      SelectionMode="Extended" SelectionUnit="FullRow"
+                      BorderThickness="1" BorderBrush="#D1D5DB" Background="White"
+                      SelectionChanged="ColumnsGrid_SelectionChanged"
+                      MouseDoubleClick="ColumnsGrid_MouseDoubleClick">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Col" Binding="{Binding ColumnLetter}" Width="60" FontWeight="Bold" />
+                    <DataGridTextColumn Header="Index" Binding="{Binding Index}" Width="55" />
+                    <DataGridTextColumn Header="Header / Label" Binding="{Binding Header}" Width="*" FontWeight="SemiBold" />
+                    <DataGridTextColumn Header="Width" Binding="{Binding Width, StringFormat='F1'}" Width="70" />
+                    <DataGridTextColumn Header="Visibility" Binding="{Binding VisibilityDisplay}" Width="80" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </GroupBox>
+
+        <!-- Status -->
+        <TextBlock x:Name="StatusText" Grid.Row="3" Text="" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,6,0,10" />
+
+        <!-- Footer Actions -->
+        <DockPanel Grid.Row="4">
+            <Button Content="Close" Style="{StaticResource ModernSecondaryButtonStyle}" DockPanel.Dock="Right" Width="80" Click="Close_Click" />
+            <Button x:Name="JumpBtn" Content="Select Column" Style="{StaticResource ModernPrimaryButtonStyle}" DockPanel.Dock="Right" Width="120" Margin="0,0,8,0" IsEnabled="False" Click="Jump_Click" />
+            <Button x:Name="HideBtn" Content="Hide" Style="{StaticResource ModernSecondaryButtonStyle}" Width="70" Margin="0,0,6,0" IsEnabled="False" Click="Hide_Click" />
+            <Button x:Name="UnhideBtn" Content="Unhide" Style="{StaticResource ModernSecondaryButtonStyle}" Width="70" Margin="0,0,6,0" IsEnabled="False" Click="Unhide_Click" />
+            <Button x:Name="AutoFitBtn" Content="Auto-Fit" Style="{StaticResource ModernSecondaryButtonStyle}" Width="80" IsEnabled="False" Click="AutoFit_Click" />
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

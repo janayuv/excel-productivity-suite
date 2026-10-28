@@ -1134,6 +1134,118 @@ namespace ExcelProductivitySuite.AddIn.Startup
                 roadmapBatch: "Batch 9"
             ));
 
+            // =========================================================================
+            // Module L: Navigation and User Productivity (Batch 10 Expansion)
+            // =========================================================================
+
+            // Named Range Manager
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_NAV_NAMED_RANGES",
+                title: "Named Range Manager",
+                description: "Inspect, audit, filter, navigate, and manage all defined names in the workbook.",
+                category: CommandCategory.NavigationAndProductivity,
+                executeAction: ctx =>
+                {
+                    var dlg = new NamedRangeManagerDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "named ranges", "name manager", "locate named range", "inspect names", "broken ref" },
+                officeIconName: "NameDefine",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "L",
+                roadmapBatch: "Batch 10"
+            ));
+
+            // Column Navigator & Manager
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_NAV_COLUMNS",
+                title: "Column Navigator",
+                description: "Fast navigation, inspection, and visibility toggling across wide worksheets.",
+                category: CommandCategory.NavigationAndProductivity,
+                executeAction: ctx =>
+                {
+                    var dlg = new ColumnNavigatorDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "column navigator", "find column", "wide sheet navigation", "hide columns list", "autofit" },
+                officeIconName: "AdpColumns",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "L",
+                roadmapBatch: "Batch 10"
+            ));
+
+            // Cell Content Inspector
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_NAV_CELL_PREVIEW",
+                title: "Cell Content Inspector",
+                description: "Inspect complete unclipped contents, text metrics, formula expressions, and formatting.",
+                category: CommandCategory.NavigationAndProductivity,
+                executeAction: ctx =>
+                {
+                    var dlg = new CellContentInspectorDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "cell inspector", "cell preview", "view long cell", "multiline viewer", "inspect text" },
+                officeIconName: "ZoomPrint",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "L",
+                roadmapBatch: "Batch 10"
+            ));
+
+            // Date Picker Insertion
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_NAV_DATE_PICKER",
+                title: "Date Picker",
+                description: "Select a calendar date and insert formatted text into the active cell cursor.",
+                category: CommandCategory.NavigationAndProductivity,
+                executeAction: ctx =>
+                {
+                    var dlg = new DatePickerDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "date picker", "calendar picker", "insert date popup", "cell calendar", "iso date" },
+                officeIconName: "AppointmentColorDialog",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "L",
+                roadmapBatch: "Batch 10"
+            ));
+
+            // Reading Grid Focus Crosshair
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_NAV_GRID_FOCUS",
+                title: "Reading Grid Focus",
+                description: "Row & column crosshair tracking assistant for effortlessly navigating wide tables.",
+                category: CommandCategory.NavigationAndProductivity,
+                executeAction: ctx =>
+                {
+                    var dlg = new ReadingGridFocusDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "grid focus", "crosshair highlighting", "reading mode", "highlight active row", "table navigation" },
+                officeIconName: "TableSelectRowAndColumn",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "L",
+                roadmapBatch: "Batch 10"
+            ));
+
+            // Table Data Entry Form
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_NAV_DATA_ENTRY_FORM",
+                title: "Table Data Entry Form",
+                description: "Dynamic structured data entry and record navigation for active worksheet tables.",
+                category: CommandCategory.NavigationAndProductivity,
+                executeAction: ctx =>
+                {
+                    var dlg = new DataEntryFormDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "data entry form", "record form", "add row dialog", "structured input", "table form" },
+                officeIconName: "FormNew",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "L",
+                roadmapBatch: "Batch 10"
+            ));
+
             // 16. Manage Worksheet Visibility - Module D: Worksheet and Workbook Management
             registry.RegisterCommand(new SuiteCommand(
                 id: "CMD_SHEET_VISIBILITY",

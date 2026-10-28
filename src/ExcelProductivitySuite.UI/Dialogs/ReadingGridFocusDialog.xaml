@@ -1,0 +1,116 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.ReadingGridFocusDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Reading Grid Focus - Excel Productivity Suite"
+        Height="440" Width="520"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="🎯" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Reading Grid Focus / Crosshair" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Row &amp; column tracking assistant for effortlessly navigating wide tables" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Main Body -->
+        <StackPanel Grid.Row="1">
+            <!-- Active Coordinate HUD Card -->
+            <Border Background="White" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,12">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,8">
+                        <TextBlock Text="COLUMN HEADER" FontSize="10" FontWeight="Bold" Foreground="{StaticResource TextSecondaryBrush}" />
+                        <TextBlock x:Name="ColHeaderText" Text="Header Name" FontSize="14" FontWeight="SemiBold" Foreground="#0078D4" TextTrimming="CharacterEllipsis" Margin="0,2,0,0" />
+                        <TextBlock x:Name="ColLetterText" Text="Column A" FontSize="10" Foreground="{StaticResource TextSecondaryBrush}" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,8">
+                        <TextBlock Text="ROW HEADER / ID" FontSize="10" FontWeight="Bold" Foreground="{StaticResource TextSecondaryBrush}" />
+                        <TextBlock x:Name="RowHeaderText" Text="Row Label" FontSize="14" FontWeight="SemiBold" Foreground="#059669" TextTrimming="CharacterEllipsis" Margin="0,2,0,0" />
+                        <TextBlock x:Name="RowNumText" Text="Row 1" FontSize="10" Foreground="{StaticResource TextSecondaryBrush}" />
+                    </StackPanel>
+
+                    <Border Grid.Row="1" Grid.ColumnSpan="2" Background="#F1F5F9" CornerRadius="4" Padding="8,4" Margin="0,4,0,0">
+                        <DockPanel>
+                            <TextBlock Text="ACTIVE CELL ADDRESS:" FontSize="10" FontWeight="Bold" Foreground="#64748B" VerticalAlignment="Center" />
+                            <TextBlock x:Name="AddressBadge" Text="$A$1" FontSize="13" FontWeight="Bold" FontFamily="Consolas" Foreground="#0F172A" HorizontalAlignment="Right" />
+                        </DockPanel>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- Navigation D-Pad & Controls -->
+            <GroupBox Header="Grid Navigation &amp; Focus Actions" Style="{StaticResource ModernGroupBoxStyle}">
+                <StackPanel Margin="6">
+                    <!-- D-Pad Controls -->
+                    <Grid HorizontalAlignment="Center" Margin="0,4,0,10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="32" />
+                            <RowDefinition Height="32" />
+                            <RowDefinition Height="32" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="60" />
+                            <ColumnDefinition Width="60" />
+                            <ColumnDefinition Width="60" />
+                        </Grid.ColumnDefinitions>
+
+                        <Button Content="▲" Grid.Row="0" Grid.Column="1" Style="{StaticResource ModernSecondaryButtonStyle}" Click="Up_Click" ToolTip="Previous Row" />
+                        <Button Content="◄" Grid.Row="1" Grid.Column="0" Style="{StaticResource ModernSecondaryButtonStyle}" Click="Left_Click" ToolTip="Previous Column" />
+                        <Button Content="🎯" Grid.Row="1" Grid.Column="1" Style="{StaticResource ModernPrimaryButtonStyle}" Click="Focus_Click" ToolTip="Select Crosshair" />
+                        <Button Content="►" Grid.Row="1" Grid.Column="2" Style="{StaticResource ModernSecondaryButtonStyle}" Click="Right_Click" ToolTip="Next Column" />
+                        <Button Content="▼" Grid.Row="2" Grid.Column="1" Style="{StaticResource ModernSecondaryButtonStyle}" Click="Down_Click" ToolTip="Next Row" />
+                    </Grid>
+
+                    <!-- Quick Focus Buttons -->
+                    <UniformGrid Columns="3" Margin="0,4,0,0">
+                        <Button Content="Focus Crosshair" Style="{StaticResource ModernSecondaryButtonStyle}" Margin="0,0,4,0" Padding="6,4" Click="Focus_Click" />
+                        <Button Content="Select Entire Row" Style="{StaticResource ModernSecondaryButtonStyle}" Margin="0,0,4,0" Padding="6,4" Click="SelectRow_Click" />
+                        <Button Content="Select Entire Col" Style="{StaticResource ModernSecondaryButtonStyle}" Padding="6,4" Click="SelectCol_Click" />
+                    </UniformGrid>
+                </StackPanel>
+            </GroupBox>
+        </StackPanel>
+
+        <!-- Footer Actions -->
+        <DockPanel Grid.Row="2" Margin="0,10,0,0">
+            <Button Content="Close" Style="{StaticResource ModernSecondaryButtonStyle}" DockPanel.Dock="Right" Width="80" Click="Close_Click" />
+            <Button Content="Refresh Cell" Style="{StaticResource ModernSecondaryButtonStyle}" DockPanel.Dock="Left" Width="100" Click="Refresh_Click" />
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

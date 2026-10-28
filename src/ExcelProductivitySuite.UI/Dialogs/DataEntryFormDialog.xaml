@@ -1,0 +1,75 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.DataEntryFormDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Data Entry Form - Excel Productivity Suite"
+        Height="540" Width="580"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="📋" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Table Data Entry Form" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Dynamic structured data entry and record navigation for active worksheet tables" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Record Navigation Bar -->
+        <Border Grid.Row="1" Background="White" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="4" Padding="8,6" Margin="0,0,0,10">
+            <DockPanel>
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                    <Button x:Name="PrevBtn" Content="◄ Prev" Style="{StaticResource ModernSecondaryButtonStyle}" Width="70" Margin="0,0,6,0" Click="Prev_Click" />
+                    <Button x:Name="NextBtn" Content="Next ►" Style="{StaticResource ModernSecondaryButtonStyle}" Width="70" Click="Next_Click" />
+                </StackPanel>
+
+                <Button Content="➕ New Record" DockPanel.Dock="Right" Style="{StaticResource ModernPrimaryButtonStyle}" Padding="10,4" Click="NewRecord_Click" />
+
+                <TextBlock x:Name="RecordStatusText" Text="Record 1 of 1" FontWeight="SemiBold" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </DockPanel>
+        </Border>
+
+        <!-- Dynamic Fields Container -->
+        <GroupBox Grid.Row="2" Header="Record Fields" Style="{StaticResource ModernGroupBoxStyle}">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel x:Name="FieldsContainer" Margin="8" />
+            </ScrollViewer>
+        </GroupBox>
+
+        <!-- Status -->
+        <TextBlock x:Name="StatusText" Grid.Row="3" Text="" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,6,0,10" />
+
+        <!-- Footer Actions -->
+        <DockPanel Grid.Row="4">
+            <Button Content="Close" Style="{StaticResource ModernSecondaryButtonStyle}" DockPanel.Dock="Right" Width="80" Click="Close_Click" />
+            <Button Content="Save / Append Record" Style="{StaticResource ModernPrimaryButtonStyle}" DockPanel.Dock="Right" Width="160" Margin="0,0,8,0" Click="SaveRecord_Click" />
+            <Button Content="Clear Fields" Style="{StaticResource ModernSecondaryButtonStyle}" Width="90" Click="ClearFields_Click" />
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

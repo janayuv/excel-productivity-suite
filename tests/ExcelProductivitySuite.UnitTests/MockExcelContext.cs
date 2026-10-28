@@ -343,6 +343,100 @@ namespace ExcelProductivitySuite.UnitTests
             return true;
         }
 
+        public List<NamedRangeInfo> MockNamedRanges { get; } = new();
+        public string? LastNavigatedNamedRange { get; set; }
+        public string? LastDeletedNamedRange { get; set; }
+        public List<WorksheetColumnInfo> MockColumns { get; } = new();
+        public int? LastSelectedColumn { get; set; }
+        public List<(List<int> cols, bool hidden)> ColumnVisibilityHistory { get; } = new();
+        public List<List<int>> AutoFittedColumnsHistory { get; } = new();
+        public CellContentDetails? MockCellDetails { get; set; }
+        public (int row, int col, string rowHeader, string colHeader, string address) MockCellContext { get; set; } = (1, 1, "ID", "101", "$A$1");
+        public (int row, int col)? LastHighlightedRowAndCol { get; set; }
+        public TableDataModel? MockTableData { get; set; }
+        public List<(object?[] row, int sRow, int sCol, int cCount)> AppendedRowsHistory { get; } = new();
+
+        public IReadOnlyList<NamedRangeInfo> GetNamedRanges()
+        {
+            if (MockNamedRanges.Count > 0) return MockNamedRanges;
+            return new List<NamedRangeInfo>
+            {
+                new NamedRangeInfo("SalesTotal", "=Sheet1!$B$10", "Workbook", "Total Q1 Sales", true, "Sheet1!$B$10"),
+                new NamedRangeInfo("TaxRates", "=Sheet2!$A$1:$B$5", "Sheet2", "Regional tax table", true, "Sheet2!$A$1:$B$5"),
+                new NamedRangeInfo("BrokenRef", "=#REF!", "Workbook", "", false, "#REF!")
+            };
+        }
+
+        public bool GoToNamedRange(string name)
+        {
+            LastNavigatedNamedRange = name;
+            return true;
+        }
+
+        public bool DeleteNamedRange(string name)
+        {
+            LastDeletedNamedRange = name;
+            return true;
+        }
+
+        public IReadOnlyList<WorksheetColumnInfo> GetWorksheetColumns(int maxCols = 100)
+        {
+            if (MockColumns.Count > 0) return MockColumns;
+            return new List<WorksheetColumnInfo>
+            {
+                new WorksheetColumnInfo(1, "A", "ID", 10.0, false),
+                new WorksheetColumnInfo(2, "B", "Name", 25.0, false),
+                new WorksheetColumnInfo(3, "C", "Department", 20.0, true),
+                new WorksheetColumnInfo(4, "D", "Salary", 15.0, false)
+            };
+        }
+
+        public void SelectColumn(int columnIndex)
+        {
+            LastSelectedColumn = columnIndex;
+        }
+
+        public void SetColumnsVisibility(IEnumerable<int> columnIndices, bool isHidden)
+        {
+            ColumnVisibilityHistory.Add((new List<int>(columnIndices), isHidden));
+        }
+
+        public void AutoFitColumns(IEnumerable<int> columnIndices)
+        {
+            AutoFittedColumnsHistory.Add(new List<int>(columnIndices));
+        }
+
+        public CellContentDetails? GetActiveCellDetails()
+        {
+            if (MockCellDetails != null) return MockCellDetails;
+            return new CellContentDetails("$B$5", "Sheet1", "Sample unclipped cell content\nSecond line text", "=SUM(A1:A4)", "$#,##0.00", "Numeric");
+        }
+
+        public (int row, int col, string rowHeader, string colHeader, string address) GetActiveCellContext() => MockCellContext;
+
+        public void HighlightActiveRowAndColumn(int row, int col)
+        {
+            LastHighlightedRowAndCol = (row, col);
+        }
+
+        public TableDataModel? GetActiveTableData(int maxSampleRows = 500)
+        {
+            if (MockTableData != null) return MockTableData;
+            var headers = new List<string> { "ID", "Name", "Department", "Salary" };
+            var rows = new List<object?[]>
+            {
+                new object?[] { 101, "Alice", "Finance", 85000 },
+                new object?[] { 102, "Bob", "Engineering", 92000 }
+            };
+            return new TableDataModel(headers, rows, 1, 1);
+        }
+
+        public bool AppendTableRow(object?[] rowData, int tableStartRow, int tableStartCol, int colCount)
+        {
+            AppendedRowsHistory.Add((rowData, tableStartRow, tableStartCol, colCount));
+            return true;
+        }
+
         public void ShowMessage(string message, string title, bool isError = false)
         {
             MessagesShown.Add($"[{title}] {message}");
