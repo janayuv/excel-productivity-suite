@@ -6,7 +6,10 @@
         xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
         mc:Ignorable="d"
         Title="Export to PDF - Excel Productivity Suite"
-        Height="500" Width="480"
+        Height="720" Width="680"
+        MinHeight="580" MinWidth="580"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResizeWithGrip"
         Background="#F8F9FA">
 
     <Window.Resources>
@@ -22,75 +25,164 @@
     <Grid Margin="18">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <!-- Header -->
         <DockPanel Grid.Row="0" Margin="0,0,0,12">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
-                    <TextBlock Text="📕" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="30" Height="30" Margin="0,0,10,0">
+                    <TextBlock Text="📕" Foreground="White" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Border>
                 <StackPanel>
                     <TextBlock Text="Export to PDF" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
-                    <TextBlock Text="Publish worksheets or entire active workbook as high-resolution PDF documents" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                    <TextBlock Text="Publish active sheet, selection, selected sheets, or workbook with advanced page layout options" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
                 </StackPanel>
             </StackPanel>
         </DockPanel>
 
-        <!-- Export Scope -->
-        <GroupBox Grid.Row="1" Header="Export Scope" Style="{StaticResource ModernGroupBoxStyle}">
-            <StackPanel Margin="4">
-                <RadioButton x:Name="ActiveSheetRadio" Content="Active Worksheet Only" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,0,6" Checked="Scope_Changed" />
-                <RadioButton x:Name="EntireWorkbookRadio" Content="Entire Active Workbook" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,0,6" Checked="Scope_Changed" />
-                <RadioButton x:Name="SelectedSheetsRadio" Content="Selected Worksheets..." Style="{StaticResource ModernRadioButtonStyle}" Checked="Scope_Changed" />
-            </StackPanel>
-        </GroupBox>
+        <!-- Main Scrollable Content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,0,8,0">
+            <StackPanel>
+                <!-- Export Scope -->
+                <GroupBox Header="Export Scope" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,0,0,10">
+                    <StackPanel Margin="4">
+                        <RadioButton x:Name="ActiveSheetRadio" Content="Active Worksheet Only" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,0,6" Checked="Scope_Changed" />
+                        <RadioButton x:Name="SelectionRadio" Content="Selection Only" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,0,6" Checked="Scope_Changed" />
+                        <RadioButton x:Name="EntireWorkbookRadio" Content="Entire Active Workbook" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,0,6" Checked="Scope_Changed" />
+                        <RadioButton x:Name="SelectedSheetsRadio" Content="Selected Worksheets..." Style="{StaticResource ModernRadioButtonStyle}" Checked="Scope_Changed" />
 
-        <!-- Worksheets List (Visible when SelectedSheetsRadio is checked) -->
-        <GroupBox x:Name="SheetsBox" Grid.Row="2" Header="Select Worksheets" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,10,0,10" Visibility="Collapsed">
-            <Grid Margin="4">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-                <DockPanel Grid.Row="0" Margin="0,0,0,6">
-                    <TextBlock Text="Worksheets to include:" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Content="Select All" Width="70" Margin="0,0,6,0" Style="{StaticResource ModernSecondaryButtonStyle}" Click="SelectAll_Click" />
-                        <Button Content="Deselect All" Width="80" Style="{StaticResource ModernSecondaryButtonStyle}" Click="DeselectAll_Click" />
+                        <!-- Worksheets List (Visible when SelectedSheetsRadio is checked) -->
+                        <Border x:Name="SheetsBox" Background="White" BorderBrush="#DEE2E6" BorderThickness="1" CornerRadius="4" Margin="0,8,0,0" Padding="8" Visibility="Collapsed">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <DockPanel Grid.Row="0" Margin="0,0,0,6">
+                                    <TextBlock Text="Worksheets to include:" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <Button Content="Select All" Width="68" Margin="0,0,6,0" Style="{StaticResource ModernSecondaryButtonStyle}" Click="SelectAll_Click" />
+                                        <Button Content="Deselect All" Width="76" Margin="0,0,6,0" Style="{StaticResource ModernSecondaryButtonStyle}" Click="DeselectAll_Click" />
+                                        <Button Content="Invert" Width="55" Style="{StaticResource ModernSecondaryButtonStyle}" Click="InvertSelection_Click" />
+                                    </StackPanel>
+                                </DockPanel>
+                                <ListBox x:Name="SheetsList" Grid.Row="1" BorderBrush="#E9ECEF" BorderThickness="1" Background="#FAFBFC" MaxHeight="130" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <CheckBox Content="{Binding Name}" IsChecked="{Binding IsSelected}" Style="{StaticResource ModernCheckBoxStyle}" Margin="4,2" />
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </Grid>
+                        </Border>
                     </StackPanel>
-                </DockPanel>
-                <ListBox x:Name="SheetsList" Grid.Row="1" BorderBrush="#DEE2E6" BorderThickness="1" Background="White" MaxHeight="120">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <CheckBox Content="{Binding Name}" IsChecked="{Binding IsSelected}" Style="{StaticResource ModernCheckBoxStyle}" Margin="2" />
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-            </Grid>
-        </GroupBox>
+                </GroupBox>
 
-        <!-- Output File & Options -->
-        <GroupBox Grid.Row="3" Header="Destination PDF &amp; Options" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,0,0,12">
-            <StackPanel Margin="4">
-                <DockPanel Margin="0,0,0,8">
-                    <Button Content="Browse..." Width="80" DockPanel.Dock="Right" Style="{StaticResource ModernSecondaryButtonStyle}" Click="Browse_Click" />
-                    <TextBox x:Name="DestinationPathText" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,8,0" />
-                </DockPanel>
-                <CheckBox x:Name="OpenAfterExportCheck" Content="Open PDF document after publishing" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" />
+                <!-- Output Mode & Destination -->
+                <GroupBox Header="Output Mode &amp; Destination" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,0,0,10">
+                    <StackPanel Margin="4">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <RadioButton x:Name="SinglePdfRadio" Content="Single combined PDF document" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,16,0" Checked="OutputMode_Changed" />
+                            <RadioButton x:Name="SeparatePdfRadio" Content="Separate PDF file for each worksheet" Style="{StaticResource ModernRadioButtonStyle}" Checked="OutputMode_Changed" />
+                        </StackPanel>
+
+                        <!-- Single PDF File Destination -->
+                        <Grid x:Name="SingleFilePanel">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="80" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Destination PDF:" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="11" />
+                            <TextBox x:Name="DestinationPathText" Grid.Column="1" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,8,0" />
+                            <Button x:Name="BrowseFileButton" Grid.Column="2" Content="Browse..." Style="{StaticResource ModernSecondaryButtonStyle}" Click="BrowseFile_Click" />
+                        </Grid>
+
+                        <!-- Separate PDFs Destination & Naming Pattern -->
+                        <StackPanel x:Name="SeparateFilesPanel" Visibility="Collapsed">
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="80" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Output Folder:" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="11" />
+                                <TextBox x:Name="OutputFolderText" Grid.Column="1" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,8,0" />
+                                <Button x:Name="BrowseFolderButton" Grid.Column="2" Content="Browse..." Style="{StaticResource ModernSecondaryButtonStyle}" Click="BrowseFolder_Click" />
+                            </Grid>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Filename Pattern:" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="11" />
+                                <ComboBox x:Name="PatternCombo" Grid.Column="1" IsEditable="True" Style="{StaticResource ModernComboBoxStyle}" />
+                            </Grid>
+                            <TextBlock Text="Supported tokens: [SheetName], [WorkbookName], [Index], [Date], [DateTime]" FontSize="10" Foreground="{StaticResource TextSecondaryBrush}" Margin="98,4,0,0" />
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- Page Setup & Layout Overrides -->
+                <GroupBox Header="Page Setup &amp; Publishing Options" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,0,0,10">
+                    <Grid Margin="4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="14" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Left Column: Layout & Sizing -->
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Page Orientation:" FontSize="11" Margin="0,0,0,4" />
+                            <ComboBox x:Name="OrientationCombo" Style="{StaticResource ModernComboBoxStyle}" Margin="0,0,0,8" />
+
+                            <TextBlock Text="Page Scaling / Fit:" FontSize="11" Margin="0,0,0,4" />
+                            <ComboBox x:Name="PageFitCombo" Style="{StaticResource ModernComboBoxStyle}" Margin="0,0,0,8" />
+
+                            <TextBlock Text="Paper Size:" FontSize="11" Margin="0,0,0,4" />
+                            <ComboBox x:Name="PaperSizeCombo" Style="{StaticResource ModernComboBoxStyle}" />
+                        </StackPanel>
+
+                        <!-- Right Column: Page Range, Quality & Options -->
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Page Range:" FontSize="11" Margin="0,0,0,4" />
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                <RadioButton x:Name="AllPagesRadio" Content="All Pages" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,12,0" Checked="PageRange_Changed" />
+                                <RadioButton x:Name="PageRangeRadio" Content="From:" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,4,0" Checked="PageRange_Changed" />
+                                <TextBox x:Name="PageFromText" Text="1" Width="36" Style="{StaticResource ModernTextBoxStyle}" IsEnabled="False" Margin="0,0,6,0" />
+                                <TextBlock Text="To:" VerticalAlignment="Center" Margin="0,0,4,0" FontSize="11" />
+                                <TextBox x:Name="PageToText" Text="1" Width="36" Style="{StaticResource ModernTextBoxStyle}" IsEnabled="False" />
+                            </StackPanel>
+
+                            <TextBlock Text="Publishing Quality:" FontSize="11" Margin="0,0,0,4" />
+                            <ComboBox x:Name="QualityCombo" Style="{StaticResource ModernComboBoxStyle}" Margin="0,0,0,8" />
+
+                            <CheckBox x:Name="IgnorePrintAreasCheck" Content="Ignore print areas (export all data)" IsChecked="False" Style="{StaticResource ModernCheckBoxStyle}" Margin="0,0,0,4" />
+                            <CheckBox x:Name="IncludeDocPropsCheck" Content="Include document properties" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" />
+                        </StackPanel>
+                    </Grid>
+                </GroupBox>
+
+                <!-- Post-Export Actions -->
+                <GroupBox Header="Post-Export Actions" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,0,0,4">
+                    <StackPanel Orientation="Horizontal" Margin="4">
+                        <CheckBox x:Name="OpenAfterExportCheck" Content="Open PDF document after publishing" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" Margin="0,0,20,0" />
+                        <CheckBox x:Name="OpenFolderCheck" Content="Open destination folder when complete" IsChecked="False" Style="{StaticResource ModernCheckBoxStyle}" />
+                    </StackPanel>
+                </GroupBox>
             </StackPanel>
-        </GroupBox>
+        </ScrollViewer>
 
         <!-- Footer / Action Buttons -->
-        <DockPanel Grid.Row="4">
-            <TextBlock x:Name="StatusLabel" Text="Ready" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+        <DockPanel Grid.Row="2" Margin="0,12,0,0">
+            <TextBlock x:Name="StatusLabel" Text="Ready" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" MaxWidth="440" TextTrimming="CharacterEllipsis" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="Publish PDF" Width="100" Margin="0,0,8,0" Style="{StaticResource ModernPrimaryButtonStyle}" Click="Export_Click" />
-                <Button Content="Close" Width="75" Style="{StaticResource ModernSecondaryButtonStyle}" Click="Close_Click" />
+                <Button x:Name="PublishButton" Content="Publish PDF" Width="110" Height="28" Margin="0,0,8,0" Style="{StaticResource ModernPrimaryButtonStyle}" Click="Export_Click" IsDefault="True" />
+                <Button x:Name="CloseButton" Content="Close" Width="75" Height="28" Style="{StaticResource ModernSecondaryButtonStyle}" Click="Close_Click" IsCancel="True" />
             </StackPanel>
         </DockPanel>
     </Grid>

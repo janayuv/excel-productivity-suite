@@ -1,0 +1,143 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.InsertSequenceNumberDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Insert Sequence Number - Excel Productivity Suite"
+        Height="600" Width="740"
+        MinHeight="520" MinWidth="640"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResizeWithGrip"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="🔢" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Insert Sequence Number" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Quickly create, customize, and insert unique sequential numbers, IDs, or codes across cells or merged ranges" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Sequence List Section -->
+        <GroupBox Grid.Row="1" Header="Sequence Number List" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,0,0,10">
+            <Grid Margin="4">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!-- Sequences Grid -->
+                <DataGrid x:Name="SequenceGrid" Grid.Row="0"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          SelectionMode="Single"
+                          HeadersVisibility="Column"
+                          GridLinesVisibility="Horizontal"
+                          HorizontalGridLinesBrush="#EAECEF"
+                          RowBackground="#FFFFFF"
+                          AlternatingRowBackground="#F8F9FA"
+                          BorderThickness="1"
+                          BorderBrush="#DEE2E6"
+                          FontSize="12"
+                          SelectionChanged="SequenceGrid_SelectionChanged"
+                          MouseDoubleClick="SequenceGrid_MouseDoubleClick">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="190" FontWeight="SemiBold" IsReadOnly="True" />
+                        <DataGridTextColumn Header="Sample" Binding="{Binding SamplePreview}" Width="160" IsReadOnly="True" />
+                        <DataGridTextColumn Header="Start" Binding="{Binding StartNumber}" Width="55" IsReadOnly="True" />
+                        <DataGridTextColumn Header="Step" Binding="{Binding Increment}" Width="50" IsReadOnly="True" />
+                        <DataGridTextColumn Header="Digits" Binding="{Binding Digits}" Width="50" IsReadOnly="True" />
+                        <DataGridTextColumn Header="Next" Binding="{Binding NextPreview}" Width="*" FontWeight="SemiBold" Foreground="#107C41" IsReadOnly="True" />
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <!-- Action Buttons for Sequence List -->
+                <DockPanel Grid.Row="1" Margin="0,8,0,0">
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="New..." Width="75" Height="26" Margin="0,0,6,0" Style="{StaticResource ModernSecondaryButtonStyle}" Click="New_Click" />
+                        <Button x:Name="EditButton" Content="Edit..." Width="70" Height="26" Margin="0,0,6,0" Style="{StaticResource ModernSecondaryButtonStyle}" Click="Edit_Click" />
+                        <Button x:Name="DeleteButton" Content="Delete" Width="70" Height="26" Margin="0,0,6,0" Style="{StaticResource ModernSecondaryButtonStyle}" Click="Delete_Click" />
+                        <Button x:Name="ResetButton" Content="Reset Counter" Width="95" Height="26" Style="{StaticResource ModernSecondaryButtonStyle}" Click="Reset_Click" />
+                    </StackPanel>
+                    <TextBlock Text="Double-click sequence to edit" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </DockPanel>
+            </Grid>
+        </GroupBox>
+
+        <!-- Fill Options & Preview Section -->
+        <GroupBox Grid.Row="2" Header="Fill Options &amp; Selection" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,0,0,12">
+            <Grid Margin="4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="14" />
+                    <ColumnDefinition Width="220" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Left Column: Fill Settings -->
+                <StackPanel Grid.Column="0">
+                    <DockPanel Margin="0,0,0,8">
+                        <TextBlock Text="Fill order:" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="11" />
+                        <ComboBox x:Name="FillOrderCombo" Style="{StaticResource ModernComboBoxStyle}" SelectionChanged="FillOrderCombo_SelectionChanged" />
+                    </DockPanel>
+
+                    <CheckBox x:Name="ContinueFromLastCheck" Content="Continue sequence from last used number (Next)" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" Margin="0,0,0,6" Checked="Options_Changed" Unchecked="Options_Changed" />
+                    <CheckBox x:Name="OnlyBlankCheck" Content="Only fill blank cells (skip cells containing data)" IsChecked="False" Style="{StaticResource ModernCheckBoxStyle}" Margin="0,0,0,6" />
+                    <CheckBox x:Name="SkipHiddenCheck" Content="Skip hidden or filtered rows and columns" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" />
+                </StackPanel>
+
+                <!-- Right Column: Target Selection & Upcoming Numbers -->
+                <Border Grid.Column="2" Background="White" BorderBrush="#DEE2E6" BorderThickness="1" CornerRadius="4" Padding="8">
+                    <StackPanel>
+                        <TextBlock Text="Target Selection:" FontSize="10" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,2" />
+                        <TextBlock x:Name="SelectionAddressLabel" Text="$A$1:$A$10" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,8" TextTrimming="CharacterEllipsis" />
+
+                        <TextBlock Text="Next values to insert:" FontSize="10" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
+                        <ListBox x:Name="UpcomingListBox" MaxHeight="80" BorderThickness="0" Background="#F8F9FA" FontSize="11" FontFamily="Consolas, Segoe UI">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding}" Padding="2,1" />
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </GroupBox>
+
+        <!-- Footer / Action Buttons -->
+        <DockPanel Grid.Row="3">
+            <TextBlock x:Name="StatusLabel" Text="Ready" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" MaxWidth="440" TextTrimming="CharacterEllipsis" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button x:Name="FillRangeButton" Content="Fill Range" Width="100" Height="28" Margin="0,0,8,0" Style="{StaticResource ModernPrimaryButtonStyle}" Click="FillRange_Click" IsDefault="True" />
+                <Button x:Name="ApplyButton" Content="Apply" Width="80" Height="28" Margin="0,0,8,0" Style="{StaticResource ModernSecondaryButtonStyle}" Click="Apply_Click" />
+                <Button Content="Close" Width="75" Height="28" Style="{StaticResource ModernSecondaryButtonStyle}" Click="Close_Click" IsCancel="True" />
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

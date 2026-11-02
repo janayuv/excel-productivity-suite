@@ -52,8 +52,9 @@ namespace ExcelProductivitySuite.UI.Dialogs
 
         private void ApplyFilter()
         {
+            if (_allColumns == null || FilterCombo == null || ColumnsGrid == null || StatusText == null) return;
             FilteredColumns.Clear();
-            string query = SearchBox.Text?.Trim().ToLowerInvariant() ?? "";
+            string query = SearchBox?.Text?.Trim().ToLowerInvariant() ?? "";
             string filterMode = ((System.Windows.Controls.ComboBoxItem)FilterCombo.SelectedItem)?.Content?.ToString() ?? "All Columns";
 
             foreach (var col in _allColumns)

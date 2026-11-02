@@ -226,6 +226,7 @@
     <AppDesigner Include="Properties\" />
     <Compile Include="ExcelIntegration\ExcelStateScope.cs" />
     <Compile Include="ExcelIntegration\ExcelContextAdapter.cs" />
+    <Compile Include="ExcelIntegration\ExcelKeyboardHook.cs" />
     <Compile Include="Startup\ToolRegistrar.cs" />
     <Compile Include="Startup\RoadmapCatalog.cs" />
     <Compile Include="Ribbon\ExcelProductivityRibbon.cs" />

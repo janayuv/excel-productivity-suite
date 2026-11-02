@@ -15,55 +15,12 @@ namespace ExcelProductivitySuite.AddIn.Startup
             if (registry == null) throw new ArgumentNullException(nameof(registry));
 
             // =========================================================================
-            // Module A: Text Tools (Remaining Future Roadmap)
-            // =========================================================================
-            AddPlanned(registry, "CMD_TEXT_BATCH_REPLACE", "Batch Replace Strings",
-                "Execute multiple find-and-replace string rules simultaneously across the active selection.",
-                CommandCategory.TextTools, "A", "Batch 2+",
-                new[] { "batch replace", "multi replace", "substitute strings", "bulk replace", "regex replace" }, "ReplaceDialog");
-
-            AddPlanned(registry, "CMD_TEXT_EXTRACT_NUMBERS", "Extract Numbers Only",
-                "Extract only numeric digits and decimal points from mixed alphanumeric cell text.",
-                CommandCategory.TextTools, "A", "Batch 2+",
-                new[] { "extract numbers", "strip letters", "digits only", "isolate numbers", "extract integers" }, "Cut");
-
-            AddPlanned(registry, "CMD_TEXT_EXTRACT_EMAILS", "Extract Email Addresses",
-                "Locate and extract email addresses from free-form cell text into adjacent cells.",
-                CommandCategory.TextTools, "A", "Batch 2+",
-                new[] { "extract email", "find email", "isolate emails", "parse email address" }, "MailMergeSendEmail");
-
-            AddPlanned(registry, "CMD_TEXT_EXTRACT_URLS", "Extract URLs and Links",
-                "Extract web URLs (http/https) and domain links from selected cell text.",
-                CommandCategory.TextTools, "A", "Batch 2+",
-                new[] { "extract url", "find links", "parse websites", "http extract", "hyperlink text" }, "HyperlinkInsert");
-
-            // =========================================================================
             // Module D: Worksheet and Workbook Management (Remaining Future Roadmap)
             // =========================================================================
-            AddPlanned(registry, "CMD_SHEET_SEQUENCE_NAMES", "Create Sequentially Named Sheets",
-                "Generate a series of new worksheets with sequential names (e.g. Month_01 to Month_12).",
-                CommandCategory.WorksheetAndWorkbook, "D", "Batch 5",
-                new[] { "sequential sheets", "create multiple sheets", "numbered sheets", "batch add sheets" }, "SheetInsert");
-
             AddPlanned(registry, "CMD_SHEET_CONSOLIDATE", "Consolidate Data Across Sheets",
                 "Aggregate tabular data across identical structured sheets using SUM, AVERAGE, or COUNT.",
                 CommandCategory.WorksheetAndWorkbook, "D", "Batch 5",
                 new[] { "consolidate sheets", "3d consolidation", "sum across sheets", "multi sheet rollup" }, "Consolidate");
-
-            AddPlanned(registry, "CMD_WB_OPEN_FOLDER", "Open Containing Folder",
-                "Open the Windows File Explorer folder containing the active workbook.",
-                CommandCategory.WorksheetAndWorkbook, "D", "Batch 5",
-                new[] { "open folder", "containing folder", "explore directory", "reveal in explorer" }, "FileOpen");
-
-            AddPlanned(registry, "CMD_WB_COPY_PATH", "Copy Workbook Full Path",
-                "Copy the full file path of the active workbook to the Windows clipboard.",
-                CommandCategory.WorksheetAndWorkbook, "D", "Batch 5",
-                new[] { "copy path", "copy file location", "workbook address", "clipboard path" }, "Copy");
-
-            AddPlanned(registry, "CMD_WB_PROPERTIES", "Workbook Extended Properties",
-                "View file size, creation timestamp, author, sheets count, and COM metadata.",
-                CommandCategory.WorksheetAndWorkbook, "D", "Batch 5",
-                new[] { "workbook properties", "file info", "stats", "sheet count", "document metadata" }, "Info");
 
             // =========================================================================
             // Module E: Data, Filtering, and Statistics (Remaining Future Roadmap)
@@ -73,19 +30,9 @@ namespace ExcelProductivitySuite.AddIn.Startup
                 CommandCategory.DataAndFiltering, "E", "Batch 6+",
                 new[] { "subtotals", "group summaries", "data subtotals", "category rollup" }, "PivotTableSubtotals");
 
-            AddPlanned(registry, "CMD_DATA_FREQUENCY_STATS", "Value Frequency Distribution",
-                "Generate a statistical frequency table showing distinct values, occurrences, and percentages.",
-                CommandCategory.DataAndFiltering, "E", "Batch 6+",
-                new[] { "frequency distribution", "value count", "histogram table", "occurrence stats" }, "FunctionsStatisticalInsertGallery");
-
             // =========================================================================
             // Module F: Data Validation and Dropdown Lists (Remaining Future Roadmap)
             // =========================================================================
-            AddPlanned(registry, "CMD_VALIDATION_CREATE_DROPDOWN", "Create Standard Dropdown List",
-                "Create clean Excel in-cell dropdown validation lists from selected source items or ranges.",
-                CommandCategory.DataValidation, "F", "Batch 6+",
-                new[] { "create dropdown", "data validation list", "cell dropdown", "combo list" }, "DataValidation");
-
             AddPlanned(registry, "CMD_VALIDATION_SEARCHABLE_DROPDOWN", "Searchable Dropdown Interface",
                 "Provide an enhanced searchable popup list for fast data entry in cells with large validation lists.",
                 CommandCategory.DataValidation, "F", "Batch 6+",
@@ -116,11 +63,6 @@ namespace ExcelProductivitySuite.AddIn.Startup
                 CommandCategory.DataValidation, "F", "Batch 6",
                 new[] { "highlight invalid", "validation errors", "invalid cells", "circle invalid data" }, "ShieldAlert");
 
-            AddPlanned(registry, "CMD_VALIDATION_BULK_REMOVE", "Remove Validation Rules in Bulk",
-                "Clear all data validation constraints across selected ranges or entire worksheets.",
-                CommandCategory.DataValidation, "F", "Batch 6",
-                new[] { "clear validation", "remove dropdowns", "delete validation rules", "reset validation" }, "Delete");
-
             AddPlanned(registry, "CMD_VALIDATION_COPY_RULES", "Copy Validation Rules",
                 "Copy data validation specifications from a source range to multiple target ranges.",
                 CommandCategory.DataValidation, "F", "Batch 6",
@@ -146,16 +88,6 @@ namespace ExcelProductivitySuite.AddIn.Startup
                 "Apply elegant table borders, gridlines, thick headers, or double bottom totals.",
                 CommandCategory.FormattingAndDesign, "H", "Batch 7",
                 new[] { "table borders", "border styles", "accounting borders", "gridlines" }, "BorderAll");
-
-            AddPlanned(registry, "CMD_FORMAT_ROW_HEIGHT", "Uniform Row Heights",
-                "Set uniform row heights or smart auto-fit across multiple tables with minimum thresholds.",
-                CommandCategory.FormattingAndDesign, "H", "Batch 7",
-                new[] { "row height", "uniform rows", "auto fit row", "standardize height" }, "TableRowsInsertAbove");
-
-            AddPlanned(registry, "CMD_FORMAT_COL_WIDTH", "Uniform Column Widths",
-                "Set standardized column widths or auto-fit with extra padding across selections.",
-                CommandCategory.FormattingAndDesign, "H", "Batch 7",
-                new[] { "column width", "uniform columns", "auto fit columns", "standardize width" }, "TableColumnsInsertLeft");
 
             AddPlanned(registry, "CMD_PRINT_SET_PRINT_AREAS", "Set Multiple Print Areas",
                 "Configure and manage print areas across multiple selected ranges or sheets simultaneously.",

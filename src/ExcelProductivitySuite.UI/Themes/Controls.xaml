@@ -71,6 +71,10 @@
         </Setter>
     </Style>
 
+    <!-- Modern Button Style Aliases -->
+    <Style x:Key="ModernPrimaryButtonStyle" TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}" />
+    <Style x:Key="ModernSecondaryButtonStyle" TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}" />
+
     <!-- Modern TextBox Style -->
     <Style x:Key="ModernTextBoxStyle" TargetType="TextBox">
         <Setter Property="FontFamily" Value="{StaticResource StandardFontFamily}" />
@@ -129,6 +133,31 @@
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Margin" Value="0,6" />
         <Setter Property="Padding" Value="10" />
+    </Style>
+
+    <!-- Modern ComboBox Style -->
+    <Style x:Key="ModernComboBoxStyle" TargetType="ComboBox">
+        <Setter Property="FontFamily" Value="{StaticResource StandardFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        <Setter Property="Background" Value="{StaticResource SurfaceBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource SurfaceBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="8,5" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Cursor" Value="Hand" />
+    </Style>
+
+    <!-- Modern PasswordBox Style -->
+    <Style x:Key="ModernPasswordBoxStyle" TargetType="PasswordBox">
+        <Setter Property="FontFamily" Value="{StaticResource StandardFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        <Setter Property="Background" Value="{StaticResource SurfaceBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource SurfaceBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="8,5" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
     </Style>
 
 </ResourceDictionary>

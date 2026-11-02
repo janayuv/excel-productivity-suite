@@ -11,7 +11,8 @@
 [CmdletBinding()]
 param (
     [string]$Configuration = "Debug",
-    [string]$TargetDir = ""
+    [string]$TargetDir = "",
+    [switch]$InstallToLocalPrograms
 )
 
 $ErrorActionPreference = "Stop"
@@ -21,6 +22,24 @@ Write-Host "  Installing Excel Productivity Suite ($Configuration)    " -Foregro
 Write-Host "==========================================================" -ForegroundColor Green
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
+
+# 0. Unblock files in script directory to remove Zone.Identifier (Mark of the Web)
+try {
+    Get-ChildItem -Path $scriptDir -Recurse | Unblock-File -ErrorAction SilentlyContinue
+} catch {}
+
+# Option: Deploy to %LOCALAPPDATA%\Programs\ExcelProductivitySuite for permanent installation
+if ($InstallToLocalPrograms) {
+    $permanentDir = Join-Path $env:LOCALAPPDATA "Programs\ExcelProductivitySuite"
+    if ($scriptDir -ne $permanentDir) {
+        Write-Host "Deploying files to permanent location: $permanentDir" -ForegroundColor Cyan
+        if (-not (Test-Path $permanentDir)) {
+            New-Item -Path $permanentDir -ItemType Directory -Force | Out-Null
+        }
+        Copy-Item -Path "$scriptDir\*" -Destination $permanentDir -Recurse -Force
+        $TargetDir = $permanentDir
+    }
+}
 
 # Determine location of the VSTO deployment manifest
 if ($TargetDir -ne "") {
@@ -41,6 +60,28 @@ if ($TargetDir -ne "") {
 if (-not (Test-Path $vstoPath)) {
     Write-Error "Deployment manifest not found at: $vstoPath. Please build the solution first or ensure release package is intact."
     exit 1
+}
+
+# 0b. Code Signing Trust: If ExcelProductivitySuite.cer is present, import into CurrentUser\TrustedPublisher
+$certFile1 = Join-Path $scriptDir "ExcelProductivitySuite.cer"
+$vstoParent = Split-Path -Parent $vstoPath
+$certFile2 = if ($vstoParent) { Join-Path $vstoParent "ExcelProductivitySuite.cer" } else { "" }
+
+$certCandidates = @($certFile1, $certFile2) | Where-Object { $_ -ne "" -and (Test-Path $_) } | Select-Object -Unique
+foreach ($cPath in $certCandidates) {
+    if (Test-Path $cPath) {
+        try {
+            $certStore = New-Object System.Security.Cryptography.X509Certificates.X509Store([System.Security.Cryptography.X509Certificates.StoreName]::TrustedPublisher, [System.Security.Cryptography.X509Certificates.StoreLocation]::CurrentUser)
+            $certStore.Open([System.Security.Cryptography.X509Certificates.OpenFlags]::ReadWrite)
+            $certObj = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($cPath)
+            $certStore.Add($certObj)
+            $certStore.Close()
+            Write-Host "Code Signing: Added certificate to CurrentUser\TrustedPublisher." -ForegroundColor Cyan
+            break
+        } catch {
+            Write-Warning "Could not register certificate in TrustedPublisher automatically: $_"
+        }
+    }
 }
 
 # 1. Verify Excel presence
@@ -135,4 +176,10 @@ Write-Host "Registered in HKCU successfully!" -ForegroundColor Green
 Write-Host "Keys         : $($addInKeys -join ', ')"
 Write-Host "Manifest     : $manifestUri"
 Write-Host "LoadBehavior : 3 (Load on Startup)"
-Write-Host "`nInstallation Complete. Start Microsoft Excel to use the suite." -ForegroundColor Green
+
+$excelProc = Get-Process -Name "EXCEL" -ErrorAction SilentlyContinue
+if ($excelProc) {
+    Write-Host "`n[NOTE] Microsoft Excel is currently open. Please restart Excel to load the newly registered add-in." -ForegroundColor Yellow
+} else {
+    Write-Host "`nInstallation Complete. Start Microsoft Excel to use the suite." -ForegroundColor Green
+}

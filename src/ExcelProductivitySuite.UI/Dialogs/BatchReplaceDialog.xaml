@@ -1,0 +1,111 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.BatchReplaceDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Batch Replace Strings - Excel Productivity Suite"
+        Height="580" Width="680"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="150" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,10">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="🔀" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Batch Replace Strings" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Define multiple find-and-replace rules to execute in a single unified pass" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Rule Entry Panel -->
+        <GroupBox Grid.Row="1" Header="Add Replacement Rule" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,0,0,6">
+            <Grid Margin="4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Find:" VerticalAlignment="Center" Margin="0,0,6,0" FontSize="11" />
+                <TextBox x:Name="FindInputBox" Grid.Row="0" Grid.Column="1" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,10,0" />
+
+                <TextBlock Grid.Row="0" Grid.Column="2" Text="Replace with:" VerticalAlignment="Center" Margin="0,0,6,0" FontSize="11" />
+                <TextBox x:Name="ReplaceInputBox" Grid.Row="0" Grid.Column="3" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,10,0" />
+
+                <Button x:Name="AddRuleButton" Grid.Row="0" Grid.Column="4" Content="+ Add Rule" Style="{StaticResource ModernPrimaryButtonStyle}" Click="AddRuleButton_Click" Height="26" Padding="8,2" />
+
+                <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal" Margin="0,6,0,0">
+                    <CheckBox x:Name="MatchCaseCheck" Content="Match Case" Style="{StaticResource ModernCheckBoxStyle}" Margin="0,0,14,0" />
+                    <CheckBox x:Name="EntireCellCheck" Content="Match Entire Cell Only" Style="{StaticResource ModernCheckBoxStyle}" Margin="0,0,14,0" />
+                    <CheckBox x:Name="UseRegexCheck" Content="Regular Expression" Style="{StaticResource ModernCheckBoxStyle}" />
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+
+        <!-- Rules DataGrid -->
+        <GroupBox Grid.Row="2" Header="Active Rules Sequence" Style="{StaticResource ModernGroupBoxStyle}">
+            <DockPanel Margin="2">
+                <StackPanel DockPanel.Dock="Right" Margin="6,0,0,0">
+                    <Button Content="Remove" Style="{StaticResource ModernSecondaryButtonStyle}" Click="RemoveRuleButton_Click" Margin="0,0,0,4" Padding="8,3" FontSize="11" />
+                    <Button Content="Clear All" Style="{StaticResource ModernSecondaryButtonStyle}" Click="ClearAllRulesButton_Click" Padding="8,3" FontSize="11" />
+                </StackPanel>
+                <DataGrid x:Name="RulesGrid" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="True"
+                          HeadersVisibility="Column" GridLinesVisibility="Horizontal" Background="White"
+                          SelectionMode="Single" SelectionUnit="FullRow">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Find Text" Binding="{Binding Find}" Width="*" />
+                        <DataGridTextColumn Header="Replace With" Binding="{Binding ReplaceWith}" Width="*" />
+                        <DataGridCheckBoxColumn Header="Match Case" Binding="{Binding MatchCase}" Width="80" />
+                        <DataGridCheckBoxColumn Header="Entire Cell" Binding="{Binding MatchEntireCell}" Width="80" />
+                        <DataGridCheckBoxColumn Header="Regex" Binding="{Binding UseRegex}" Width="60" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+        </GroupBox>
+
+        <!-- Live Preview -->
+        <DockPanel Grid.Row="3" Margin="0,6,0,0">
+            <TextBlock Text="Live Preview (First 10 Selected Cells):" DockPanel.Dock="Top" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,4" />
+            <controls:LivePreviewTable x:Name="PreviewTable" />
+        </DockPanel>
+
+        <!-- Footer -->
+        <DockPanel Grid.Row="4" Margin="0,10,0,0">
+            <TextBlock x:Name="RangeInfoText" Text="Selection: $A$1:$A$10" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Cancel" Style="{StaticResource ModernSecondaryButtonStyle}" Margin="0,0,8,0" Click="CancelButton_Click" IsCancel="True" />
+                <Button Content="Batch Replace" Style="{StaticResource ModernPrimaryButtonStyle}" Click="ApplyButton_Click" IsDefault="True" />
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

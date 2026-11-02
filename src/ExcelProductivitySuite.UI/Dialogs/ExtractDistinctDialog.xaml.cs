@@ -34,10 +34,11 @@ namespace ExcelProductivitySuite.UI.Dialogs
 
         private void PopulateColumns()
         {
+            if (ColumnsListBox == null) return;
             ColumnItems.Clear();
             if (_matrix == null)
             {
-                StatusLabel.Text = "No range selected.";
+                if (StatusLabel != null) StatusLabel.Text = "No range selected.";
                 return;
             }
 
@@ -55,7 +56,10 @@ namespace ExcelProductivitySuite.UI.Dialogs
             }
 
             int rows = _matrix.GetUpperBound(0) - rStart + 1;
-            StatusLabel.Text = $"{rows} rows x {cols} columns ready to process.";
+            if (StatusLabel != null)
+            {
+                StatusLabel.Text = $"{rows} rows x {cols} columns ready to process.";
+            }
         }
 
         private void HasHeaders_Changed(object sender, RoutedEventArgs e)

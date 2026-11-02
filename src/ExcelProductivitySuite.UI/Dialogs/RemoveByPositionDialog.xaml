@@ -44,21 +44,21 @@
         <GroupBox Grid.Row="1" Header="Position Rules" Style="{StaticResource ModernGroupBoxStyle}">
             <StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                    <RadioButton x:Name="FromLeftRadio" Content="From beginning (left):" Width="160" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Checked="OptionChanged" />
+                    <RadioButton x:Name="FromLeftRadio" GroupName="PositionRule" Content="From beginning (left):" Width="160" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Checked="OptionChanged" Unchecked="OptionChanged" />
                     <TextBlock Text="Remove" VerticalAlignment="Center" Margin="0,0,6,0" FontSize="11" />
                     <TextBox x:Name="LeftCountTextBox" Width="50" Style="{StaticResource ModernTextBoxStyle}" Text="1" TextChanged="OptionChanged" />
                     <TextBlock Text="characters" VerticalAlignment="Center" Margin="6,0,0,0" FontSize="11" />
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                    <RadioButton x:Name="FromRightRadio" Content="From end (right):" Width="160" Style="{StaticResource ModernRadioButtonStyle}" Checked="OptionChanged" />
+                    <RadioButton x:Name="FromRightRadio" GroupName="PositionRule" Content="From end (right):" Width="160" Style="{StaticResource ModernRadioButtonStyle}" Checked="OptionChanged" Unchecked="OptionChanged" />
                     <TextBlock Text="Remove" VerticalAlignment="Center" Margin="0,0,6,0" FontSize="11" />
                     <TextBox x:Name="RightCountTextBox" Width="50" Style="{StaticResource ModernTextBoxStyle}" Text="1" TextChanged="OptionChanged" IsEnabled="False" />
                     <TextBlock Text="characters" VerticalAlignment="Center" Margin="6,0,0,0" FontSize="11" />
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                    <RadioButton x:Name="FromMiddleRadio" Content="From middle range:" Width="160" Style="{StaticResource ModernRadioButtonStyle}" Checked="OptionChanged" />
+                    <RadioButton x:Name="FromMiddleRadio" GroupName="PositionRule" Content="From middle range:" Width="160" Style="{StaticResource ModernRadioButtonStyle}" Checked="OptionChanged" Unchecked="OptionChanged" />
                     <TextBlock Text="Start at position" VerticalAlignment="Center" Margin="0,0,6,0" FontSize="11" />
                     <TextBox x:Name="MidStartTextBox" Width="40" Style="{StaticResource ModernTextBoxStyle}" Text="1" TextChanged="OptionChanged" IsEnabled="False" />
                     <TextBlock Text=", remove" VerticalAlignment="Center" Margin="6,0,6,0" FontSize="11" />
@@ -67,8 +67,8 @@
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal">
-                    <RadioButton x:Name="DelimiterRadio" Content="Relative to delimiter:" Width="160" Style="{StaticResource ModernRadioButtonStyle}" Checked="OptionChanged" />
-                    <ComboBox x:Name="DelimModeComboBox" Width="130" SelectionChanged="OptionChanged" FontSize="11" IsEnabled="False" Margin="0,0,8,0">
+                    <RadioButton x:Name="DelimiterRadio" GroupName="PositionRule" Content="Relative to delimiter:" Width="160" Style="{StaticResource ModernRadioButtonStyle}" Checked="OptionChanged" Unchecked="OptionChanged" />
+                    <ComboBox x:Name="DelimModeComboBox" Width="130" Style="{StaticResource ModernComboBoxStyle}" SelectionChanged="OptionChanged" FontSize="11" IsEnabled="False" Margin="0,0,8,0">
                         <ComboBoxItem Content="Remove before" Tag="Before" IsSelected="True" />
                         <ComboBoxItem Content="Remove after" Tag="After" />
                     </ComboBox>

@@ -14,10 +14,15 @@ namespace ExcelProductivitySuite.UI.Dialogs
         private readonly object?[,]? _matrix;
         private List<(int Row, int Column, object? Value, object? BaselineValue)>? _differences;
 
-        public RowDifferencesDialog(IExcelContext context)
+        public RowDifferencesDialog(IExcelContext context, bool defaultToColumnDifferences = false)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             InitializeComponent();
+
+            if (defaultToColumnDifferences && ColDiffRadio != null)
+            {
+                ColDiffRadio.IsChecked = true;
+            }
 
             _matrix = _context.GetSelectedValues();
             UpdateSummary();

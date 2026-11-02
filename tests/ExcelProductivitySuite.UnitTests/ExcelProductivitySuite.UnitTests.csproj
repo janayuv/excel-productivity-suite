@@ -3,6 +3,7 @@
     <TargetFramework>net48</TargetFramework>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
     <RootNamespace>ExcelProductivitySuite.UnitTests</RootNamespace>
     <AssemblyName>ExcelProductivitySuite.UnitTests</AssemblyName>
   </PropertyGroup>
@@ -11,6 +12,7 @@
     <ProjectReference Include="..\..\src\ExcelProductivitySuite.Core\ExcelProductivitySuite.Core.csproj" />
     <ProjectReference Include="..\..\src\ExcelProductivitySuite.Engine\ExcelProductivitySuite.Engine.csproj" />
     <ProjectReference Include="..\..\src\ExcelProductivitySuite.Infrastructure\ExcelProductivitySuite.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\ExcelProductivitySuite.UI\ExcelProductivitySuite.UI.csproj" />
   </ItemGroup>
 
   <ItemGroup>

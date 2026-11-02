@@ -76,44 +76,82 @@ namespace ExcelProductivitySuite.UI.Dialogs
                 return;
             }
 
+            var options = GetOptions();
+            int affected = 0;
+
             if (_context.IsMultiAreaSelection)
             {
-                _context.ShowMessage("Please select a single contiguous range of cells to modify.", "Remove Characters", isError: true);
+                var areas = _context.GetMultiAreaSelectedValues();
+                if (areas == null || areas.Count == 0)
+                {
+                    _context.ShowMessage("No cells selected.", "Remove Characters", isError: true);
+                    return;
+                }
+
+                var updatedAreas = new List<object?[,]>();
+                foreach (var matrix in areas)
+                {
+                    if (matrix == null) continue;
+                    int rStart = matrix.GetLowerBound(0);
+                    int rEnd = matrix.GetUpperBound(0);
+                    int cStart = matrix.GetLowerBound(1);
+                    int cEnd = matrix.GetUpperBound(1);
+
+                    var updated = (object?[,])matrix.Clone();
+                    for (int r = rStart; r <= rEnd; r++)
+                    {
+                        for (int c = cStart; c <= cEnd; c++)
+                        {
+                            var val = matrix[r, c];
+                            if (val != null)
+                            {
+                                string str = val.ToString() ?? "";
+                                string cleaned = CharacterRemover.RemoveCharacters(str, options);
+                                updated[r, c] = cleaned;
+                                affected++;
+                            }
+                        }
+                    }
+                    updatedAreas.Add(updated);
+                }
+
+                _context.SetMultiAreaSelectedValues(updatedAreas);
+                _context.ShowMessage($"Removed characters across {affected} cells in {updatedAreas.Count} areas.", "Remove Characters");
+                DialogResult = true;
+                Close();
                 return;
             }
 
-            var matrix = _context.GetSelectedValues();
-            if (matrix == null)
+            var singleMatrix = _context.GetSelectedValues();
+            if (singleMatrix == null)
             {
                 _context.ShowMessage("No cells selected.", "Remove Characters", isError: true);
                 return;
             }
 
-            var options = GetOptions();
-            int rStart = matrix.GetLowerBound(0);
-            int rEnd = matrix.GetUpperBound(0);
-            int cStart = matrix.GetLowerBound(1);
-            int cEnd = matrix.GetUpperBound(1);
+            int sRStart = singleMatrix.GetLowerBound(0);
+            int sREnd = singleMatrix.GetUpperBound(0);
+            int sCStart = singleMatrix.GetLowerBound(1);
+            int sCEnd = singleMatrix.GetUpperBound(1);
 
-            int affected = 0;
-            var updated = (object?[,])matrix.Clone();
+            var sUpdated = (object?[,])singleMatrix.Clone();
 
-            for (int r = rStart; r <= rEnd; r++)
+            for (int r = sRStart; r <= sREnd; r++)
             {
-                for (int c = cStart; c <= cEnd; c++)
+                for (int c = sCStart; c <= sCEnd; c++)
                 {
-                    var val = matrix[r, c];
+                    var val = singleMatrix[r, c];
                     if (val != null)
                     {
                         string str = val.ToString() ?? "";
                         string cleaned = CharacterRemover.RemoveCharacters(str, options);
-                        updated[r, c] = cleaned;
+                        sUpdated[r, c] = cleaned;
                         affected++;
                     }
                 }
             }
 
-            _context.SetSelectedValues(updated);
+            _context.SetSelectedValues(sUpdated);
             _context.ShowMessage($"Removed characters across {affected} cells.", "Remove Characters");
             DialogResult = true;
             Close();

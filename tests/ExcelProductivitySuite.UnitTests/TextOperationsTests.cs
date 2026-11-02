@@ -640,6 +640,60 @@ namespace ExcelProductivitySuite.UnitTests
             Assert.AreEqual("KEY_ID", result);
         }
 
+        [TestMethod]
+        public void PositionRemover_AfterDelimiter_RemovesDateSuffix()
+        {
+            var options = new PositionRemovalOptions
+            {
+                Mode = PositionRemovalMode.AfterDelimiter,
+                Delimiter = "-"
+            };
+            string result = PositionRemover.Remove("2026-10-20 14:02:38.019", options);
+            Assert.AreEqual("2026", result);
+        }
+
+        [TestMethod]
+        public void PositionRemover_BeforeDelimiter_RemovesDatePrefix()
+        {
+            var options = new PositionRemovalOptions
+            {
+                Mode = PositionRemovalMode.BeforeDelimiter,
+                Delimiter = "-"
+            };
+            string result = PositionRemover.Remove("2026-10-20 14:02:38.019", options);
+            Assert.AreEqual("10-20 14:02:38.019", result);
+        }
+
+        [TestMethod]
+        public void PositionRemover_MultiAreaRanges_ProcessedIndependently()
+        {
+            var area1 = new object?[,]
+            {
+                { "2026-10-31 0" },
+                { "2026-10-31 0" }
+            };
+
+            var area2 = new object?[,]
+            {
+                { "2026-10-26 10:00:56.56" },
+                { "2026-10-26 09:50:42.486" }
+            };
+
+            var options = new PositionRemovalOptions
+            {
+                Mode = PositionRemovalMode.FromRight,
+                Count = 2
+            };
+
+            var res1 = PositionRemover.RemoveRange(area1, options);
+            var res2 = PositionRemover.RemoveRange(area2, options);
+
+            Assert.AreEqual("2026-10-31", res1[0, 0]);
+            Assert.AreEqual("2026-10-31", res1[1, 0]);
+            Assert.AreEqual("2026-10-26 10:00:56.", res2[0, 0]);
+            Assert.AreEqual("2026-10-26 09:50:42.4", res2[1, 0]);
+        }
+
         #endregion
     }
 }

@@ -83,7 +83,7 @@ namespace ExcelProductivitySuite.UI.Dialogs
 
         private void UpdatePreview()
         {
-            if (PreviewLabel == null) return;
+            if (PreviewLabel == null || _sampleValues == null) return;
 
             if (!TryGetOperand(out double operand))
             {

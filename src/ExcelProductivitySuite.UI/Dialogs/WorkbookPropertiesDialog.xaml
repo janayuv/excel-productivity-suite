@@ -1,0 +1,99 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.WorkbookPropertiesDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Workbook Extended Properties - Excel Productivity Suite"
+        Height="480" Width="600"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="ℹ" Foreground="White" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Workbook Extended Properties" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Detailed metrics, file paths, sheet breakdown, and structure protection status" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Properties Grid -->
+        <GroupBox Grid.Row="1" Header="Workbook Metadata &amp; Structure" Style="{StaticResource ModernGroupBoxStyle}">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <Grid Margin="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Workbook Name:" FontWeight="SemiBold" Margin="0,6" />
+                    <TextBlock Grid.Row="0" Grid.Column="1" x:Name="WbNameText" Text="Sales2026.xlsx" Margin="0,6" TextWrapping="Wrap" />
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Full File Path:" FontWeight="SemiBold" Margin="0,6" />
+                    <TextBlock Grid.Row="1" Grid.Column="1" x:Name="WbPathText" Text="C:\Finance\Sales2026.xlsx" Margin="0,6" TextWrapping="Wrap" />
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="File Size on Disk:" FontWeight="SemiBold" Margin="0,6" />
+                    <TextBlock Grid.Row="2" Grid.Column="1" x:Name="FileSizeText" Text="1.45 MB" Margin="0,6" />
+
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Last Modified:" FontWeight="SemiBold" Margin="0,6" />
+                    <TextBlock Grid.Row="3" Grid.Column="1" x:Name="LastModifiedText" Text="2026-10-28 14:30" Margin="0,6" />
+
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Active Sheet:" FontWeight="SemiBold" Margin="0,6" />
+                    <TextBlock Grid.Row="4" Grid.Column="1" x:Name="ActiveSheetText" Text="Summary" Margin="0,6" />
+
+                    <TextBlock Grid.Row="5" Grid.Column="0" Text="Total Worksheets:" FontWeight="SemiBold" Margin="0,6" />
+                    <TextBlock Grid.Row="5" Grid.Column="1" x:Name="SheetCountsText" Text="12 sheets (10 visible, 2 hidden)" Margin="0,6" />
+
+                    <TextBlock Grid.Row="6" Grid.Column="0" Text="Workbook Protection:" FontWeight="SemiBold" Margin="0,6" />
+                    <TextBlock Grid.Row="6" Grid.Column="1" x:Name="WbProtectionText" Text="Unprotected" Margin="0,6" />
+
+                    <TextBlock Grid.Row="7" Grid.Column="0" Text="Current Sheet Protection:" FontWeight="SemiBold" Margin="0,6" />
+                    <TextBlock Grid.Row="7" Grid.Column="1" x:Name="SheetProtectionText" Text="Unprotected" Margin="0,6" />
+                </Grid>
+            </ScrollViewer>
+        </GroupBox>
+
+        <!-- Footer -->
+        <DockPanel Grid.Row="2" Margin="0,12,0,0">
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Copy Path" Style="{StaticResource ModernSecondaryButtonStyle}" Margin="0,0,8,0" Click="CopyPathButton_Click" ToolTip="Copy full path to clipboard" />
+                <Button Content="Open Folder" Style="{StaticResource ModernSecondaryButtonStyle}" Click="OpenFolderButton_Click" ToolTip="Open containing folder in Explorer" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Close" Style="{StaticResource ModernPrimaryButtonStyle}" Width="90" Click="CloseButton_Click" IsCancel="True" />
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

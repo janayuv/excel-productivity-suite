@@ -79,7 +79,7 @@
                         <TextBlock Text="Password (Optional):" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,2" />
                         <DockPanel Margin="0,0,0,8">
                             <Button x:Name="TogglePwdBtn" Content="👁" Width="30" DockPanel.Dock="Right" Style="{StaticResource ModernSecondaryButtonStyle}" Click="TogglePassword_Click" ToolTip="Show/Hide Password" />
-                            <PasswordBox x:Name="PasswordBox" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,4,0" PasswordChanged="PasswordBox_PasswordChanged" />
+                            <PasswordBox x:Name="PasswordBox" Style="{StaticResource ModernPasswordBoxStyle}" Margin="0,0,4,0" PasswordChanged="PasswordBox_PasswordChanged" />
                             <TextBox x:Name="PasswordVisibleBox" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,4,0" Visibility="Collapsed" TextChanged="PasswordVisibleBox_TextChanged" />
                         </DockPanel>
 

@@ -13,6 +13,7 @@ namespace ExcelProductivitySuite.AddIn
         private ICommandRegistry? _registry;
         private IExcelContext? _context;
         private ExcelProductivityRibbon? _ribbon;
+        private ExcelKeyboardHook? _keyboardHook;
 
         protected override Office.IRibbonExtensibility CreateRibbonExtensibilityObject()
         {
@@ -37,11 +38,48 @@ namespace ExcelProductivitySuite.AddIn
             {
                 ToolRegistrar.RegisterAllTools(_registry);
             }
+
+            if (_context != null)
+            {
+                try
+                {
+                    _keyboardHook = new ExcelKeyboardHook(_context, () => this.Application);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Trace.TraceWarning($"[ExcelProductivitySuite] Keyboard hook setup warning: {ex.Message}");
+                }
+
+                try
+                {
+                    this.Application.WorkbookBeforeClose += Application_WorkbookBeforeClose;
+                }
+                catch { }
+            }
+        }
+
+        private void Application_WorkbookBeforeClose(Microsoft.Office.Interop.Excel.Workbook wb, ref bool cancel)
+        {
+            try
+            {
+                if (!cancel && wb != null && _context != null)
+                {
+                    _context.UndoManager.ClearForWorkbook(wb.Name);
+                }
+            }
+            catch { }
         }
 
         private void ThisAddIn_Shutdown(object sender, System.EventArgs e)
         {
-            // Clean unhooking and disposal
+            try
+            {
+                this.Application.WorkbookBeforeClose -= Application_WorkbookBeforeClose;
+            }
+            catch { }
+
+            _keyboardHook?.Dispose();
+            _keyboardHook = null;
         }
 
         #region VSTO generated code

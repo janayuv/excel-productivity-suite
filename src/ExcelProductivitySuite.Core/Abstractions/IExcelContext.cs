@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ExcelProductivitySuite.Core.Models;
 
 namespace ExcelProductivitySuite.Core.Abstractions
 {
@@ -312,6 +313,11 @@ namespace ExcelProductivitySuite.Core.Abstractions
         bool ExportToPdf(string destinationPath, IEnumerable<string>? sheetNames = null, bool openAfterExport = false);
 
         /// <summary>
+        /// Exports worksheets, selection, or entire workbook to PDF with comprehensive layout, quality, and output options.
+        /// </summary>
+        PdfExportResult ExportToPdfWithOptions(PdfExportSettings settings);
+
+        /// <summary>
         /// Batch converts workbook files from one format to another (e.g. .xls to .xlsx).
         /// Returns the number of files successfully converted.
         /// </summary>
@@ -450,6 +456,11 @@ namespace ExcelProductivitySuite.Core.Abstractions
         IReadOnlyList<object?[,]> GetMultiAreaSelectedValues();
 
         /// <summary>
+        /// Writes matrix values back to each disjoint area in the active multi-selection.
+        /// </summary>
+        void SetMultiAreaSelectedValues(IReadOnlyList<object?[,]> areaValues);
+
+        /// <summary>
         /// Retrieves cell addresses of each disjoint area in the active multi-selection.
         /// </summary>
         IReadOnlyList<string> GetMultiAreaAddresses();
@@ -508,6 +519,47 @@ namespace ExcelProductivitySuite.Core.Abstractions
         /// Removes data validation rules from the specified cell addresses.
         /// </summary>
         void RemoveValidationFromRange(IEnumerable<string> addresses);
+
+        /// <summary>
+        /// Clears data validation rules across the specified scope.
+        /// </summary>
+        int ClearValidationRules(ValidationClearScope scope);
+
+        /// <summary>
+        /// Creates an in-cell dropdown list data validation rule on the selected range.
+        /// </summary>
+        bool CreateDropdownList(string listFormulaOrItems, bool isFormula, bool allowBlank, bool showDropdown, string? errorTitle, string? errorMessage);
+
+        /// <summary>
+        /// Adjusts row heights and/or column widths across the selection or active worksheet.
+        /// </summary>
+        bool AdjustCellDimensions(double? rowHeightPoints, double? colWidthPoints, bool autoFitRows, bool autoFitCols, bool entireSheet);
+
+        /// <summary>
+        /// Inserts customizable sequential numbers, IDs, or codes into the active selection or designated cells.
+        /// Supports contiguous ranges, non-contiguous multi-area selections, and merged cells.
+        /// </summary>
+        OperationResult InsertSequenceNumbers(SequenceNumberDefinition sequence, SequenceFillOptions options);
+
+        /// <summary>
+        /// Transforms columns to tables, tables to single columns/rows, or reshapes matrices based on fixed or delimiter rules.
+        /// </summary>
+        OperationResult TransformRange(TransformRangeOptions options);
+
+        /// <summary>
+        /// Central undo/redo manager tracking cell and range modifications across suite operations.
+        /// </summary>
+        IUndoManager UndoManager { get; }
+
+        /// <summary>
+        /// Reverts the most recent suite command that modified cell values or formulas.
+        /// </summary>
+        bool UndoLastAction();
+
+        /// <summary>
+        /// Re-applies the most recent undone suite command.
+        /// </summary>
+        bool RedoLastAction();
     }
 
     public class FormulaErrorInfo
@@ -841,5 +893,19 @@ namespace ExcelProductivitySuite.Core.Abstractions
             ErrorMessage = errorMessage ?? string.Empty;
             IsValid = isValid;
         }
+    }
+
+    public enum ValidationClearScope
+    {
+        Selection,
+        ActiveWorksheet,
+        AllWorksheets
+    }
+
+    public enum CellDimensionUnit
+    {
+        Points,
+        Inches,
+        Centimeters
     }
 }

@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using ExcelProductivitySuite.Core.Abstractions;
+using ExcelProductivitySuite.Core.Models;
+using ExcelProductivitySuite.Engine.Files;
+using ExcelProductivitySuite.Engine.Ranges;
 
 namespace ExcelProductivitySuite.UnitTests
 {
@@ -278,12 +281,124 @@ namespace ExcelProductivitySuite.UnitTests
         }
 
         public List<(string dest, List<string>? sheets, bool open)> ExportedPdfs { get; } = new();
+        public List<PdfExportSettings> ExportedPdfSettings { get; } = new();
         public List<(List<string> files, string outDir, string ext)> ConvertedWorkbooks { get; } = new();
 
         public bool ExportToPdf(string destinationPath, IEnumerable<string>? sheetNames = null, bool openAfterExport = false)
         {
-            ExportedPdfs.Add((destinationPath, sheetNames != null ? new List<string>(sheetNames) : null, openAfterExport));
-            return true;
+            var sheetList = sheetNames != null ? new List<string>(sheetNames) : new List<string>();
+            var settings = new PdfExportSettings
+            {
+                DestinationPath = destinationPath,
+                SelectedSheets = sheetList,
+                Scope = sheetList.Count > 0 ? (sheetList.Count == 1 ? PdfExportScope.ActiveSheet : PdfExportScope.SelectedSheets) : PdfExportScope.EntireWorkbook,
+                OpenAfterExport = openAfterExport
+            };
+            return ExportToPdfWithOptions(settings).Success;
+        }
+
+        public PdfExportResult ExportToPdfWithOptions(PdfExportSettings settings)
+        {
+            if (settings == null) throw new ArgumentNullException(nameof(settings));
+            ExportedPdfSettings.Add(settings);
+
+            var validation = PdfExportEngine.ValidateSettings(settings, Sheets, !string.IsNullOrEmpty(SelectionAddress));
+            if (!validation.Success)
+            {
+                return PdfExportResult.Failed(validation.Message);
+            }
+
+            var exportedFiles = new List<string>();
+            if (settings.OutputMode == PdfOutputMode.SingleCombinedFile)
+            {
+                exportedFiles.Add(settings.DestinationPath);
+                ExportedPdfs.Add((settings.DestinationPath, settings.SelectedSheets, settings.OpenAfterExport));
+            }
+            else
+            {
+                var sheets = settings.Scope == PdfExportScope.SelectedSheets && settings.SelectedSheets.Count > 0
+                    ? settings.SelectedSheets
+                    : Sheets;
+
+                int idx = 1;
+                foreach (var s in sheets)
+                {
+                    string fName = PdfExportEngine.ResolveFileName(settings.FileNamePattern, ActiveWorkbookName, s, idx++);
+                    string path = System.IO.Path.Combine(settings.OutputDirectory, fName);
+                    exportedFiles.Add(path);
+                    ExportedPdfs.Add((path, new List<string> { s }, settings.OpenAfterExport));
+                }
+            }
+
+            return PdfExportResult.Succeeded(exportedFiles.Count, exportedFiles, "Mock export succeeded.");
+        }
+
+        public List<(SequenceNumberDefinition seq, SequenceFillOptions opts)> InsertedSequences { get; } = new();
+
+        public OperationResult InsertSequenceNumbers(SequenceNumberDefinition sequence, SequenceFillOptions options)
+        {
+            if (sequence == null) throw new ArgumentNullException(nameof(sequence));
+            options ??= new SequenceFillOptions();
+
+            InsertedSequences.Add((sequence.Clone(), options));
+
+            if (CurrentValues != null)
+            {
+                CurrentValues = SequenceNumberEngine.FormatMatrix(
+                    CurrentValues,
+                    sequence,
+                    options,
+                    out int updated,
+                    out int skipped,
+                    out long next);
+
+                sequence.CurrentNumber = next;
+                return OperationResult.Succeeded($"Inserted {updated} sequential numbers.", updated, skipped);
+            }
+
+            int rows = SelectionRowCount > 0 ? SelectionRowCount : 10;
+            int cols = SelectionColumnCount > 0 ? SelectionColumnCount : 1;
+            var matrix = new object?[rows, cols];
+
+            CurrentValues = SequenceNumberEngine.FormatMatrix(
+                matrix,
+                sequence,
+                options,
+                out int upCount,
+                out int skCount,
+                out long nextNum);
+
+            sequence.CurrentNumber = nextNum;
+            return OperationResult.Succeeded($"Inserted {upCount} sequential numbers.", upCount, skCount);
+        }
+
+        public OperationResult TransformRange(TransformRangeOptions options)
+        {
+            if (options == null) throw new ArgumentNullException(nameof(options));
+
+            var (isValid, errorMessage) = options.Validate();
+            if (!isValid) return OperationResult.Failed(errorMessage ?? "Invalid transformation options.");
+
+            var matrix = CurrentValues ?? new object?[1, 1];
+            var transformed = RangeTransformer.Transform(matrix, options);
+            int rows = transformed.GetLength(0);
+            int cols = transformed.GetLength(1);
+
+            if (options.DestinationMode == TransformDestinationMode.NewSheet)
+            {
+                CreateWorksheetWithData(options.NewSheetName, transformed);
+            }
+            else if (options.DestinationMode == TransformDestinationMode.TargetCell)
+            {
+                SetRangeValuesByAddress(options.TargetAddress, transformed);
+            }
+            else
+            {
+                CurrentValues = transformed;
+            }
+
+            int total = rows * cols;
+            return OperationResult.Succeeded($"Transformed {rows}x{cols} range.", total);
         }
 
         public int BatchConvertWorkbooks(IEnumerable<string> filePaths, string outputDirectory, string targetExtension)
@@ -509,6 +624,15 @@ namespace ExcelProductivitySuite.UnitTests
             };
         }
 
+        public List<IReadOnlyList<object?[,]>> SetMultiAreaValuesHistory { get; } = new();
+
+        public void SetMultiAreaSelectedValues(IReadOnlyList<object?[,]> areaValues)
+        {
+            SetMultiAreaValuesHistory.Add(areaValues);
+            MockMultiAreaValues.Clear();
+            MockMultiAreaValues.AddRange(areaValues);
+        }
+
         public IReadOnlyList<string> GetMultiAreaAddresses() => MockMultiAreaAddresses;
 
         public bool WriteMatrixToAddress(string targetAddress, object?[,] matrix)
@@ -582,6 +706,40 @@ namespace ExcelProductivitySuite.UnitTests
         public void RemoveValidationFromRange(IEnumerable<string> addresses)
         {
             RemovedValidationHistory.AddRange(addresses);
+        }
+
+        public int ClearValidationRules(ValidationClearScope scope) => 1;
+
+        public bool CreateDropdownList(string listFormulaOrItems, bool isFormula, bool allowBlank, bool showDropdown, string? errorTitle, string? errorMessage) => true;
+
+        public bool AdjustCellDimensions(double? rowHeightPoints, double? colWidthPoints, bool autoFitRows, bool autoFitCols, bool entireSheet) => true;
+
+        public IUndoManager UndoManager { get; } = new ExcelProductivitySuite.Engine.Recovery.UndoManager();
+
+        public bool UndoLastAction()
+        {
+            if (!UndoManager.CanUndo) return false;
+            var step = UndoManager.PopUndo();
+            if (step != null)
+            {
+                CurrentValues = step.BeforeValues;
+                UndoManager.PushRedo(step);
+                return true;
+            }
+            return false;
+        }
+
+        public bool RedoLastAction()
+        {
+            if (!UndoManager.CanRedo) return false;
+            var step = UndoManager.PopRedo();
+            if (step != null)
+            {
+                CurrentValues = step.AfterValues;
+                UndoManager.PushUndo(step);
+                return true;
+            }
+            return false;
         }
     }
 }

@@ -4,6 +4,8 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Windows;
 using ExcelProductivitySuite.Core.Abstractions;
+using ExcelProductivitySuite.Core.Models;
+using ExcelProductivitySuite.Engine.Files;
 using ExcelProductivitySuite.Engine.Formulas;
 using ExcelProductivitySuite.Engine.Navigation;
 using ExcelProductivitySuite.Engine.Ranges;
@@ -14,17 +16,22 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
     public class ExcelContextAdapter : IExcelContext
     {
         private readonly Func<Excel.Application> _appAccessor;
+        private readonly IUndoManager _undoManager;
         private Excel.Application _app => _appAccessor() ?? throw new InvalidOperationException("Excel Application instance is not available.");
 
-        public ExcelContextAdapter(Excel.Application app)
+        public IUndoManager UndoManager => _undoManager;
+
+        public ExcelContextAdapter(Excel.Application app, IUndoManager? undoManager = null)
         {
             if (app == null) throw new ArgumentNullException(nameof(app));
             _appAccessor = () => app;
+            _undoManager = undoManager ?? new ExcelProductivitySuite.Engine.Recovery.UndoManager(50);
         }
 
-        public ExcelContextAdapter(Func<Excel.Application> appAccessor)
+        public ExcelContextAdapter(Func<Excel.Application> appAccessor, IUndoManager? undoManager = null)
         {
             _appAccessor = appAccessor ?? throw new ArgumentNullException(nameof(appAccessor));
+            _undoManager = undoManager ?? new ExcelProductivitySuite.Engine.Recovery.UndoManager(50);
         }
 
         public IntPtr MainWindowHandle
@@ -279,16 +286,36 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
             var samples = new List<string>();
             try
             {
-                var matrix = GetSelectedValues();
-                if (matrix == null) return samples;
-
-                int rStart = matrix.GetLowerBound(0);
-                int rEnd = matrix.GetUpperBound(0);
-                int cStart = matrix.GetLowerBound(1);
-
-                for (int r = rStart; r <= rEnd && samples.Count < maxSamples; r++)
+                if (IsMultiAreaSelection)
                 {
-                    var val = matrix[r, cStart];
+                    var areas = GetMultiAreaSelectedValues();
+                    foreach (var matrix in areas)
+                    {
+                        if (matrix == null) continue;
+                        int rStart = matrix.GetLowerBound(0);
+                        int rEnd = matrix.GetUpperBound(0);
+                        int cStart = matrix.GetLowerBound(1);
+
+                        for (int r = rStart; r <= rEnd && samples.Count < maxSamples; r++)
+                        {
+                            var val = matrix[r, cStart];
+                            samples.Add(val?.ToString() ?? "");
+                        }
+                        if (samples.Count >= maxSamples) break;
+                    }
+                    return samples;
+                }
+
+                var singleMatrix = GetSelectedValues();
+                if (singleMatrix == null) return samples;
+
+                int rS = singleMatrix.GetLowerBound(0);
+                int rE = singleMatrix.GetUpperBound(0);
+                int cS = singleMatrix.GetLowerBound(1);
+
+                for (int r = rS; r <= rE && samples.Count < maxSamples; r++)
+                {
+                    var val = singleMatrix[r, cS];
                     samples.Add(val?.ToString() ?? "");
                 }
             }
@@ -316,6 +343,8 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
                 return;
             }
 
+            RecordBeforeRangeChange(range, values, isFormula: false, customDesc: "Cell Value Update");
+
             using (new ExcelStateScope(_app))
             {
                 range.Value2 = values;
@@ -342,6 +371,8 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
                 Excel.Range topLeft = sheet.Cells[startRow, startCol];
                 Excel.Range bottomRight = sheet.Cells[startRow + rows - 1, startCol + cols - 1];
                 Excel.Range targetRange = sheet.Range[topLeft, bottomRight];
+
+                RecordBeforeRangeChange(targetRange, values, isFormula: false, customDesc: "Range Value Update");
 
                 targetRange.Value2 = values;
             }
@@ -383,6 +414,9 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
                     {
                         target = target.Resize[rows, cols];
                     }
+
+                    RecordBeforeRangeChange(target, values, isFormula: false, customDesc: "Address Value Update");
+
                     target.Value2 = values;
                 }
             }
@@ -1480,6 +1514,8 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
                 return;
             }
 
+            RecordBeforeRangeChange(range, formulas, isFormula: true, customDesc: "Formula Update");
+
             using (new ExcelStateScope(_app))
             {
                 range.Formula = formulas;
@@ -1557,6 +1593,9 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
                 Excel.Range topLeft = sheet.Cells[startRow, startCol];
                 Excel.Range bottomRight = sheet.Cells[startRow + rows - 1, startCol + cols - 1];
                 Excel.Range targetRange = sheet.Range[topLeft, bottomRight];
+
+                RecordBeforeRangeChange(targetRange, formulas, isFormula: true, customDesc: "Formula Update");
+
                 targetRange.Formula = formulas;
             }
         }
@@ -1575,6 +1614,9 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
             using (new ExcelStateScope(_app))
             {
                 Excel.Range targetRange = _app.Range[address];
+
+                RecordBeforeRangeChange(targetRange, formulas, isFormula: true, customDesc: "Formula Update");
+
                 targetRange.Formula = formulas;
             }
         }
@@ -1827,60 +1869,549 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
             }
         }
 
+        private class PageSetupState
+        {
+            public Excel.XlPageOrientation Orientation { get; set; }
+            public Excel.XlPaperSize PaperSize { get; set; }
+            public object Zoom { get; set; } = 100;
+            public object FitToPagesWide { get; set; } = false;
+            public object FitToPagesTall { get; set; } = false;
+        }
+
+        private static PageSetupState CapturePageSetup(Excel.PageSetup ps)
+        {
+            return new PageSetupState
+            {
+                Orientation = ps.Orientation,
+                PaperSize = ps.PaperSize,
+                Zoom = ps.Zoom,
+                FitToPagesWide = ps.FitToPagesWide,
+                FitToPagesTall = ps.FitToPagesTall
+            };
+        }
+
+        private static void RestorePageSetup(Excel.PageSetup ps, PageSetupState state)
+        {
+            try
+            {
+                ps.Orientation = state.Orientation;
+                ps.PaperSize = state.PaperSize;
+                ps.Zoom = state.Zoom;
+                ps.FitToPagesWide = state.FitToPagesWide;
+                ps.FitToPagesTall = state.FitToPagesTall;
+            }
+            catch { /* Ignore COM quirks during restore */ }
+        }
+
+        private static void ApplyPageSetupOverrides(Excel.PageSetup ps, PdfExportSettings settings)
+        {
+            try
+            {
+                if (settings.Orientation == PdfPageOrientation.Portrait)
+                {
+                    ps.Orientation = Excel.XlPageOrientation.xlPortrait;
+                }
+                else if (settings.Orientation == PdfPageOrientation.Landscape)
+                {
+                    ps.Orientation = Excel.XlPageOrientation.xlLandscape;
+                }
+            }
+            catch { }
+
+            try
+            {
+                if (settings.PaperSize != PdfPaperSize.Default)
+                {
+                    Excel.XlPaperSize? psEnum = settings.PaperSize switch
+                    {
+                        PdfPaperSize.A4 => Excel.XlPaperSize.xlPaperA4,
+                        PdfPaperSize.Letter => Excel.XlPaperSize.xlPaperLetter,
+                        PdfPaperSize.Legal => Excel.XlPaperSize.xlPaperLegal,
+                        PdfPaperSize.A3 => Excel.XlPaperSize.xlPaperA3,
+                        PdfPaperSize.Tabloid => Excel.XlPaperSize.xlPaper11x17,
+                        PdfPaperSize.Executive => Excel.XlPaperSize.xlPaperExecutive,
+                        _ => null
+                    };
+                    if (psEnum.HasValue)
+                    {
+                        ps.PaperSize = psEnum.Value;
+                    }
+                }
+            }
+            catch { }
+
+            try
+            {
+                if (settings.PageFit != PdfPageFit.Default)
+                {
+                    ps.Zoom = false; // Zoom must be false for FitToPages to take effect in Excel
+                    switch (settings.PageFit)
+                    {
+                        case PdfPageFit.FitSheetOnOnePage:
+                            ps.FitToPagesWide = 1;
+                            ps.FitToPagesTall = 1;
+                            break;
+                        case PdfPageFit.FitAllColumnsOnOnePage:
+                            ps.FitToPagesWide = 1;
+                            ps.FitToPagesTall = false;
+                            break;
+                        case PdfPageFit.FitAllRowsOnOnePage:
+                            ps.FitToPagesWide = false;
+                            ps.FitToPagesTall = 1;
+                            break;
+                    }
+                }
+            }
+            catch { }
+        }
+
         public bool ExportToPdf(string destinationPath, IEnumerable<string>? sheetNames = null, bool openAfterExport = false)
         {
             if (string.IsNullOrWhiteSpace(destinationPath)) throw new ArgumentNullException(nameof(destinationPath));
 
+            var sheetList = sheetNames != null ? new List<string>(sheetNames) : new List<string>();
+            var settings = new PdfExportSettings
+            {
+                DestinationPath = destinationPath,
+                SelectedSheets = sheetList,
+                Scope = sheetList.Count > 0 ? (sheetList.Count == 1 ? PdfExportScope.ActiveSheet : PdfExportScope.SelectedSheets) : PdfExportScope.EntireWorkbook,
+                OpenAfterExport = openAfterExport
+            };
+
+            return ExportToPdfWithOptions(settings).Success;
+        }
+
+        public PdfExportResult ExportToPdfWithOptions(PdfExportSettings settings)
+        {
+            if (settings == null) throw new ArgumentNullException(nameof(settings));
+
             try
             {
-                if (!(_app.ActiveWorkbook is Excel.Workbook wb)) return false;
+                if (!(_app.ActiveWorkbook is Excel.Workbook wb))
+                {
+                    ShowMessage("No active workbook is currently open.", "PDF Export Error", isError: true);
+                    return PdfExportResult.Failed("No active workbook is open.");
+                }
+
+                var availableSheets = new List<string>();
+                foreach (Excel.Worksheet s in wb.Worksheets)
+                {
+                    availableSheets.Add(s.Name);
+                }
+
+                bool hasSelection = _app.Selection is Excel.Range;
+                var validation = PdfExportEngine.ValidateSettings(settings, availableSheets, hasSelection);
+                if (!validation.Success)
+                {
+                    ShowMessage(validation.Message, "PDF Export Validation", isError: true);
+                    return PdfExportResult.Failed(validation.Message);
+                }
 
                 using (new ExcelStateScope(_app))
                 {
-                    var sheetList = sheetNames != null ? new List<string>(sheetNames) : new List<string>();
+                    var exportedFiles = new List<string>();
+                    var quality = settings.Quality == PdfQuality.MinimumSize
+                        ? Excel.XlFixedFormatQuality.xlQualityMinimum
+                        : Excel.XlFixedFormatQuality.xlQualityStandard;
 
-                    if (sheetList.Count == 1)
+                    object fromPage = settings.ExportPageRange ? (object)settings.PageFrom : Type.Missing;
+                    object toPage = settings.ExportPageRange ? (object)settings.PageTo : Type.Missing;
+
+                    bool needsLayoutOverride = settings.Orientation != PdfPageOrientation.Default ||
+                                               settings.PaperSize != PdfPaperSize.Default ||
+                                               settings.PageFit != PdfPageFit.Default;
+
+                    if (settings.Scope == PdfExportScope.Selection)
                     {
-                        string sName = sheetList[0];
-                        Excel.Worksheet? targetWs = null;
-                        foreach (Excel.Worksheet ws in wb.Worksheets)
+                        if (!(_app.Selection is Excel.Range selRange))
                         {
-                            if (string.Equals(ws.Name, sName, StringComparison.OrdinalIgnoreCase))
+                            return PdfExportResult.Failed("The active selection is not a valid cell range.");
+                        }
+
+                        string? dir = System.IO.Path.GetDirectoryName(settings.DestinationPath);
+                        if (!string.IsNullOrWhiteSpace(dir) && !System.IO.Directory.Exists(dir))
+                        {
+                            System.IO.Directory.CreateDirectory(dir);
+                        }
+
+                        Excel.Worksheet? activeWs = wb.ActiveSheet as Excel.Worksheet;
+                        PageSetupState? psState = null;
+                        try
+                        {
+                            if (activeWs != null && needsLayoutOverride)
                             {
-                                targetWs = ws;
-                                break;
+                                psState = CapturePageSetup(activeWs.PageSetup);
+                                ApplyPageSetupOverrides(activeWs.PageSetup, settings);
+                            }
+
+                            selRange.ExportAsFixedFormat(
+                                Excel.XlFixedFormatType.xlTypePDF,
+                                settings.DestinationPath,
+                                quality,
+                                settings.IncludeDocumentProperties,
+                                settings.IgnorePrintAreas,
+                                fromPage,
+                                toPage,
+                                settings.OpenAfterExport);
+
+                            exportedFiles.Add(settings.DestinationPath);
+                        }
+                        finally
+                        {
+                            if (activeWs != null && psState != null)
+                            {
+                                RestorePageSetup(activeWs.PageSetup, psState);
+                            }
+                        }
+                    }
+                    else if (settings.Scope == PdfExportScope.ActiveSheet)
+                    {
+                        if (!(_app.ActiveSheet is Excel.Worksheet activeWs))
+                        {
+                            return PdfExportResult.Failed("No active worksheet found.");
+                        }
+
+                        string? dir = System.IO.Path.GetDirectoryName(settings.DestinationPath);
+                        if (!string.IsNullOrWhiteSpace(dir) && !System.IO.Directory.Exists(dir))
+                        {
+                            System.IO.Directory.CreateDirectory(dir);
+                        }
+
+                        PageSetupState? psState = null;
+                        try
+                        {
+                            if (needsLayoutOverride)
+                            {
+                                psState = CapturePageSetup(activeWs.PageSetup);
+                                ApplyPageSetupOverrides(activeWs.PageSetup, settings);
+                            }
+
+                            activeWs.ExportAsFixedFormat(
+                                Excel.XlFixedFormatType.xlTypePDF,
+                                settings.DestinationPath,
+                                quality,
+                                settings.IncludeDocumentProperties,
+                                settings.IgnorePrintAreas,
+                                fromPage,
+                                toPage,
+                                settings.OpenAfterExport);
+
+                            exportedFiles.Add(settings.DestinationPath);
+                        }
+                        finally
+                        {
+                            if (psState != null)
+                            {
+                                RestorePageSetup(activeWs.PageSetup, psState);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        List<string> targetSheetNames;
+                        if (settings.Scope == PdfExportScope.SelectedSheets)
+                        {
+                            targetSheetNames = settings.SelectedSheets != null ? new List<string>(settings.SelectedSheets) : new List<string>();
+                        }
+                        else
+                        {
+                            targetSheetNames = new List<string>();
+                            foreach (Excel.Worksheet ws in wb.Worksheets)
+                            {
+                                if (ws.Visible == Excel.XlSheetVisibility.xlSheetVisible)
+                                {
+                                    targetSheetNames.Add(ws.Name);
+                                }
                             }
                         }
 
-                        if (targetWs != null)
+                        if (targetSheetNames.Count == 0)
                         {
-                            targetWs.ExportAsFixedFormat(
-                                Excel.XlFixedFormatType.xlTypePDF,
-                                destinationPath,
-                                Excel.XlFixedFormatQuality.xlQualityStandard,
-                                IncludeDocProperties: true,
-                                IgnorePrintAreas: false,
-                                OpenAfterPublish: openAfterExport);
-                            return true;
+                            return PdfExportResult.Failed("No visible worksheets to export.");
+                        }
+
+                        if (settings.OutputMode == PdfOutputMode.SeparateFilesPerSheet)
+                        {
+                            if (!System.IO.Directory.Exists(settings.OutputDirectory))
+                            {
+                                System.IO.Directory.CreateDirectory(settings.OutputDirectory);
+                            }
+
+                            int index = 1;
+                            foreach (string sName in targetSheetNames)
+                            {
+                                Excel.Worksheet? ws = null;
+                                foreach (Excel.Worksheet w in wb.Worksheets)
+                                {
+                                    if (string.Equals(w.Name, sName, StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        ws = w;
+                                        break;
+                                    }
+                                }
+
+                                if (ws == null) continue;
+
+                                string fileName = PdfExportEngine.ResolveFileName(
+                                    settings.FileNamePattern,
+                                    wb.Name,
+                                    ws.Name,
+                                    index++,
+                                    DateTime.Now);
+                                string fullPath = System.IO.Path.Combine(settings.OutputDirectory, fileName);
+
+                                PageSetupState? psState = null;
+                                try
+                                {
+                                    if (needsLayoutOverride)
+                                    {
+                                        psState = CapturePageSetup(ws.PageSetup);
+                                        ApplyPageSetupOverrides(ws.PageSetup, settings);
+                                    }
+
+                                    ws.ExportAsFixedFormat(
+                                        Excel.XlFixedFormatType.xlTypePDF,
+                                        fullPath,
+                                        quality,
+                                        settings.IncludeDocumentProperties,
+                                        settings.IgnorePrintAreas,
+                                        fromPage,
+                                        toPage,
+                                        OpenAfterPublish: false);
+
+                                    exportedFiles.Add(fullPath);
+                                }
+                                finally
+                                {
+                                    if (psState != null)
+                                    {
+                                        RestorePageSetup(ws.PageSetup, psState);
+                                    }
+                                }
+                            }
+
+                            if (exportedFiles.Count == 0)
+                            {
+                                return PdfExportResult.Failed("No worksheets were successfully exported.");
+                            }
+
+                            if (settings.OpenAfterExport && exportedFiles.Count > 0)
+                            {
+                                try
+                                {
+                                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                                    {
+                                        FileName = exportedFiles[0],
+                                        UseShellExecute = true
+                                    });
+                                }
+                                catch { }
+                            }
+                        }
+                        else
+                        {
+                            // Single Combined PDF
+                            string? dir = System.IO.Path.GetDirectoryName(settings.DestinationPath);
+                            if (!string.IsNullOrWhiteSpace(dir) && !System.IO.Directory.Exists(dir))
+                            {
+                                System.IO.Directory.CreateDirectory(dir);
+                            }
+
+                            if (targetSheetNames.Count == 1)
+                            {
+                                Excel.Worksheet? ws = null;
+                                foreach (Excel.Worksheet w in wb.Worksheets)
+                                {
+                                    if (string.Equals(w.Name, targetSheetNames[0], StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        ws = w;
+                                        break;
+                                    }
+                                }
+
+                                if (ws == null) return PdfExportResult.Failed($"Worksheet '{targetSheetNames[0]}' not found.");
+
+                                PageSetupState? psState = null;
+                                try
+                                {
+                                    if (needsLayoutOverride)
+                                    {
+                                        psState = CapturePageSetup(ws.PageSetup);
+                                        ApplyPageSetupOverrides(ws.PageSetup, settings);
+                                    }
+
+                                    ws.ExportAsFixedFormat(
+                                        Excel.XlFixedFormatType.xlTypePDF,
+                                        settings.DestinationPath,
+                                        quality,
+                                        settings.IncludeDocumentProperties,
+                                        settings.IgnorePrintAreas,
+                                        fromPage,
+                                        toPage,
+                                        settings.OpenAfterExport);
+
+                                    exportedFiles.Add(settings.DestinationPath);
+                                }
+                                finally
+                                {
+                                    if (psState != null)
+                                    {
+                                        RestorePageSetup(ws.PageSetup, psState);
+                                    }
+                                }
+                            }
+                            else if (settings.Scope == PdfExportScope.EntireWorkbook && !needsLayoutOverride)
+                            {
+                                wb.ExportAsFixedFormat(
+                                    Excel.XlFixedFormatType.xlTypePDF,
+                                    settings.DestinationPath,
+                                    quality,
+                                    settings.IncludeDocumentProperties,
+                                    settings.IgnorePrintAreas,
+                                    fromPage,
+                                    toPage,
+                                    settings.OpenAfterExport);
+
+                                exportedFiles.Add(settings.DestinationPath);
+                            }
+                            else
+                            {
+                                var originalActive = wb.ActiveSheet as Excel.Worksheet;
+                                var restoredStates = new List<(Excel.Worksheet ws, PageSetupState state)>();
+
+                                try
+                                {
+                                    if (needsLayoutOverride)
+                                    {
+                                        foreach (var sName in targetSheetNames)
+                                        {
+                                            foreach (Excel.Worksheet w in wb.Worksheets)
+                                            {
+                                                if (string.Equals(w.Name, sName, StringComparison.OrdinalIgnoreCase))
+                                                {
+                                                    restoredStates.Add((w, CapturePageSetup(w.PageSetup)));
+                                                    ApplyPageSetupOverrides(w.PageSetup, settings);
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    bool isFirst = true;
+                                    foreach (var sName in targetSheetNames)
+                                    {
+                                        foreach (Excel.Worksheet w in wb.Worksheets)
+                                        {
+                                            if (string.Equals(w.Name, sName, StringComparison.OrdinalIgnoreCase) &&
+                                                w.Visible == Excel.XlSheetVisibility.xlSheetVisible)
+                                            {
+                                                w.Select(Replace: isFirst);
+                                                isFirst = false;
+                                                break;
+                                            }
+                                        }
+                                    }
+
+                                    dynamic? selSheets = _app.ActiveWindow?.SelectedSheets;
+                                    if (selSheets != null)
+                                    {
+                                        selSheets.ExportAsFixedFormat(
+                                            Excel.XlFixedFormatType.xlTypePDF,
+                                            settings.DestinationPath,
+                                            quality,
+                                            settings.IncludeDocumentProperties,
+                                            settings.IgnorePrintAreas,
+                                            fromPage,
+                                            toPage,
+                                            settings.OpenAfterExport);
+                                    }
+                                    else if (wb.ActiveSheet is Excel.Worksheet grpWs)
+                                    {
+                                        grpWs.ExportAsFixedFormat(
+                                            Excel.XlFixedFormatType.xlTypePDF,
+                                            settings.DestinationPath,
+                                            quality,
+                                            settings.IncludeDocumentProperties,
+                                            settings.IgnorePrintAreas,
+                                            fromPage,
+                                            toPage,
+                                            settings.OpenAfterExport);
+                                    }
+                                    else
+                                    {
+                                        wb.ExportAsFixedFormat(
+                                            Excel.XlFixedFormatType.xlTypePDF,
+                                            settings.DestinationPath,
+                                            quality,
+                                            settings.IncludeDocumentProperties,
+                                            settings.IgnorePrintAreas,
+                                            fromPage,
+                                            toPage,
+                                            settings.OpenAfterExport);
+                                    }
+
+                                    exportedFiles.Add(settings.DestinationPath);
+                                }
+                                finally
+                                {
+                                    foreach (var item in restoredStates)
+                                    {
+                                        RestorePageSetup(item.ws.PageSetup, item.state);
+                                    }
+                                    try { originalActive?.Select(); } catch { }
+                                }
+                            }
                         }
                     }
 
-                    // Export entire workbook
-                    wb.ExportAsFixedFormat(
-                        Excel.XlFixedFormatType.xlTypePDF,
-                        destinationPath,
-                        Excel.XlFixedFormatQuality.xlQualityStandard,
-                        IncludeDocProperties: true,
-                        IgnorePrintAreas: false,
-                        OpenAfterPublish: openAfterExport);
+                    if (settings.OpenOutputFolder)
+                    {
+                        string folder = settings.OutputMode == PdfOutputMode.SeparateFilesPerSheet
+                            ? settings.OutputDirectory
+                            : System.IO.Path.GetDirectoryName(settings.DestinationPath) ?? "";
 
-                    return true;
+                        if (!string.IsNullOrWhiteSpace(folder) && System.IO.Directory.Exists(folder))
+                        {
+                            try
+                            {
+                                if (settings.OutputMode == PdfOutputMode.SingleCombinedFile && System.IO.File.Exists(settings.DestinationPath))
+                                {
+                                    System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{settings.DestinationPath}\"");
+                                }
+                                else
+                                {
+                                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                                    {
+                                        FileName = folder,
+                                        UseShellExecute = true
+                                    });
+                                }
+                            }
+                            catch { }
+                        }
+                    }
+
+                    string successMsg = exportedFiles.Count == 1
+                        ? $"PDF published successfully: '{exportedFiles[0]}'."
+                        : $"Exported {exportedFiles.Count} PDF files to '{settings.OutputDirectory}'.";
+
+                    return PdfExportResult.Succeeded(exportedFiles.Count, exportedFiles, successMsg);
                 }
+            }
+            catch (COMException comEx)
+            {
+                string msg = comEx.Message;
+                if (comEx.ErrorCode == unchecked((int)0x800A03EC) || msg.Contains("sharing violation") || msg.Contains("used by another process") || msg.Contains("access"))
+                {
+                    msg = "The destination PDF file may be open or locked in another program (such as Adobe Acrobat or a web browser). Please close the file and try again.";
+                }
+                ShowMessage(msg, "PDF Export Error", isError: true);
+                return PdfExportResult.Failed(msg);
             }
             catch (Exception ex)
             {
                 ShowMessage($"Error exporting PDF: {ex.Message}", "PDF Export Error", isError: true);
-                return false;
+                return PdfExportResult.Failed(ex.Message);
             }
         }
 
@@ -2722,6 +3253,42 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
             return list;
         }
 
+        public void SetMultiAreaSelectedValues(IReadOnlyList<object?[,]> areaValues)
+        {
+            if (areaValues == null) throw new ArgumentNullException(nameof(areaValues));
+            if (!(_app.Selection is Excel.Range range)) return;
+
+            if (IsCurrentSheetProtected)
+            {
+                ShowMessage("The active worksheet is protected. Please unprotect the sheet before modifying cell values.", "Sheet Protected", isError: true);
+                return;
+            }
+
+            using (new ExcelStateScope(_app))
+            {
+                int count = Math.Min(range.Areas.Count, areaValues.Count);
+                for (int i = 1; i <= count; i++)
+                {
+                    Excel.Range area = range.Areas[i];
+                    var matrix = areaValues[i - 1];
+                    if (matrix != null)
+                    {
+                        RecordBeforeRangeChange(area, matrix, isFormula: false, customDesc: "Multi-Area Cell Value Update");
+                        if (area.Rows.Count == 1 && area.Columns.Count == 1)
+                        {
+                            int r0 = matrix.GetLowerBound(0);
+                            int c0 = matrix.GetLowerBound(1);
+                            area.Value2 = matrix[r0, c0];
+                        }
+                        else
+                        {
+                            area.Value2 = matrix;
+                        }
+                    }
+                }
+            }
+        }
+
         public bool WriteMatrixToAddress(string targetAddress, object?[,] matrix)
         {
             if (!HasActiveWorksheet || string.IsNullOrWhiteSpace(targetAddress) || matrix == null) return false;
@@ -3212,6 +3779,668 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
             catch (Exception ex)
             {
                 ShowMessage($"Failed to remove validation: {ex.Message}", "Validation Error", isError: true);
+            }
+        }
+
+        public int ClearValidationRules(ValidationClearScope scope)
+        {
+            if (!HasActiveWorkbook) return 0;
+
+            try
+            {
+                using (new ExcelStateScope(_app))
+                {
+                    switch (scope)
+                    {
+                        case ValidationClearScope.Selection:
+                            if (_app.Selection is Excel.Range sel)
+                            {
+                                sel.Validation.Delete();
+                                return 1;
+                            }
+                            break;
+
+                        case ValidationClearScope.ActiveWorksheet:
+                            if (_app.ActiveSheet is Excel.Worksheet ws)
+                            {
+                                ws.Cells.Validation.Delete();
+                                return 1;
+                            }
+                            break;
+
+                        case ValidationClearScope.AllWorksheets:
+                            int cleared = 0;
+                            var wb = _app.ActiveWorkbook;
+                            foreach (Excel.Worksheet sheet in wb.Worksheets)
+                            {
+                                try
+                                {
+                                    sheet.Cells.Validation.Delete();
+                                    cleared++;
+                                }
+                                catch { }
+                            }
+                            return cleared;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Failed to clear validation rules: {ex.Message}", "Validation Clear Error", isError: true);
+            }
+
+            return 0;
+        }
+
+        public bool CreateDropdownList(string listFormulaOrItems, bool isFormula, bool allowBlank, bool showDropdown, string? errorTitle, string? errorMessage)
+        {
+            if (!HasActiveWorksheet) return false;
+            if (string.IsNullOrWhiteSpace(listFormulaOrItems)) return false;
+
+            try
+            {
+                if (!(_app.Selection is Excel.Range range)) return false;
+                if (IsCurrentSheetProtected)
+                {
+                    ShowMessage("The active worksheet is protected. Cannot modify validation rules.", "Sheet Protected", isError: true);
+                    return false;
+                }
+
+                using (new ExcelStateScope(_app))
+                {
+                    Excel.Validation val = range.Validation;
+                    val.Delete();
+                    val.Add(
+                        Excel.XlDVType.xlValidateList,
+                        Excel.XlDVAlertStyle.xlValidAlertStop,
+                        Excel.XlFormatConditionOperator.xlBetween,
+                        listFormulaOrItems);
+
+                    val.IgnoreBlank = allowBlank;
+                    val.InCellDropdown = showDropdown;
+
+                    if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        val.ShowError = true;
+                        val.ErrorTitle = errorTitle ?? "Invalid Entry";
+                        val.ErrorMessage = errorMessage;
+                    }
+                    else
+                    {
+                        val.ShowError = false;
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Failed to create dropdown list: {ex.Message}", "Dropdown List Error", isError: true);
+                return false;
+            }
+        }
+
+        public bool AdjustCellDimensions(double? rowHeightPoints, double? colWidthPoints, bool autoFitRows, bool autoFitCols, bool entireSheet)
+        {
+            if (!HasActiveWorksheet) return false;
+
+            try
+            {
+                var ws = (Excel.Worksheet)_app.ActiveSheet;
+                Excel.Range target = entireSheet ? ws.Cells : (_app.Selection as Excel.Range ?? ws.UsedRange);
+
+                using (new ExcelStateScope(_app))
+                {
+                    if (autoFitRows)
+                    {
+                        target.Rows.AutoFit();
+                    }
+                    else if (rowHeightPoints.HasValue && rowHeightPoints.Value > 0)
+                    {
+                        target.RowHeight = Math.Min(409.5, Math.Max(1.0, rowHeightPoints.Value));
+                    }
+
+                    if (autoFitCols)
+                    {
+                        target.Columns.AutoFit();
+                    }
+                    else if (colWidthPoints.HasValue && colWidthPoints.Value > 0)
+                    {
+                        // In Excel COM, ColumnWidth is in characters (~1 char ~= 5.3 points for 11pt Calibri default)
+                        // Standard conversion: characters = points / 5.25
+                        double chars = colWidthPoints.Value / 5.25;
+                        target.ColumnWidth = Math.Min(255.0, Math.Max(0.5, chars));
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Failed to adjust cell dimensions: {ex.Message}", "Dimension Error", isError: true);
+                return false;
+            }
+        }
+
+        public OperationResult InsertSequenceNumbers(SequenceNumberDefinition sequence, SequenceFillOptions options)
+        {
+            if (sequence == null) throw new ArgumentNullException(nameof(sequence));
+            options ??= new SequenceFillOptions();
+
+            if (!HasActiveWorkbook || !(_app.ActiveSheet is Excel.Worksheet sheet))
+            {
+                ShowMessage("No active worksheet is currently open.", "Insert Sequence Number", isError: true);
+                return OperationResult.Failed("No active worksheet found.");
+            }
+
+            if (IsCurrentSheetProtected)
+            {
+                ShowMessage("The active worksheet is protected. Please unprotect the sheet before modifying cell values.", "Sheet Protected", isError: true);
+                return OperationResult.Failed("The active worksheet is protected.");
+            }
+
+            if (!(_app.Selection is Excel.Range selRange))
+            {
+                ShowMessage("Please select a range of cells where you want to insert sequential numbers.", "No Selection", isError: true);
+                return OperationResult.Failed("No cells are selected.");
+            }
+
+            try
+            {
+                // FAST PATH: Single contiguous area without merged cells and without blank-cell filtering
+                bool isMerged = selRange.MergeCells is true || selRange.MergeCells is null || (selRange.MergeCells is object o && Convert.IsDBNull(o));
+                if (selRange.Areas.Count == 1 && !isMerged && !options.OnlyFillBlankCells && !options.SkipHiddenCells)
+                {
+                    object?[,] beforeValues = NormalizeTo2DArray(selRange.Value2);
+                    object?[,] newMatrix = SequenceNumberEngine.FormatMatrix(
+                        beforeValues,
+                        sequence,
+                        options,
+                        out int updated,
+                        out int skipped,
+                        out long nextNum);
+
+                    RecordBeforeRangeChange(selRange, newMatrix, isFormula: false, customDesc: "Insert Sequence Numbers");
+
+                    using (new ExcelStateScope(_app))
+                    {
+                        selRange.Value2 = newMatrix;
+                    }
+
+                    sequence.CurrentNumber = nextNum;
+                    return OperationResult.Succeeded($"Successfully inserted {updated} sequence numbers.", updated, skipped);
+                }
+
+                // ADVANCED PATH: Merged cells, non-contiguous multi-area selections, or blank-cell filtering
+                var targetCells = new List<Excel.Range>();
+                var seenMergeAreas = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+                foreach (Excel.Range area in selRange.Areas)
+                {
+                    int rCount = area.Rows.Count;
+                    int cCount = area.Columns.Count;
+
+                    if (options.FillOrder == SequenceFillOrder.Vertical)
+                    {
+                        for (int c = 1; c <= cCount; c++)
+                        {
+                            for (int r = 1; r <= rCount; r++)
+                            {
+                                Excel.Range cell = area.Cells[r, c];
+                                if (options.SkipHiddenCells && ((bool)cell.EntireRow.Hidden || (bool)cell.EntireColumn.Hidden))
+                                    continue;
+
+                                if (cell.MergeCells is true)
+                                {
+                                    Excel.Range mergeArea = cell.MergeArea;
+                                    string mergeAddr = mergeArea.get_Address();
+                                    if (seenMergeAreas.Contains(mergeAddr)) continue;
+                                    seenMergeAreas.Add(mergeAddr);
+                                    cell = (Excel.Range)mergeArea.Cells[1, 1];
+                                }
+
+                                if (options.OnlyFillBlankCells)
+                                {
+                                    object? val = cell.Value2;
+                                    if (val != null && !string.IsNullOrWhiteSpace(val.ToString())) continue;
+                                }
+
+                                targetCells.Add(cell);
+                            }
+                        }
+                    }
+                    else // Horizontal
+                    {
+                        for (int r = 1; r <= rCount; r++)
+                        {
+                            for (int c = 1; c <= cCount; c++)
+                            {
+                                Excel.Range cell = area.Cells[r, c];
+                                if (options.SkipHiddenCells && ((bool)cell.EntireRow.Hidden || (bool)cell.EntireColumn.Hidden))
+                                    continue;
+
+                                if (cell.MergeCells is true)
+                                {
+                                    Excel.Range mergeArea = cell.MergeArea;
+                                    string mergeAddr = mergeArea.get_Address();
+                                    if (seenMergeAreas.Contains(mergeAddr)) continue;
+                                    seenMergeAreas.Add(mergeAddr);
+                                    cell = (Excel.Range)mergeArea.Cells[1, 1];
+                                }
+
+                                if (options.OnlyFillBlankCells)
+                                {
+                                    object? val = cell.Value2;
+                                    if (val != null && !string.IsNullOrWhiteSpace(val.ToString())) continue;
+                                }
+
+                                targetCells.Add(cell);
+                            }
+                        }
+                    }
+                }
+
+                if (targetCells.Count == 0)
+                {
+                    return OperationResult.Failed("No eligible cells found in the selection to insert sequential numbers.");
+                }
+
+                using (new ExcelStateScope(_app))
+                {
+                    long currentVal = options.ContinueFromLast ? sequence.CurrentNumber : sequence.StartNumber;
+                    int rep = 0;
+                    int updated = 0;
+
+                    foreach (var cell in targetCells)
+                    {
+                        string formatted = sequence.FormatValue(currentVal);
+                        cell.Value2 = formatted;
+                        updated++;
+
+                        rep++;
+                        if (rep >= sequence.RepeatCount)
+                        {
+                            rep = 0;
+                            currentVal += sequence.Increment;
+                            if (sequence.EndNumber.HasValue)
+                            {
+                                if (sequence.Increment > 0 && currentVal > sequence.EndNumber.Value) currentVal = sequence.StartNumber;
+                                else if (sequence.Increment < 0 && currentVal < sequence.EndNumber.Value) currentVal = sequence.StartNumber;
+                            }
+                        }
+                    }
+
+                    sequence.CurrentNumber = currentVal;
+                    return OperationResult.Succeeded($"Successfully inserted {updated} sequence numbers.", updated);
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Error inserting sequence numbers: {ex.Message}", "Insert Sequence Error", isError: true);
+                return OperationResult.Failed(ex.Message);
+            }
+        }
+
+        public OperationResult TransformRange(TransformRangeOptions options)
+        {
+            if (options == null) throw new ArgumentNullException(nameof(options));
+
+            var (isValid, errorMessage) = options.Validate();
+            if (!isValid)
+            {
+                ShowMessage(errorMessage ?? "Invalid transformation options.", "Transform Range", isError: true);
+                return OperationResult.Failed(errorMessage ?? "Invalid transformation options.");
+            }
+
+            if (IsCurrentSheetProtected)
+            {
+                ShowMessage("The active worksheet is protected. Please unprotect the sheet before transforming.", "Sheet Protected", isError: true);
+                return OperationResult.Failed("Worksheet is protected.");
+            }
+
+            var matrix = GetSelectedValues();
+            if (matrix == null || matrix.Length == 0)
+            {
+                ShowMessage("No cells selected to transform.", "Transform Range", isError: true);
+                return OperationResult.Failed("No cells selected.");
+            }
+
+            try
+            {
+                var transformed = RangeTransformer.Transform(matrix, options);
+                int outRows = transformed.GetLength(0);
+                int outCols = transformed.GetLength(1);
+
+                if (outRows == 0 || outCols == 0)
+                {
+                    ShowMessage("Transformation yielded no records.", "Transform Range", isError: false);
+                    return OperationResult.Succeeded("No records transformed.", 0);
+                }
+
+                if (options.DestinationMode == TransformDestinationMode.NewSheet)
+                {
+                    string sheetName = string.IsNullOrWhiteSpace(options.NewSheetName) ? "Transformed" : options.NewSheetName.Trim();
+                    bool created = CreateWorksheetWithData(sheetName, transformed);
+                    if (!created)
+                    {
+                        ShowMessage($"Could not create sheet '{sheetName}'. A sheet with this name may already exist.", "Transform Range", isError: true);
+                        return OperationResult.Failed($"Worksheet '{sheetName}' could not be created.");
+                    }
+                }
+                else if (options.DestinationMode == TransformDestinationMode.TargetCell)
+                {
+                    string targetAddress = options.TargetAddress?.Trim() ?? "$A$1";
+                    SetRangeValuesByAddress(targetAddress, transformed);
+                }
+                else // InPlace
+                {
+                    int startRow = SelectionStartRow;
+                    int startCol = SelectionStartColumn;
+                    ClearSelection();
+                    SetRangeValues(startRow, startCol, transformed);
+                }
+
+                int totalCells = outRows * outCols;
+                return OperationResult.Succeeded($"Successfully transformed {outRows} × {outCols} range ({totalCells} cells).", totalCells);
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Error transforming range: {ex.Message}", "Transform Range Error", isError: true);
+                return OperationResult.Failed(ex.Message);
+            }
+        }
+
+        private static object?[,] NormalizeTo2DArray(object? raw)
+        {
+            if (raw is object[,] matrix)
+            {
+                int rStart = matrix.GetLowerBound(0);
+                int rEnd = matrix.GetUpperBound(0);
+                int cStart = matrix.GetLowerBound(1);
+                int cEnd = matrix.GetUpperBound(1);
+
+                int rows = rEnd - rStart + 1;
+                int cols = cEnd - cStart + 1;
+                var res = new object?[rows, cols];
+                for (int r = 0; r < rows; r++)
+                {
+                    for (int c = 0; c < cols; c++)
+                    {
+                        res[r, c] = matrix[rStart + r, cStart + c];
+                    }
+                }
+                return res;
+            }
+
+            var single = new object?[1, 1];
+            single[0, 0] = raw;
+            return single;
+        }
+
+        public const int MaxUndoCellCount = 500_000;
+
+        private void RecordBeforeRangeChange(Excel.Range range, object?[,] newValues, bool isFormula = false, string? customDesc = null)
+        {
+            if (range == null || newValues == null) return;
+            try
+            {
+                long totalCells = (long)range.Rows.Count * range.Columns.Count;
+                if (totalCells > MaxUndoCellCount)
+                {
+                    // Safeguard: Skip recording massive ranges to protect memory on 32-bit Excel 2016
+                    return;
+                }
+
+                var sheet = (Excel.Worksheet)range.Worksheet;
+                var wb = (Excel.Workbook)sheet.Parent;
+                string wbName = wb?.Name ?? string.Empty;
+                string? wbPath = null;
+                try { wbPath = wb?.FullName; } catch { }
+
+                object?[,] beforeValues = NormalizeTo2DArray(range.Value2);
+                object?[,]? beforeFormulas = null;
+
+                try
+                {
+                    object hasFormObj = range.HasFormula;
+                    // In Excel COM:
+                    // bool false = no formulas in range
+                    // bool true = all cells have formulas
+                    // DBNull.Value = mixed range with some formulas and some constants
+                    bool hasFormulas = !(hasFormObj is bool b && !b);
+                    if (hasFormulas)
+                    {
+                        var formulaMatrix = NormalizeTo2DArray(range.Formula);
+                        bool containsRealFormula = false;
+                        for (int r = 0; r < formulaMatrix.GetLength(0); r++)
+                        {
+                            for (int c = 0; c < formulaMatrix.GetLength(1); c++)
+                            {
+                                if (formulaMatrix[r, c] is string s && s.StartsWith("="))
+                                {
+                                    containsRealFormula = true;
+                                    break;
+                                }
+                            }
+                            if (containsRealFormula) break;
+                        }
+
+                        if (containsRealFormula)
+                        {
+                            beforeFormulas = formulaMatrix;
+                        }
+                    }
+                }
+                catch { }
+
+                object?[,]? afterFormulas = isFormula ? newValues : null;
+                object?[,] afterValues = isFormula ? beforeValues : newValues;
+
+                string desc = customDesc ?? (isFormula ? "Formula Update" : "Cell Value Update");
+                _undoManager.RecordAction(
+                    description: desc,
+                    workbookName: wbName,
+                    workbookPath: wbPath,
+                    sheetName: sheet.Name,
+                    rangeAddress: range.get_Address(),
+                    startRow: range.Row,
+                    startColumn: range.Column,
+                    beforeValues: beforeValues,
+                    afterValues: afterValues,
+                    beforeFormulas: beforeFormulas,
+                    afterFormulas: afterFormulas);
+            }
+            catch
+            {
+                // Non-blocking undo tracking
+            }
+        }
+
+        public bool UndoLastAction()
+        {
+            if (!HasActiveWorkbook) return false;
+
+            if (!_undoManager.CanUndo)
+            {
+                try
+                {
+                    _app.Undo();
+                    return true;
+                }
+                catch
+                {
+                    ShowMessage("There are no suite actions to undo.", "Undo", isError: false);
+                    return false;
+                }
+            }
+
+            var step = _undoManager.PopUndo();
+            if (step == null) return false;
+
+            try
+            {
+                Excel.Workbook? targetWb = null;
+                if (!string.IsNullOrEmpty(step.WorkbookName))
+                {
+                    foreach (Excel.Workbook w in _app.Workbooks)
+                    {
+                        if (string.Equals(w.Name, step.WorkbookName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            targetWb = w;
+                            break;
+                        }
+                    }
+                }
+                targetWb ??= _app.ActiveWorkbook;
+
+                if (targetWb == null)
+                {
+                    ShowMessage($"Cannot undo '{step.Description}': Target workbook '{step.WorkbookName}' is closed or unavailable.", "Undo Error", isError: true);
+                    return false;
+                }
+
+                Excel.Worksheet? targetSheet = null;
+                foreach (Excel.Worksheet s in targetWb.Worksheets)
+                {
+                    if (string.Equals(s.Name, step.SheetName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        targetSheet = s;
+                        break;
+                    }
+                }
+
+                if (targetSheet == null)
+                {
+                    ShowMessage($"Cannot undo '{step.Description}': Worksheet '{step.SheetName}' was not found in workbook '{targetWb.Name}'.", "Undo Error", isError: true);
+                    return false;
+                }
+
+                if (targetSheet.ProtectContents)
+                {
+                    ShowMessage($"Cannot undo '{step.Description}': Worksheet '{step.SheetName}' is protected. Please unprotect the sheet first.", "Sheet Protected", isError: true);
+                    return false;
+                }
+
+                using (new ExcelStateScope(_app))
+                {
+                    try { targetSheet.Activate(); } catch { }
+
+                    Excel.Range targetRange = targetSheet.Range[step.RangeAddress];
+
+                    _undoManager.PushRedo(step);
+
+                    if (step.BeforeFormulas != null)
+                    {
+                        targetRange.Formula = step.BeforeFormulas;
+                    }
+                    else
+                    {
+                        targetRange.Value2 = step.BeforeValues;
+                    }
+                }
+
+                try
+                {
+                    _app.StatusBar = $"Suite Undo: Undid '{step.Description}' on [{targetWb.Name}]{step.SheetName}!{step.RangeAddress}";
+                }
+                catch { }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Error performing undo: {ex.Message}", "Undo Error", isError: true);
+                return false;
+            }
+        }
+
+        public bool RedoLastAction()
+        {
+            if (!HasActiveWorkbook) return false;
+
+            if (!_undoManager.CanRedo)
+            {
+                ShowMessage("There are no suite actions to redo.", "Redo", isError: false);
+                return false;
+            }
+
+            var step = _undoManager.PopRedo();
+            if (step == null) return false;
+
+            try
+            {
+                Excel.Workbook? targetWb = null;
+                if (!string.IsNullOrEmpty(step.WorkbookName))
+                {
+                    foreach (Excel.Workbook w in _app.Workbooks)
+                    {
+                        if (string.Equals(w.Name, step.WorkbookName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            targetWb = w;
+                            break;
+                        }
+                    }
+                }
+                targetWb ??= _app.ActiveWorkbook;
+
+                if (targetWb == null)
+                {
+                    ShowMessage($"Cannot redo '{step.Description}': Target workbook '{step.WorkbookName}' is closed or unavailable.", "Redo Error", isError: true);
+                    return false;
+                }
+
+                Excel.Worksheet? targetSheet = null;
+                foreach (Excel.Worksheet s in targetWb.Worksheets)
+                {
+                    if (string.Equals(s.Name, step.SheetName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        targetSheet = s;
+                        break;
+                    }
+                }
+
+                if (targetSheet == null)
+                {
+                    ShowMessage($"Cannot redo '{step.Description}': Worksheet '{step.SheetName}' was not found in workbook '{targetWb.Name}'.", "Redo Error", isError: true);
+                    return false;
+                }
+
+                if (targetSheet.ProtectContents)
+                {
+                    ShowMessage($"Cannot redo '{step.Description}': Worksheet '{step.SheetName}' is protected. Please unprotect the sheet first.", "Sheet Protected", isError: true);
+                    return false;
+                }
+
+                using (new ExcelStateScope(_app))
+                {
+                    try { targetSheet.Activate(); } catch { }
+
+                    Excel.Range targetRange = targetSheet.Range[step.RangeAddress];
+
+                    _undoManager.PushUndo(step);
+
+                    if (step.AfterFormulas != null)
+                    {
+                        targetRange.Formula = step.AfterFormulas;
+                    }
+                    else
+                    {
+                        targetRange.Value2 = step.AfterValues;
+                    }
+                }
+
+                try
+                {
+                    _app.StatusBar = $"Suite Redo: Redid '{step.Description}' on [{targetWb.Name}]{step.SheetName}!{step.RangeAddress}";
+                }
+                catch { }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Error performing redo: {ex.Message}", "Redo Error", isError: true);
+                return false;
             }
         }
     }

@@ -19,6 +19,7 @@
     <SolidColorBrush x:Key="SurfaceSecondaryBrush" Color="#F8F9FA" />
     <SolidColorBrush x:Key="SurfaceCardBrush" Color="#F3F5F7" />
     <SolidColorBrush x:Key="SurfaceBorderBrush" Color="#DDE0E3" />
+    <SolidColorBrush x:Key="BorderLightBrush" Color="#DDE0E3" />
     <SolidColorBrush x:Key="SurfaceDividerBrush" Color="#EAECEF" />
 
     <!-- Text Palette -->

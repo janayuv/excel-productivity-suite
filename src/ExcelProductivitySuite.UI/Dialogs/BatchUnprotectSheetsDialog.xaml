@@ -69,7 +69,7 @@
         <GroupBox Grid.Row="2" Header="Password (Leave blank if no password)" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,10,0,8">
             <DockPanel Margin="4">
                 <Button x:Name="TogglePwdBtn" Content="👁" Width="30" DockPanel.Dock="Right" Style="{StaticResource ModernSecondaryButtonStyle}" Click="TogglePassword_Click" ToolTip="Show/Hide Password" />
-                <PasswordBox x:Name="PasswordBox" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,4,0" PasswordChanged="PasswordBox_PasswordChanged" />
+                <PasswordBox x:Name="PasswordBox" Style="{StaticResource ModernPasswordBoxStyle}" Margin="0,0,4,0" PasswordChanged="PasswordBox_PasswordChanged" />
                 <TextBox x:Name="PasswordVisibleBox" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,4,0" Visibility="Collapsed" TextChanged="PasswordVisibleBox_TextChanged" />
             </DockPanel>
         </GroupBox>

@@ -1,0 +1,96 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.AdjustCellSizeDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Adjust Cell Size - Excel Productivity Suite"
+        Height="460" Width="520"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="📏" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Adjust Cell Size" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Standardize row heights and column widths across tables uniformly" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Main Body -->
+        <StackPanel Grid.Row="1">
+            <!-- Unit Selector -->
+            <GroupBox Header="Measurement Unit" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,0,0,10">
+                <StackPanel Orientation="Horizontal" Margin="6">
+                    <RadioButton x:Name="UnitPointsRadio" Content="Points (pt)" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,18,0" Checked="Unit_Changed" />
+                    <RadioButton x:Name="UnitInchesRadio" Content="Inches (in)" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,18,0" Checked="Unit_Changed" />
+                    <RadioButton x:Name="UnitCmRadio" Content="Centimeters (cm)" Style="{StaticResource ModernRadioButtonStyle}" Checked="Unit_Changed" />
+                </StackPanel>
+            </GroupBox>
+
+            <!-- Dimensions -->
+            <GroupBox Header="Cell Dimensions" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,0,0,10">
+                <Grid Margin="6">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Row Height -->
+                    <CheckBox x:Name="RowHeightCheck" Grid.Row="0" Grid.Column="0" Content="Row Height:" Style="{StaticResource ModernCheckBoxStyle}" VerticalAlignment="Center" Margin="0,0,10,8" Checked="RowHeightCheck_Changed" Unchecked="RowHeightCheck_Changed" />
+                    <TextBox x:Name="RowHeightBox" Grid.Row="0" Grid.Column="1" Text="15" Style="{StaticResource ModernTextBoxStyle}" Width="80" HorizontalAlignment="Left" Margin="0,0,10,8" />
+                    <CheckBox x:Name="AutoFitRowsCheck" Grid.Row="0" Grid.Column="2" Content="AutoFit Rows" Style="{StaticResource ModernCheckBoxStyle}" VerticalAlignment="Center" Margin="0,0,0,8" Checked="AutoFitRows_Changed" />
+
+                    <!-- Column Width -->
+                    <CheckBox x:Name="ColWidthCheck" Grid.Row="1" Grid.Column="0" Content="Column Width:" Style="{StaticResource ModernCheckBoxStyle}" VerticalAlignment="Center" Margin="0,0,10,0" Checked="ColWidthCheck_Changed" Unchecked="ColWidthCheck_Changed" />
+                    <TextBox x:Name="ColWidthBox" Grid.Row="1" Grid.Column="1" Text="12" Style="{StaticResource ModernTextBoxStyle}" Width="80" HorizontalAlignment="Left" Margin="0,0,10,0" />
+                    <CheckBox x:Name="AutoFitColsCheck" Grid.Row="1" Grid.Column="2" Content="AutoFit Columns" Style="{StaticResource ModernCheckBoxStyle}" VerticalAlignment="Center" Checked="AutoFitCols_Changed" />
+                </Grid>
+            </GroupBox>
+
+            <!-- Scope -->
+            <GroupBox Header="Apply Scope" Style="{StaticResource ModernGroupBoxStyle}">
+                <StackPanel Orientation="Horizontal" Margin="6">
+                    <RadioButton x:Name="SelectionScopeRadio" Content="Selected Range" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,20,0" />
+                    <RadioButton x:Name="EntireSheetScopeRadio" Content="Entire Worksheet" Style="{StaticResource ModernRadioButtonStyle}" />
+                </StackPanel>
+            </GroupBox>
+        </StackPanel>
+
+        <!-- Footer -->
+        <DockPanel Grid.Row="2" Margin="0,12,0,0">
+            <TextBlock x:Name="SelectionInfoText" Text="Target: Active Selection" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Cancel" Style="{StaticResource ModernSecondaryButtonStyle}" Margin="0,0,8,0" Click="CancelButton_Click" IsCancel="True" />
+                <Button Content="Apply Sizing" Style="{StaticResource ModernPrimaryButtonStyle}" Click="ApplyButton_Click" IsDefault="True" />
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

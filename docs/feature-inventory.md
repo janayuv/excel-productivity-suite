@@ -4,19 +4,20 @@
 **Host Application:** Microsoft Excel 2016 / 2019 / 2021 / Microsoft 365 (32-bit & 64-bit Windows Desktop)  
 **Framework:** .NET Framework 4.8 & Visual Studio Tools for Office (VSTO)  
 **UI Subsystem:** Windows Presentation Foundation (WPF) / Modern Fluent Office Palette  
-**Version:** 5.2.0 (Batch 12 Advanced Range Operations & Copy/Paste Expansion Milestone)  
-**Last Audit Date:** 2026-10-28  
+**Version:** 5.5.1 (Hardened Suite Undo/Redo Engine Audit Milestone)  
+**Last Audit Date:** 2026-10-29  
 
 ---
 
 ## 1. Executive Summary & Inventory Overview
 
-Following the mandatory codebase audit, the **Excel Productivity Suite** feature taxonomy has been unified into a standardized 12-module taxonomy (Modules A through L) aligned with premier Windows desktop Excel productivity toolboxes.
+Following the comprehensive Undo/Redo hardening audit, the **Excel Productivity Suite** feature taxonomy has been audited and hardened for production deployment.
 
 The current implementation comprises:
 - **Total Cataloged Capabilities:** 200+ features planned across 12 modules
-- **Active & Verified Tools:** 89 commands (87 core productivity utilities + 2 suite navigation/information utilities)
-- **Unit Test Coverage:** 231 passing automated unit & performance tests (100% pass rate in 1.8s)
+- **Active & Verified Tools:** 105 commands (101 core productivity utilities + 4 suite navigation/system utilities)
+- **Unit Test Coverage:** 256 passing automated unit & performance tests (100% pass rate in 4.0s)
+- **Hardened Suite Undo/Redo Engine:** Real-time multi-level `Ctrl+Z` Undo and `Ctrl+Y` Redo for cell, text, range, formula, and data commands via thread-level Win32 keyboard hook and managed `UndoManager` with snapshot immutability, mixed formula preservation, multi-area / multi-workbook lifecycle isolation, 500,000-cell memory protection, and zero shortcut interference outside worksheet grid (`EXCEL7`).
 - **Real Excel COM Integration Tests:** 18 passing out-of-process Excel 2016+ scenarios (100% pass rate in 1.27s)
 - **Searchable Quick Tool Launcher (SuperSearch):** Integrated multi-category search, active/roadmap status filtering, module badges, and keyword scoring (`Ctrl+Shift+P` / KeyTip: `TL`)
 
@@ -66,6 +67,8 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 | `CMD_TEXT_CONVERT_DATES` | **Convert Dates** | A | Text Tools | `DateTextConverter.cs` | `ConvertDatesDialog.xaml` | `TextOperationsTests` | Implemented and verified |
 | `CMD_TEXT_SPELL_NUMBER` | **Spell Numbers** | A | Text Tools | `NumberSpeller.cs` | `SpellNumberDialog.xaml` | `TextOperationsTests` | Implemented and verified |
 | `CMD_RANGE_FILL_BLANKS` | **Fill Blank Cells** | B | Range & Cells | `RangeFill.cs` | `FillBlanksDialog.xaml` | `RangeAndSheetTests`, `Benchmark_FillBlanks` | Implemented and verified |
+| `CMD_RANGE_INSERT_SEQUENCE_NUMBER` | **Insert Sequence Number** | B | Range & Cells | `SequenceNumberEngine.cs` | `InsertSequenceNumberDialog.xaml`, `CreateSequenceNumberDialog.xaml` | `SequenceNumberTests`, STA Dialog Tests | Implemented and verified |
+| `CMD_RANGE_TRANSFORM` | **Transform Range** | B | Range & Cells | `RangeTransformer.cs` | `TransformRangeDialog.xaml` | `TransformRangeTests`, STA Dialog Tests | Implemented and verified |
 | `CMD_RANGE_TRANSPOSE` | **Transpose Range** | B | Range & Cells | `RangeTransposer.cs` | `TransposeRangeDialog.xaml` | `RangeAndSheetTests`, `Benchmark_RangeTransposer` | Implemented and verified |
 | `CMD_RANGE_FLIP_HORIZONTAL` | **Flip Range** | B | Range & Cells | `RangeFlipper.cs` | `FlipRangeDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
 | `CMD_RANGE_SWAP` | **Swap Ranges** | B | Range & Cells | `RangeSwapper.cs` | `SwapRangesDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
@@ -139,6 +142,22 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 | `CMD_RANGE_RANDOM_SAMPLE` | **Random Sampling** | B | Range & Cells | `RandomSampler.cs` | `RandomSampleDialog.xaml` | `RangeAndSheetTests`, `Benchmark_RandomSampler` | Implemented and verified |
 | `CMD_FIND_BY_FORMAT` | **Find by Format** | C | Find & Select | `ExcelContextAdapter.cs` | `FindByFormatDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
 | `CMD_FIND_BY_VALIDATION` | **Find Validation** | C | Find & Select | `ExcelContextAdapter.cs` | `FindByValidationDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_TEXT_EXTRACT_NUMBERS` | **Extract Numbers** | A | Text Tools | `NumberExtractor.cs` | `ExtractNumbersDialog.xaml` | `NewToolsTests` | Implemented and verified |
+| `CMD_TEXT_EXTRACT_EMAILS` | **Extract Emails** | A | Text Tools | `EmailExtractor.cs` | `ExtractEmailsDialog.xaml` | `NewToolsTests` | Implemented and verified |
+| `CMD_SHEET_SEQUENCE_NAMES` | **Sequence Sheets** | D | Worksheet & Workbook | `SequenceSheetGenerator.cs` | `SequenceSheetsDialog.xaml` | `NewToolsTests` | Implemented and verified |
+| `CMD_WB_OPEN_FOLDER` | **Open Folder** | D | Worksheet & Workbook | `Process.Start` | Direct Explorer Launch | `ToolRegistrar` | Implemented and verified |
+| `CMD_WB_COPY_PATH` | **Copy Path** | D | Worksheet & Workbook | `Clipboard.SetText` | Direct Clipboard Copy | `ToolRegistrar` | Implemented and verified |
+| `CMD_WB_PROPERTIES` | **Workbook Properties** | D | Worksheet & Workbook | `FileInfo / Interop` | `WorkbookPropertiesDialog.xaml` | `DialogInstantiationTests` | Implemented and verified |
+| `CMD_TEXT_EXTRACT_URLS` | **Extract URLs** | A | Text Tools | `UrlExtractor.cs` | `ExtractUrlsDialog.xaml` | `NewToolsTests` | Implemented and verified |
+| `CMD_TEXT_BATCH_REPLACE` | **Batch Replace** | A | Text Tools | `BatchReplacer.cs` | `BatchReplaceDialog.xaml` | `NewToolsTests` | Implemented and verified |
+| `CMD_DATA_FREQUENCY_STATS` | **Frequency Distribution** | E | Data & Filtering | `FrequencyDistributionCalculator.cs` | `FrequencyDistributionDialog.xaml` | `NewToolsTests` | Implemented and verified |
+| `CMD_VALIDATION_BULK_REMOVE` | **Clear Validation** | F | Data Validation | `ExcelContextAdapter.cs` | `ClearValidationDialog.xaml` | `DialogInstantiationTests` | Implemented and verified |
+| `CMD_FORMAT_ROW_HEIGHT` | **Adjust Row Height** | H | Formatting & Design | `CellDimensionHelper.cs` | `AdjustCellSizeDialog.xaml` | `NewToolsTests` | Implemented and verified |
+| `CMD_FORMAT_COL_WIDTH` | **Adjust Column Width** | H | Formatting & Design | `CellDimensionHelper.cs` | `AdjustCellSizeDialog.xaml` | `NewToolsTests` | Implemented and verified |
+| `CMD_VALIDATION_CREATE_DROPDOWN` | **Create Dropdown List** | F | Data Validation | `DropdownListBuilder.cs` | `CreateDropdownDialog.xaml` | `NewToolsTests` | Implemented and verified |
+| `CMD_SELECT_COLUMN_DIFFERENCES` | **Column Differences** | C | Find, Select & Compare | `RowDifferenceFinder.cs` | `RowDifferencesDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_SUITE_UNDO` | **Undo Suite Action** | General | General / System | `UndoManager.cs`, `ExcelKeyboardHook.cs` | Direct Action / `Ctrl+Z` | `UndoEngineTests` | Implemented and verified |
+| `CMD_SUITE_REDO` | **Redo Suite Action** | General | General / System | `UndoManager.cs`, `ExcelKeyboardHook.cs` | Direct Action / `Ctrl+Y` | `UndoEngineTests` | Implemented and verified |
 
 ---
 
@@ -158,14 +177,15 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 - [x] `CMD_TEXT_CONVERT_DATES`: Recognize and convert varied text date formats into standardized ISO, EU, US, or long dates. *(Active - Batch 2)*
 - [x] `CMD_TEXT_SPELL_NUMBER`: Convert numbers/currencies to written English words up to trillions (SpellNumber). *(Active - Batch 2)*
 - [x] `CMD_TEXT_REMOVE_BY_POS`: Remove characters by exact position (left N, right N, middle range, before/after delimiter). *(Active - Batch 2)*
-- [ ] `CMD_TEXT_BATCH_REPLACE`: Multi-pattern string and punctuation batch replacement. *(Planned - Batch 2+)*
-- [ ] `CMD_TEXT_EXTRACT_NUMBERS`: Extract only numeric digits from mixed text strings. *(Planned - Batch 2+)*
-- [ ] `CMD_TEXT_EXTRACT_EMAILS`: Extract email addresses from free-form text. *(Planned - Batch 2+)*
-- [ ] `CMD_TEXT_EXTRACT_URLS`: Extract web URLs and domain links into adjacent cells. *(Planned - Batch 2+)*
+- [x] `CMD_TEXT_BATCH_REPLACE`: Multi-pattern string and punctuation batch replacement. *(Active - Batch 14)*
+- [x] `CMD_TEXT_EXTRACT_NUMBERS`: Extract only numeric digits from mixed text strings. *(Active - Batch 13)*
+- [x] `CMD_TEXT_EXTRACT_EMAILS`: Extract email addresses from free-form text. *(Active - Batch 13)*
+- [x] `CMD_TEXT_EXTRACT_URLS`: Extract web URLs and domain links into adjacent cells. *(Active - Batch 14)*
 
 ### Module B: Range and Cell Operations (Target: 18 Tools)
 - [x] `CMD_RANGE_FILL_BLANKS`: Populate blank cells from above, below, left, right, or constants. *(Active)*
 - [x] `CMD_MERGE_RANGES`: Append rows with header alignment or side-by-side concatenation. *(Active)*
+- [x] `CMD_RANGE_TRANSFORM`: Reshape single columns or rows into tables, or flatten tabular ranges into a single column or row with custom delimiters. *(Active - Batch 14)*
 - [x] `CMD_RANGE_TRANSPOSE`: Transpose rows to columns and columns to rows with formatting. *(Active - Batch 3)*
 - [x] `CMD_RANGE_FLIP_HORIZONTAL`: Mirror/flip columns horizontally left-to-right. *(Active - Batch 3)*
 - [x] `CMD_RANGE_FLIP_VERTICAL`: Mirror/flip rows vertically top-to-bottom. *(Active - Batch 3)*
@@ -195,7 +215,7 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 - [x] `CMD_FIND_BY_VALIDATION`: Locate all cells governed by data validation rules. *(Active - Batch 12)*
 - [ ] `CMD_SELECT_DUPLICATES`: Quick one-click selection of duplicate cells. *(Planned - Batch 13+)*
 - [ ] `CMD_HIGHLIGHT_DUPLICATES`: Direct conditional color highlighting rule generator for duplicate rows. *(Planned - Batch 13+)*
-- [ ] `CMD_SELECT_COLUMN_DIFFERENCES`: Direct single-click column difference selector. *(Planned - Batch 13+)*
+- [x] `CMD_SELECT_COLUMN_DIFFERENCES`: Direct single-click column difference selector. *(Active - Batch 14)*
 
 ### Module D: Worksheet and Workbook Management (Target: 18 Tools)
 - [x] `CMD_SHEET_VISIBILITY`: Bulk toggle Visible, Hidden, and VeryHidden worksheet states. *(Active)*
@@ -210,11 +230,11 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 - [x] `CMD_SHEET_DELETE_BLANKS`: Scan and delete completely empty worksheets after confirmation. *(Active - Batch 5)*
 - [ ] `CMD_SHEET_COPY_PAGE_SETUP`: Copy margins, orientation, and scaling across sheets. *(Planned - Batch 5+)*
 - [ ] `CMD_SHEET_FREEZE_MULTI`: Synchronize Freeze Panes across all worksheets simultaneously. *(Planned - Batch 5+)*
-- [ ] `CMD_SHEET_SEQUENCE_NAMES`: Create a sequence of new worksheets with custom naming pattern. *(Planned - Batch 5+)*
+- [x] `CMD_SHEET_SEQUENCE_NAMES`: Create a sequence of new worksheets with custom naming pattern. *(Active - Batch 13)*
 - [ ] `CMD_SHEET_CONSOLIDATE`: Aggregate values across identical sheets using standard math functions. *(Planned - Batch 5+)*
-- [ ] `CMD_WB_OPEN_FOLDER`: Open Windows File Explorer at active workbook's containing folder. *(Planned - Batch 5)*
-- [ ] `CMD_WB_COPY_PATH`: Copy full workbook file path to clipboard. *(Planned - Batch 5)*
-- [ ] `CMD_WB_PROPERTIES`: Inspect detailed workbook properties, sheet count, author, and size. *(Planned - Batch 5)*
+- [x] `CMD_WB_OPEN_FOLDER`: Open Windows File Explorer at active workbook's containing folder. *(Active - Batch 13)*
+- [x] `CMD_WB_COPY_PATH`: Copy full workbook file path to clipboard. *(Active - Batch 13)*
+- [x] `CMD_WB_PROPERTIES`: Inspect detailed workbook properties, sheet count, author, and size. *(Active - Batch 13)*
 
 ### Module E: Data, Filtering, and Statistics (Target: 15 Tools)
 - [x] `CMD_DATA_REMOVE_DUPLICATES`: Remove duplicate rows with key-column selection and header preservation. *(Active)*
@@ -226,18 +246,18 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 - [x] `CMD_DATA_MERGE_TABLES`: Upsert and update target table records matching secondary lookup keys. *(Active - Batch 6)*
 - [x] `CMD_DATA_EXTRACT_DISTINCT`: Filter and copy distinct rows to a new destination worksheet. *(Active - Batch 6)*
 - [ ] `CMD_DATA_QUICK_SUBTOTAL`: Automatically insert group subtotals and summaries at key changes. *(Planned - Batch 6+)*
-- [ ] `CMD_DATA_FREQUENCY_STATS`: Calculate occurrence frequency distribution table for column values. *(Planned - Batch 6+)*
+- [x] `CMD_DATA_FREQUENCY_STATS`: Calculate occurrence frequency distribution table for column values. *(Active - Batch 14)*
 
 ### Module F: Data Validation and Dropdown Lists (Target: 12 Tools)
 - [x] `CMD_VALIDATION_PREVENT_DUPLICATE`: Apply validation rule that rejects duplicate entries in real-time. *(Active - Batch 6)*
-- [ ] `CMD_VALIDATION_CREATE_DROPDOWN`: Create standard Excel in-cell dropdown list from items/range. *(Planned - Batch 6+)*
+- [x] `CMD_VALIDATION_CREATE_DROPDOWN`: Create standard Excel in-cell dropdown list from items/range. *(Active - Batch 14)*
 - [ ] `CMD_VALIDATION_SEARCHABLE_DROPDOWN`: Floating searchable popup interface for large validation lists. *(Planned - Batch 6+)*
 - [ ] `CMD_VALIDATION_MULTI_SELECT`: Allow multi-item selection in dropdown separated by commas. *(Planned - Batch 6+)*
 - [ ] `CMD_VALIDATION_EMAIL_RULE`: Apply regex-based validation rule requiring valid email syntax. *(Planned - Batch 6+)*
 - [ ] `CMD_VALIDATION_PHONE_RULE`: Apply validation rule enforcing phone number patterns. *(Planned - Batch 6+)*
 - [ ] `CMD_VALIDATION_DATE_RANGE`: Restrict entry to dates within specified calendar boundaries. *(Planned - Batch 6+)*
 - [ ] `CMD_VALIDATION_HIGHLIGHT_INVALID`: Scan range and highlight all cells with invalid validation data. *(Planned - Batch 6+)*
-- [ ] `CMD_VALIDATION_BULK_REMOVE`: Remove data validation rules across selected ranges or sheets. *(Planned - Batch 6+)*
+- [x] `CMD_VALIDATION_BULK_REMOVE`: Remove data validation rules across selected ranges or sheets. *(Active - Batch 14)*
 - [ ] `CMD_VALIDATION_COPY_RULES`: Copy validation rules from source range to target ranges. *(Planned - Batch 6+)*
 
 ### Module G: Formula and Calculation Utilities (Target: 14 Tools)
@@ -258,8 +278,8 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 - [x] `CMD_FORMAT_DATE_STANDARDS`: Standardize date cells to ISO 8601 (YYYY-MM-DD) or custom formats. *(Active - Batch 11)*
 - [ ] `CMD_FORMAT_HIGHLIGHT_CELL_TYPES`: Color-code formulas, constants, locked cells, and errors. *(Planned - Batch 7+)*
 - [ ] `CMD_FORMAT_BORDERS`: Apply accounting borders, double bottom lines, and header styling. *(Planned - Batch 7+)*
-- [ ] `CMD_FORMAT_ROW_HEIGHT`: Set uniform row heights or smart auto-fit across multiple tables. *(Planned - Batch 7+)*
-- [ ] `CMD_FORMAT_COL_WIDTH`: Set uniform column widths or padded auto-fit across selections. *(Planned - Batch 7+)*
+- [x] `CMD_FORMAT_ROW_HEIGHT`: Set uniform row heights or smart auto-fit across multiple tables. *(Active - Batch 14)*
+- [x] `CMD_FORMAT_COL_WIDTH`: Set uniform column widths or padded auto-fit across selections. *(Active - Batch 14)*
 - [ ] `CMD_PRINT_SET_PRINT_AREAS`: Configure multiple print areas across sheets simultaneously. *(Planned - Batch 7+)*
 - [ ] `CMD_PRINT_INSERT_PAGE_BREAKS`: Insert horizontal page breaks every N rows or on category changes. *(Planned - Batch 7+)*
 - [ ] `CMD_PRINT_REPEATING_HEADERS`: Configure rows and columns to repeat on every printed page. *(Planned - Batch 7+)*

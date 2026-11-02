@@ -15,6 +15,22 @@
                   supertip="Instant search and launch for all Excel Productivity Suite tools (KeyTip: TL)."
                   keytip="TL"
                   onAction="OnRibbonButtonClicked" />
+          <button id="btnSuiteUndo"
+                  label="Undo"
+                  size="normal"
+                  imageMso="Undo"
+                  screentip="Undo Suite Action (Ctrl+Z)"
+                  supertip="Revert the last cell, range, formula, or text operation performed by the suite."
+                  keytip="ZU"
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnSuiteRedo"
+                  label="Redo"
+                  size="normal"
+                  imageMso="Redo"
+                  screentip="Redo Suite Action (Ctrl+Y)"
+                  supertip="Re-apply the last undone operation performed by the suite."
+                  keytip="ZR"
+                  onAction="OnRibbonButtonClicked" />
           <button id="btnAbout"
                   label="About Suite"
                   size="normal"
@@ -119,10 +135,46 @@
                   screentip="Convert Numbers to Words"
                   supertip="Generate written English words for currency amounts or numbers."
                   onAction="OnRibbonButtonClicked" />
+          <separator id="sepText3" />
+          <button id="btnExtractNumbers"
+                  label="Extract Numbers"
+                  size="normal"
+                  imageMso="Cut"
+                  screentip="Extract Numbers"
+                  supertip="Isolate integers, decimals, and negative numbers from alphanumeric strings."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnExtractEmails"
+                  label="Extract Emails"
+                  size="normal"
+                  imageMso="MailMergeSendEmail"
+                  screentip="Extract Email Addresses"
+                  supertip="Find and isolate valid email addresses from notes, descriptions, or contact blocks."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnExtractUrls"
+                  label="Extract URLs"
+                  size="normal"
+                  imageMso="HyperlinkInsert"
+                  screentip="Extract URLs &amp; Hyperlinks"
+                  supertip="Isolate web addresses, domain links, and hyperlinks from mixed text cells."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnBatchReplace"
+                  label="Batch Replace"
+                  size="normal"
+                  imageMso="ReplaceDialog"
+                  screentip="Batch Replace Strings"
+                  supertip="Execute multiple find-and-replace rules simultaneously in a single unified pass."
+                  onAction="OnRibbonButtonClicked" />
         </group>
 
         <!-- Group: Range & Cells -->
         <group id="grpRange" label="Range &amp; Cells">
+          <button id="btnTransformRange"
+                  label="Transform Range"
+                  size="large"
+                  imageMso="TableCustom"
+                  screentip="Transform Range"
+                  supertip="Reshape single columns or rows into multi-column tables, or flatten tabular ranges into a single column or row with custom delimiters."
+                  onAction="OnRibbonButtonClicked" />
           <button id="btnTranspose"
                   label="Transpose"
                   size="large"
@@ -136,6 +188,13 @@
                   imageMso="FillDown"
                   screentip="Fill Blank Cells"
                   supertip="Fill blank cells with values from above, below, left, right, or fixed constants."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnInsertSequenceNumber"
+                  label="Sequence Number"
+                  size="large"
+                  imageMso="NumberingInsertGallery"
+                  screentip="Insert Sequence Number"
+                  supertip="Quickly create, customize, and insert unique sequential numbers, prefixes, suffixes, leading zeros, and repeated sequences across cells or merged ranges."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnMergeKeepData"
                   label="Merge (Keep Data)"
@@ -284,6 +343,13 @@
                   screentip="Select Row Differences"
                   supertip="Compare each cell in a row against a baseline reference cell and select mismatches."
                   onAction="OnRibbonButtonClicked" />
+          <button id="btnColumnDifferences"
+                  label="Col Differences"
+                  size="normal"
+                  imageMso="ConditionalFormattingHighlightCells"
+                  screentip="Select Column Differences"
+                  supertip="Compare each cell in a column against a baseline reference cell and select mismatches."
+                  onAction="OnRibbonButtonClicked" />
           <button id="btnCommentInspector"
                   label="Comments"
                   size="normal"
@@ -353,6 +419,13 @@
                   screentip="Advanced Multi-Condition Filter"
                   supertip="Filter rows with multiple AND/OR conditions and export or select matches."
                   onAction="OnRibbonButtonClicked" />
+          <button id="btnFrequencyStats"
+                  label="Frequency Stats"
+                  size="normal"
+                  imageMso="FunctionsStatisticalInsertGallery"
+                  screentip="Value Frequency Distribution"
+                  supertip="Calculate occurrence frequency counts, percentages, and cumulative distributions."
+                  onAction="OnRibbonButtonClicked" />
         </group>
 
         <!-- Group: Tables & Validation -->
@@ -370,6 +443,20 @@
                   imageMso="DataValidation"
                   screentip="Prevent Duplicate Entries"
                   supertip="Apply dynamic Excel Data Validation to prevent duplicate inputs in the selected range."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnCreateDropdown"
+                  label="Create Dropdown"
+                  size="normal"
+                  imageMso="DataValidation"
+                  screentip="Create Dropdown List"
+                  supertip="Create in-cell dropdown list validation from custom items or cell range references."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnClearValidation"
+                  label="Clear Validation"
+                  size="normal"
+                  imageMso="Delete"
+                  screentip="Clear Data Validation"
+                  supertip="Clear data validation rules and dropdown arrows across selection or worksheets."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnFindMissing"
                   label="Find Missing"
@@ -573,6 +660,13 @@
                   screentip="Delete Blank Worksheets"
                   supertip="Scan and batch remove completely empty worksheets after confirmation."
                   onAction="OnRibbonButtonClicked" />
+          <button id="btnSequenceSheets"
+                  label="Sequence Sheets"
+                  size="normal"
+                  imageMso="SheetInsert"
+                  screentip="Create Sequentially Named Sheets"
+                  supertip="Batch generate worksheets following numbers, calendar months, days, or quarterly sequences."
+                  onAction="OnRibbonButtonClicked" />
         </group>
 
         <group id="grpWorkbooks" label="Workbook Operations">
@@ -605,6 +699,28 @@
                   screentip="Compare Two Workbooks"
                   supertip="Audit differences in worksheet names, dimensions, and cell values across workbooks."
                   onAction="OnRibbonButtonClicked" />
+          <separator id="sepWb2" />
+          <button id="btnWbOpenFolder"
+                  label="Open Folder"
+                  size="normal"
+                  imageMso="FileOpen"
+                  screentip="Open Containing Folder"
+                  supertip="Open the Windows File Explorer folder containing the active workbook with the file selected."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnWbCopyPath"
+                  label="Copy Path"
+                  size="normal"
+                  imageMso="Copy"
+                  screentip="Copy Workbook Path"
+                  supertip="Copy the full disk path of the active workbook to the Windows clipboard."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnWbProperties"
+                  label="Properties"
+                  size="normal"
+                  imageMso="Info"
+                  screentip="Workbook Extended Properties"
+                  supertip="View file size, creation timestamp, author, sheets count, and COM metadata."
+                  onAction="OnRibbonButtonClicked" />
         </group>
 
         <group id="grpPageSetup" label="Page Setup &amp; View">
@@ -621,6 +737,21 @@
                   imageMso="FreezePanes"
                   screentip="Synchronize Freeze Panes"
                   supertip="Apply uniform pane freezing or unfreezing across multiple worksheets."
+                  onAction="OnRibbonButtonClicked" />
+          <separator id="sepPageSetup1" />
+          <button id="btnAdjustRowHeight"
+                  label="Row Height"
+                  size="normal"
+                  imageMso="TableRowsInsertAbove"
+                  screentip="Adjust Row Height"
+                  supertip="Set uniform row heights in points, inches, or centimeters, or apply smart auto-fit."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnAdjustColWidth"
+                  label="Column Width"
+                  size="normal"
+                  imageMso="TableColumnsInsertLeft"
+                  screentip="Adjust Column Width"
+                  supertip="Set uniform column widths in points, inches, or centimeters, or apply auto-fit."
                   onAction="OnRibbonButtonClicked" />
         </group>
 

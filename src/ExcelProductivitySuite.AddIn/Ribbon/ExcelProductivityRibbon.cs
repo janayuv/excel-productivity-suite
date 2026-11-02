@@ -96,6 +96,7 @@ namespace ExcelProductivitySuite.AddIn.Ribbon
                 case "btnConvertNumbers": return "CMD_TEXT_CONVERT_NUMBERS";
                 case "btnConvertDates": return "CMD_TEXT_CONVERT_DATES";
                 case "btnSpellNumber": return "CMD_TEXT_SPELL_NUMBER";
+                case "btnTransformRange": return "CMD_RANGE_TRANSFORM";
                 case "btnTranspose": return "CMD_RANGE_TRANSPOSE";
                 case "btnFlipRange": return "CMD_RANGE_FLIP_HORIZONTAL";
                 case "btnSwapRanges": return "CMD_RANGE_SWAP";
@@ -111,6 +112,7 @@ namespace ExcelProductivitySuite.AddIn.Ribbon
                 case "btnRowDifferences": return "CMD_SELECT_ROW_DIFFERENCES";
                 case "btnCommentInspector": return "CMD_FIND_BY_COMMENT";
                 case "btnFillBlanks": return "CMD_RANGE_FILL_BLANKS";
+                case "btnInsertSequenceNumber": return "CMD_RANGE_INSERT_SEQUENCE_NUMBER";
                 case "btnCompareRanges": return "CMD_RANGE_COMPARE";
                 case "btnSelectSpecial": return "CMD_SELECT_SPECIAL";
                 case "btnMergeRanges": return "CMD_MERGE_RANGES";
@@ -170,6 +172,22 @@ namespace ExcelProductivitySuite.AddIn.Ribbon
                 case "btnDatePicker": return "CMD_NAV_DATE_PICKER";
                 case "btnGridFocus": return "CMD_NAV_GRID_FOCUS";
                 case "btnDataEntryForm": return "CMD_NAV_DATA_ENTRY_FORM";
+                case "btnExtractNumbers": return "CMD_TEXT_EXTRACT_NUMBERS";
+                case "btnExtractEmails": return "CMD_TEXT_EXTRACT_EMAILS";
+                case "btnSequenceSheets": return "CMD_SHEET_SEQUENCE_NAMES";
+                case "btnWbOpenFolder": return "CMD_WB_OPEN_FOLDER";
+                case "btnWbCopyPath": return "CMD_WB_COPY_PATH";
+                case "btnWbProperties": return "CMD_WB_PROPERTIES";
+                case "btnExtractUrls": return "CMD_TEXT_EXTRACT_URLS";
+                case "btnBatchReplace": return "CMD_TEXT_BATCH_REPLACE";
+                case "btnFrequencyStats": return "CMD_DATA_FREQUENCY_STATS";
+                case "btnClearValidation": return "CMD_VALIDATION_BULK_REMOVE";
+                case "btnAdjustRowHeight": return "CMD_FORMAT_ROW_HEIGHT";
+                case "btnAdjustColWidth": return "CMD_FORMAT_COL_WIDTH";
+                case "btnCreateDropdown": return "CMD_VALIDATION_CREATE_DROPDOWN";
+                case "btnColumnDifferences": return "CMD_SELECT_COLUMN_DIFFERENCES";
+                case "btnSuiteUndo": return "CMD_SUITE_UNDO";
+                case "btnSuiteRedo": return "CMD_SUITE_REDO";
                 case "btnAbout": return "CMD_ABOUT";
                 default: return controlId;
             }

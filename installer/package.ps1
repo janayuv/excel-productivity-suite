@@ -9,7 +9,7 @@
 
 [CmdletBinding()]
 param (
-    [string]$Version = "4.0.0",
+    [string]$Version = "5.6.0",
     [string]$Configuration = "Release"
 )
 
@@ -88,15 +88,26 @@ if (Test-Path $srcRibbon) {
     Write-Host "  -> Copied: Ribbon\ExcelProductivityRibbon.xml" -ForegroundColor Gray
 }
 
-# Copy installer scripts
-Copy-Item -Path (Join-Path $scriptDir "install.ps1") -Destination $stageDir -Force
-Copy-Item -Path (Join-Path $scriptDir "uninstall.ps1") -Destination $stageDir -Force
-Copy-Item -Path (Join-Path $scriptDir "diagnostics.ps1") -Destination $stageDir -Force
-Copy-Item -Path (Join-Path $scriptDir "install.cmd") -Destination $stageDir -Force
-Copy-Item -Path (Join-Path $scriptDir "uninstall.cmd") -Destination $stageDir -Force
-Copy-Item -Path (Join-Path $scriptDir "diagnostics.cmd") -Destination $stageDir -Force
+# Copy installer scripts and tools
+$installerFiles = @(
+    "install.ps1",
+    "uninstall.ps1",
+    "diagnostics.ps1",
+    "install.cmd",
+    "setup.cmd",
+    "uninstall.cmd",
+    "diagnostics.cmd",
+    "ExcelProductivitySuite.cer"
+)
+foreach ($iFile in $installerFiles) {
+    $srcFile = Join-Path $scriptDir $iFile
+    if (Test-Path $srcFile) {
+        Copy-Item -Path $srcFile -Destination $stageDir -Force
+        Write-Host "  -> Copied installer component: $iFile" -ForegroundColor Gray
+    }
+}
 
-# Create release notice
+# Create release notice and user guide for other PCs
 $readmeContent = @"
 ========================================================================
 Excel Productivity Suite - Version $Version (Windows Desktop x64 / x86)
@@ -104,25 +115,43 @@ Host Application : Microsoft Excel 2016 / 2019 / 2021 / Microsoft 365
 Target Runtime   : .NET Framework 4.8 & Visual Studio Tools for Office
 ========================================================================
 
-QUICK INSTALLATION:
-Option A (Double-Click):
-   Double-click 'install.cmd' in File Explorer.
+PREREQUISITES FOR TARGET PC:
+1. Windows 10 (version 1903+) or Windows 11 (or Win 7/8.1 with .NET 4.8).
+2. Microsoft Excel 2016, 2019, 2021, or Microsoft 365 (32-bit or 64-bit).
+3. Visual Studio Tools for Office (VSTO) Runtime:
+   Included by default with standard Microsoft Office installations.
+   (If missing, download free from: https://www.microsoft.com/en-us/download/details.aspx?id=48217)
 
-Option B (PowerShell):
-   Open PowerShell and run:
-   .\install.ps1
-   (or: powershell.exe -ExecutionPolicy Bypass -File .\install.ps1)
+HOW TO INSTALL ON THIS PC:
+
+Method 1: Permanent Setup (Recommended)
+   - Extract the entire ZIP archive to any temporary folder (e.g. Downloads).
+   - Double-click 'setup.cmd'.
+   - This automatically unblocks files, registers the code-signing certificate,
+     installs the suite to '%LOCALAPPDATA%\Programs\ExcelProductivitySuite',
+     and configures Excel.
+   - After installation, you can safely delete the extracted folder.
+
+Method 2: In-Place / Portable Installation
+   - Place this folder in your desired permanent location (e.g. C:\Tools\ExcelProductivitySuite).
+   - Double-click 'install.cmd'.
+   - The add-in will be registered directly from this folder.
 
 VERIFY INSTALLATION:
-Double-click 'diagnostics.cmd' or run '.\diagnostics.ps1'.
+   - Double-click 'diagnostics.cmd'.
+   - All items should show PASSED.
+   - Open Microsoft Excel. You will see two new ribbon tabs:
+     [Excel Productivity] and [Workbook & Sheets].
+   - Press Ctrl+Shift+P anytime inside Excel to open the Quick Tool Launcher (SuperSearch).
 
 UNINSTALL:
-Double-click 'uninstall.cmd' or run '.\uninstall.ps1'.
+   - Double-click 'uninstall.cmd' to cleanly unregister the add-in from Excel.
 
-CODE SIGNING NOTE:
-This release package is signed with the internal developer certificate
-(Thumbprint: 74F1C194A7C449209F1795774588A5D07C4375D6). For enterprise
-production deployments, replace with your organization's Authenticode CA.
+TROUBLESHOOTING:
+   - If Excel was already open during installation, close and reopen Excel.
+   - If Excel shows a disabled items prompt, run 'diagnostics.cmd' to automatically detect
+     and clear any disabled flags.
+========================================================================
 "@
 Set-Content -Path (Join-Path $stageDir "README.txt") -Value $readmeContent
 

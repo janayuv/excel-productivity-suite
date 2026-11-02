@@ -45,7 +45,9 @@ namespace ExcelProductivitySuite.UI.Dialogs
             }
             else if (DelimiterRadio?.IsChecked == true)
             {
-                bool isBefore = (DelimModeComboBox?.SelectedItem as ComboBoxItem)?.Tag?.ToString() == "Before";
+                string tag = (DelimModeComboBox?.SelectedItem as ComboBoxItem)?.Tag?.ToString()
+                    ?? (DelimModeComboBox?.SelectedIndex == 0 ? "Before" : "After");
+                bool isBefore = string.Equals(tag, "Before", StringComparison.OrdinalIgnoreCase);
                 options.Mode = isBefore ? PositionRemovalMode.BeforeDelimiter : PositionRemovalMode.AfterDelimiter;
                 options.Delimiter = DelimiterTextBox?.Text ?? "-";
             }
@@ -70,7 +72,7 @@ namespace ExcelProductivitySuite.UI.Dialogs
 
         private void UpdatePreview()
         {
-            if (PreviewTable == null) return;
+            if (PreviewTable == null || _sampleOriginals == null) return;
 
             var options = GetOptions();
             var previews = new List<PreviewItem>();
@@ -99,46 +101,86 @@ namespace ExcelProductivitySuite.UI.Dialogs
                 return;
             }
 
+            var options = GetOptions();
+            int affected = 0;
+
             if (_context.IsMultiAreaSelection)
             {
-                _context.ShowMessage("Please select a single contiguous range of cells to modify.", "Multi-Area Selection", isError: true);
+                var areas = _context.GetMultiAreaSelectedValues();
+                if (areas == null || areas.Count == 0)
+                {
+                    _context.ShowMessage("No cells selected.", "Remove Characters", isError: true);
+                    return;
+                }
+
+                var updatedAreas = new List<object?[,]>();
+                foreach (var matrix in areas)
+                {
+                    if (matrix == null) continue;
+                    int rStart = matrix.GetLowerBound(0);
+                    int rEnd = matrix.GetUpperBound(0);
+                    int cStart = matrix.GetLowerBound(1);
+                    int cEnd = matrix.GetUpperBound(1);
+
+                    var updated = (object?[,])matrix.Clone();
+                    for (int r = rStart; r <= rEnd; r++)
+                    {
+                        for (int c = cStart; c <= cEnd; c++)
+                        {
+                            var val = matrix[r, c];
+                            if (val != null)
+                            {
+                                string str = val.ToString() ?? "";
+                                if (!string.IsNullOrEmpty(str))
+                                {
+                                    updated[r, c] = PositionRemover.Remove(str, options);
+                                    affected++;
+                                }
+                            }
+                        }
+                    }
+                    updatedAreas.Add(updated);
+                }
+
+                _context.SetMultiAreaSelectedValues(updatedAreas);
+                DialogResult = true;
+                Close();
+                _context.ShowMessage($"Removed characters by position in {affected} cells across {updatedAreas.Count} areas.", "Remove Characters");
                 return;
             }
 
-            var matrix = _context.GetSelectedValues();
-            if (matrix == null)
+            var singleMatrix = _context.GetSelectedValues();
+            if (singleMatrix == null)
             {
                 _context.ShowMessage("No cells selected.", "Remove Characters", isError: true);
                 return;
             }
 
-            var options = GetOptions();
-            int rStart = matrix.GetLowerBound(0);
-            int rEnd = matrix.GetUpperBound(0);
-            int cStart = matrix.GetLowerBound(1);
-            int cEnd = matrix.GetUpperBound(1);
+            int sRStart = singleMatrix.GetLowerBound(0);
+            int sREnd = singleMatrix.GetUpperBound(0);
+            int sCStart = singleMatrix.GetLowerBound(1);
+            int sCEnd = singleMatrix.GetUpperBound(1);
 
-            int affected = 0;
-            var updated = (object?[,])matrix.Clone();
+            var sUpdated = (object?[,])singleMatrix.Clone();
 
-            for (int r = rStart; r <= rEnd; r++)
+            for (int r = sRStart; r <= sREnd; r++)
             {
-                for (int c = cStart; c <= cEnd; c++)
+                for (int c = sCStart; c <= sCEnd; c++)
                 {
-                    var val = matrix[r, c];
+                    var val = singleMatrix[r, c];
                     if (val != null)
                     {
                         string str = val.ToString() ?? "";
                         if (!string.IsNullOrEmpty(str))
                         {
-                            updated[r, c] = PositionRemover.Remove(str, options);
+                            sUpdated[r, c] = PositionRemover.Remove(str, options);
                             affected++;
                         }
                     }
                 }
             }
 
-            _context.SetSelectedValues(updated);
+            _context.SetSelectedValues(sUpdated);
             DialogResult = true;
             Close();
             _context.ShowMessage($"Removed characters by position in {affected} cells.", "Remove Characters");

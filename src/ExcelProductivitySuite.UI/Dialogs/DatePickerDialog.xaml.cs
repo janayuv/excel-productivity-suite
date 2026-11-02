@@ -29,6 +29,7 @@ namespace ExcelProductivitySuite.UI.Dialogs
 
         private void UpdatePreview()
         {
+            if (PreviewText == null || CustomFormatBox == null) return;
             string pattern = CustomFormatBox.Text.Trim();
             if (string.IsNullOrEmpty(pattern)) pattern = "yyyy-MM-dd";
 

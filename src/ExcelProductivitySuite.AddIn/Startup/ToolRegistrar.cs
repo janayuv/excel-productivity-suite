@@ -264,6 +264,42 @@ namespace ExcelProductivitySuite.AddIn.Startup
                 roadmapBatch: "Batch 2"
             ));
 
+            // Extract Numbers - Module A: Text Tools (Batch 13)
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_TEXT_EXTRACT_NUMBERS",
+                title: "Extract Numbers",
+                description: "Isolate numeric values, decimals, integers, or sum from alphanumeric cells.",
+                category: CommandCategory.TextTools,
+                executeAction: ctx =>
+                {
+                    var dlg = new ExtractNumbersDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "extract numbers", "strip letters", "digits only", "isolate numbers", "extract integers" },
+                officeIconName: "Cut",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "A",
+                roadmapBatch: "Batch 13"
+            ));
+
+            // Extract Emails - Module A: Text Tools (Batch 13)
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_TEXT_EXTRACT_EMAILS",
+                title: "Extract Emails",
+                description: "Locate and extract email addresses from free-form cell text into selected cells.",
+                category: CommandCategory.TextTools,
+                executeAction: ctx =>
+                {
+                    var dlg = new ExtractEmailsDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "extract email", "find email", "isolate emails", "parse email address" },
+                officeIconName: "MailMergeSendEmail",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "A",
+                roadmapBatch: "Batch 13"
+            ));
+
             // 8. Fill Blank Cells - Module B: Range and Cell Operations
             registry.RegisterCommand(new SuiteCommand(
                 id: "CMD_RANGE_FILL_BLANKS",
@@ -282,7 +318,43 @@ namespace ExcelProductivitySuite.AddIn.Startup
                 roadmapBatch: "Active"
             ));
 
+            // Insert Sequence Number - Module B: Range and Cell Operations
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_RANGE_INSERT_SEQUENCE_NUMBER",
+                title: "Insert Sequence Number",
+                description: "Quickly create, customize, and insert unique sequential numbers, prefixes, suffixes, leading zeros, and repeated sequences across cells or merged ranges.",
+                category: CommandCategory.RangeAndCells,
+                executeAction: ctx =>
+                {
+                    var dlg = new InsertSequenceNumberDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "insert sequence number", "sequential numbers", "serial numbers", "fill sequence", "sequence numbers", "auto numbering", "invoice number" },
+                officeIconName: "NumberingInsertGallery",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "B",
+                roadmapBatch: "Batch 14"
+            ));
+
             // Batch 3 - Module B: Range and Cell Operations Expansion
+            // Transform Range
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_RANGE_TRANSFORM",
+                title: "Transform Range",
+                description: "Reshape single columns or rows to multi-column tables, or flatten tabular ranges into a single column or row with custom delimiters.",
+                category: CommandCategory.RangeAndCells,
+                executeAction: ctx =>
+                {
+                    var dlg = new TransformRangeDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "transform range", "column to row", "row to column", "flatten", "unpivot", "reshape table", "matrix", "single column to range", "range to single column" },
+                officeIconName: "TableCustom",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "B",
+                roadmapBatch: "Batch 14"
+            ));
+
             // Transpose Range
             registry.RegisterCommand(new SuiteCommand(
                 id: "CMD_RANGE_TRANSPOSE",
@@ -950,14 +1022,14 @@ namespace ExcelProductivitySuite.AddIn.Startup
             registry.RegisterCommand(new SuiteCommand(
                 id: "CMD_FILE_EXPORT_SHEETS_PDF",
                 title: "Export to PDF",
-                description: "Publish worksheets or entire active workbook as high-resolution PDF documents.",
+                description: "Publish active sheet, selection, selected sheets, or entire workbook to PDF with full page layout, fit-to-page, paper size, and separate file options.",
                 category: CommandCategory.ImportExportAndFiles,
                 executeAction: ctx =>
                 {
                     var dlg = new ExportSheetsPdfDialog(ctx);
                     dlg.ShowModal(ctx);
                 },
-                keywords: new[] { "export pdf", "save as pdf", "batch pdf export", "convert sheets to pdf" },
+                keywords: new[] { "export pdf", "save as pdf", "batch pdf export", "convert sheets to pdf", "export range to pdf", "selection to pdf", "fit to page pdf", "separate pdf files" },
                 officeIconName: "FileSaveAsPdfOrXps",
                 status: FeatureStatus.ImplementedAndVerified,
                 moduleCode: "I",
@@ -1652,6 +1724,285 @@ namespace ExcelProductivitySuite.AddIn.Startup
                 status: FeatureStatus.ImplementedAndVerified,
                 moduleCode: "D",
                 roadmapBatch: "Batch 5"
+            ));
+
+            // Sequentially Named Sheets - Module D (Batch 13)
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_SHEET_SEQUENCE_NAMES",
+                title: "Sequence Sheets",
+                description: "Generate a series of new worksheets with sequential names (e.g. Month_01 to Month_12, Quarters, numbers).",
+                category: CommandCategory.WorksheetAndWorkbook,
+                executeAction: ctx =>
+                {
+                    var dlg = new SequenceSheetsDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "sequential sheets", "create multiple sheets", "numbered sheets", "batch add sheets" },
+                officeIconName: "SheetInsert",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "D",
+                roadmapBatch: "Batch 13"
+            ));
+
+            // Open Containing Folder - Module D (Batch 13)
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_WB_OPEN_FOLDER",
+                title: "Open Folder",
+                description: "Open the Windows File Explorer folder containing the active workbook with the file selected.",
+                category: CommandCategory.WorksheetAndWorkbook,
+                executeAction: ctx =>
+                {
+                    string? path = ctx.ActiveWorkbookPath;
+                    if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path))
+                    {
+                        ctx.ShowMessage("The active workbook has not been saved yet or does not exist on disk.", "Open Folder", isError: true);
+                        return;
+                    }
+                    try
+                    {
+                        System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{path}\"");
+                    }
+                    catch (Exception ex)
+                    {
+                        ctx.ShowMessage($"Could not open folder: {ex.Message}", "Error", isError: true);
+                    }
+                },
+                keywords: new[] { "open folder", "containing folder", "explore directory", "reveal in explorer" },
+                officeIconName: "FileOpen",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "D",
+                roadmapBatch: "Batch 13"
+            ));
+
+            // Copy Workbook Path - Module D (Batch 13)
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_WB_COPY_PATH",
+                title: "Copy Path",
+                description: "Copy the full file system path of the active workbook to the Windows clipboard.",
+                category: CommandCategory.WorksheetAndWorkbook,
+                executeAction: ctx =>
+                {
+                    string? path = ctx.ActiveWorkbookPath;
+                    if (string.IsNullOrEmpty(path))
+                    {
+                        ctx.ShowMessage("The active workbook has not been saved yet.", "Copy Path", isError: true);
+                        return;
+                    }
+                    try
+                    {
+                        System.Windows.Clipboard.SetText(path);
+                        ctx.ShowMessage($"Copied workbook path to clipboard:\n\n{path}", "Workbook Path Copied");
+                    }
+                    catch (Exception ex)
+                    {
+                        ctx.ShowMessage($"Could not copy path: {ex.Message}", "Clipboard Error", isError: true);
+                    }
+                },
+                keywords: new[] { "copy path", "copy file location", "workbook address", "clipboard path" },
+                officeIconName: "Copy",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "D",
+                roadmapBatch: "Batch 13"
+            ));
+
+            // Workbook Extended Properties - Module D (Batch 13)
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_WB_PROPERTIES",
+                title: "Workbook Properties",
+                description: "View file size, creation timestamp, author, sheets count, and COM metadata.",
+                category: CommandCategory.WorksheetAndWorkbook,
+                executeAction: ctx =>
+                {
+                    var dlg = new WorkbookPropertiesDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "workbook properties", "file info", "stats", "sheet count", "document metadata" },
+                officeIconName: "Info",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "D",
+                roadmapBatch: "Batch 13"
+            ));
+
+            // =========================================================================
+            // Batch 14: Missing Features & Functions Expansion (Kutools Alignment)
+            // =========================================================================
+
+            // Extract URLs & Hyperlinks - Module A (Batch 14)
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_TEXT_EXTRACT_URLS",
+                title: "Extract URLs",
+                description: "Extract web URLs, domain links, and embedded hyperlinks from cell contents.",
+                category: CommandCategory.TextTools,
+                executeAction: ctx =>
+                {
+                    var dlg = new ExtractUrlsDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "extract url", "find links", "parse websites", "http extract", "hyperlinks" },
+                officeIconName: "HyperlinkInsert",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "A",
+                roadmapBatch: "Batch 14"
+            ));
+
+            // Batch Replace Strings - Module A (Batch 14)
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_TEXT_BATCH_REPLACE",
+                title: "Batch Replace",
+                description: "Execute multiple find-and-replace rules simultaneously in a single unified pass.",
+                category: CommandCategory.TextTools,
+                executeAction: ctx =>
+                {
+                    var dlg = new BatchReplaceDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "batch replace", "multi replace", "bulk replace", "substitute strings", "find replace rules" },
+                officeIconName: "ReplaceDialog",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "A",
+                roadmapBatch: "Batch 14"
+            ));
+
+            // Value Frequency Distribution - Module E (Batch 14)
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_DATA_FREQUENCY_STATS",
+                title: "Frequency Distribution",
+                description: "Generate occurrence frequency, percentage, and cumulative distribution statistics.",
+                category: CommandCategory.DataAndFiltering,
+                executeAction: ctx =>
+                {
+                    var dlg = new FrequencyDistributionDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "frequency distribution", "value count", "histogram table", "occurrence stats", "cumulative percent" },
+                officeIconName: "FunctionsStatisticalInsertGallery",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "E",
+                roadmapBatch: "Batch 14"
+            ));
+
+            // Clear Data Validation - Module F (Batch 14)
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_VALIDATION_BULK_REMOVE",
+                title: "Clear Validation",
+                description: "Clear data validation rules, dropdown arrows, and restrictions across selection or sheets.",
+                category: CommandCategory.DataValidation,
+                executeAction: ctx =>
+                {
+                    var dlg = new ClearValidationDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "clear validation", "remove dropdowns", "delete validation rules", "reset validation" },
+                officeIconName: "Delete",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "F",
+                roadmapBatch: "Batch 14"
+            ));
+
+            // Adjust Row Height - Module H (Batch 14)
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_FORMAT_ROW_HEIGHT",
+                title: "Adjust Row Height",
+                description: "Set uniform row heights in points, inches, or centimeters, or apply smart auto-fit.",
+                category: CommandCategory.FormattingAndDesign,
+                executeAction: ctx =>
+                {
+                    var dlg = new AdjustCellSizeDialog(ctx, focusRowHeight: true);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "row height", "uniform rows", "auto fit row", "standardize height", "cell size" },
+                officeIconName: "TableRowsInsertAbove",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "H",
+                roadmapBatch: "Batch 14"
+            ));
+
+            // Adjust Column Width - Module H (Batch 14)
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_FORMAT_COL_WIDTH",
+                title: "Adjust Column Width",
+                description: "Set uniform column widths in points, inches, or centimeters, or apply auto-fit.",
+                category: CommandCategory.FormattingAndDesign,
+                executeAction: ctx =>
+                {
+                    var dlg = new AdjustCellSizeDialog(ctx, focusColWidth: true);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "column width", "uniform columns", "auto fit columns", "standardize width" },
+                officeIconName: "TableColumnsInsertLeft",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "H",
+                roadmapBatch: "Batch 14"
+            ));
+
+            // Create Dropdown List - Module F (Batch 14)
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_VALIDATION_CREATE_DROPDOWN",
+                title: "Create Dropdown List",
+                description: "Create in-cell dropdown list validation from custom items or cell range references.",
+                category: CommandCategory.DataValidation,
+                executeAction: ctx =>
+                {
+                    var dlg = new CreateDropdownDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "create dropdown", "data validation list", "cell dropdown", "combo list", "dropdown arrow" },
+                officeIconName: "DataValidation",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "F",
+                roadmapBatch: "Batch 14"
+            ));
+
+            // Column Differences - Module C (Batch 14)
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_SELECT_COLUMN_DIFFERENCES",
+                title: "Column Differences",
+                description: "Compare each cell in a column against the baseline row in that column and select mismatches.",
+                category: CommandCategory.FindSelectCompare,
+                executeAction: ctx =>
+                {
+                    var dlg = new RowDifferencesDialog(ctx, defaultToColumnDifferences: true);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "column differences", "select column differences", "compare column cells", "mismatch cells" },
+                officeIconName: "ConditionalFormattingHighlightCells",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "C",
+                roadmapBatch: "Batch 14"
+            ));
+
+            // Suite Undo - General (Batch 14)
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_SUITE_UNDO",
+                title: "Undo Suite Action",
+                description: "Revert the most recent cell, text, or range operation performed by Excel Productivity Suite (Ctrl+Z).",
+                category: CommandCategory.General,
+                executeAction: ctx =>
+                {
+                    ctx.UndoLastAction();
+                },
+                keywords: new[] { "undo", "ctrl+z", "revert suite action", "rollback", "undo last command" },
+                officeIconName: "Undo",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "General",
+                roadmapBatch: "Batch 14"
+            ));
+
+            // Suite Redo - General (Batch 14)
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_SUITE_REDO",
+                title: "Redo Suite Action",
+                description: "Re-apply the most recent undone Excel Productivity Suite operation (Ctrl+Y).",
+                category: CommandCategory.General,
+                executeAction: ctx =>
+                {
+                    ctx.RedoLastAction();
+                },
+                keywords: new[] { "redo", "ctrl+y", "repeat suite action", "reapply", "redo last command" },
+                officeIconName: "Redo",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "General",
+                roadmapBatch: "Batch 14"
             ));
 
             // 20. About Dialog - General / Information

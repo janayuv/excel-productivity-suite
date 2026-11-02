@@ -1,0 +1,122 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.TransformRangeDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Transform Range - Excel Productivity Suite"
+        Height="700" Width="640"
+        MinHeight="600" MinWidth="580"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResizeWithGrip"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="▦" Foreground="White" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Transform Range" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Convert single column or row to range, or flatten multi-column range to single column or row" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Transform Type -->
+        <GroupBox Grid.Row="1" Header="Transform Type" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,0,0,8">
+            <Grid Margin="4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <RadioButton x:Name="rbColToRange" Grid.Row="0" Grid.Column="0" Content="Single column to range" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,2,8,4" Checked="OnTypeChanged" />
+                <RadioButton x:Name="rbRowToRange" Grid.Row="0" Grid.Column="1" Content="Single row to range" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,2,0,4" Checked="OnTypeChanged" />
+                <RadioButton x:Name="rbRangeToCol" Grid.Row="1" Grid.Column="0" Content="Range to single column" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,2,8,2" Checked="OnTypeChanged" />
+                <RadioButton x:Name="rbRangeToRow" Grid.Row="1" Grid.Column="1" Content="Range to single row" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,2,0,2" Checked="OnTypeChanged" />
+            </Grid>
+        </GroupBox>
+
+        <!-- Rules / Options based on type -->
+        <GroupBox Grid.Row="2" Header="Transform Settings" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,0,0,8">
+            <StackPanel Margin="4">
+                <!-- Settings for List to Range -->
+                <StackPanel x:Name="panelListToRange" Visibility="Visible">
+                    <StackPanel Orientation="Horizontal" Margin="0,2,0,4">
+                        <RadioButton x:Name="rbFixedValue" GroupName="ListToRangeRule" Content="Fixed value (columns per record):" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,8,0" Checked="OnOptionChanged" />
+                        <TextBox x:Name="txtColumnsPerRecord" Width="70" Style="{StaticResource ModernTextBoxStyle}" Text="5" TextChanged="OnOptionChanged" />
+                    </StackPanel>
+                    <RadioButton x:Name="rbBlankDelimited" GroupName="ListToRangeRule" Content="Blank cell delimited records (splits into new row at empty cells)" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,2,0,0" Checked="OnOptionChanged" />
+                </StackPanel>
+
+                <!-- Settings for Range to List -->
+                <StackPanel x:Name="panelRangeToList" Visibility="Collapsed">
+                    <TextBlock Text="Traversal order:" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,4" />
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                        <RadioButton x:Name="rbOrderByRow" Content="Row by row (across rows)" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,16,0" Checked="OnOptionChanged" />
+                        <RadioButton x:Name="rbOrderByCol" Content="Column by column (down columns)" Style="{StaticResource ModernRadioButtonStyle}" Checked="OnOptionChanged" />
+                    </StackPanel>
+                    <CheckBox x:Name="chkSkipBlanks" Content="Skip blank cells" Style="{StaticResource ModernCheckBoxStyle}" Margin="0,2,0,0" Checked="OnOptionChanged" Unchecked="OnOptionChanged" />
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Destination & Placement -->
+        <GroupBox Grid.Row="3" Header="Destination &amp; Placement" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,0,0,8">
+            <StackPanel Margin="4">
+                <StackPanel Orientation="Horizontal" Margin="0,2,0,4">
+                    <RadioButton x:Name="rbTargetCell" GroupName="TransformPlacement" Content="Paste transformed at target cell:" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,8,0" Checked="OnOptionChanged" />
+                    <TextBox x:Name="txtTargetCell" Width="120" Style="{StaticResource ModernTextBoxStyle}" Text="$E$1" TextChanged="OnOptionChanged" />
+                </StackPanel>
+                <RadioButton x:Name="rbInPlace" GroupName="TransformPlacement" Content="Transform in-place (overwrites active selection starting at top-left cell)" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,2,0,4" Checked="OnOptionChanged" />
+                <StackPanel Orientation="Horizontal" Margin="0,2,0,4">
+                    <RadioButton x:Name="rbNewSheet" GroupName="TransformPlacement" Content="Transform into new worksheet:" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,8,0" Checked="OnOptionChanged" />
+                    <TextBox x:Name="txtSheetName" Width="140" Style="{StaticResource ModernTextBoxStyle}" Text="Transformed" TextChanged="OnOptionChanged" />
+                </StackPanel>
+                <TextBlock x:Name="DimensionInfoText" Text="Source Selection: 0 rows × 0 cols ➔ Transformed: 0 rows × 0 cols" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource BrandPrimaryBrush}" Margin="0,6,0,0" />
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Live Preview -->
+        <DockPanel Grid.Row="4" Margin="0,0,0,8">
+            <TextBlock DockPanel.Dock="Top" Text="Live Preview (First 10 Cells / Records):" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,4" />
+            <controls:LivePreviewTable x:Name="PreviewTable" />
+        </DockPanel>
+
+        <!-- Footer -->
+        <DockPanel Grid.Row="5" Margin="0,4,0,0">
+            <TextBlock Text="Safe in-memory batch processing with undo support" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Cancel" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,8,0" Click="CancelButton_Click" IsCancel="True" />
+                <Button Content="Transform" Style="{StaticResource PrimaryButtonStyle}" Click="ApplyButton_Click" IsDefault="True" />
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

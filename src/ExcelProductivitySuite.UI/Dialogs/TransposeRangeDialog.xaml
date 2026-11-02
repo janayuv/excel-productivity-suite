@@ -43,13 +43,13 @@
         <!-- Options -->
         <GroupBox Grid.Row="1" Header="Destination &amp; Placement" Style="{StaticResource ModernGroupBoxStyle}">
             <StackPanel>
-                <RadioButton x:Name="InPlaceRadio" Content="Transpose in-place (overwrites active selection starting at top-left cell)" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Checked="OptionChanged" />
+                <RadioButton x:Name="InPlaceRadio" GroupName="TransposePlacement" Content="Transpose in-place (overwrites active selection starting at top-left cell)" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Checked="OptionChanged" />
                 <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                    <RadioButton x:Name="TargetAddressRadio" Content="Paste transposed at target cell:" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,8,0" Checked="OptionChanged" />
+                    <RadioButton x:Name="TargetAddressRadio" GroupName="TransposePlacement" Content="Paste transposed at target cell:" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,8,0" Checked="OptionChanged" />
                     <TextBox x:Name="TargetAddressBox" Width="120" Style="{StaticResource ModernTextBoxStyle}" Text="$E$1" TextChanged="OptionChanged" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                    <RadioButton x:Name="NewSheetRadio" Content="Transpose into new worksheet:" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,8,0" Checked="OptionChanged" />
+                    <RadioButton x:Name="NewSheetRadio" GroupName="TransposePlacement" Content="Transpose into new worksheet:" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,8,0" Checked="OptionChanged" />
                     <TextBox x:Name="SheetNameBox" Width="140" Style="{StaticResource ModernTextBoxStyle}" Text="Transposed" TextChanged="OptionChanged" />
                 </StackPanel>
                 <TextBlock x:Name="DimensionInfoText" Text="Current Selection: 0 rows × 0 cols ➔ Transposed: 0 rows × 0 cols" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource BrandPrimaryBrush}" Margin="0,8,0,0" />

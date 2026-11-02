@@ -41,6 +41,7 @@ namespace ExcelProductivitySuite.UI.Dialogs
 
         private void UpdatePreview()
         {
+            if (PreviewOrderListBox == null) return;
             var mode = GetSortMode();
             _sortedSheets = SheetTabSorter.Sort(_originalSheets, mode);
             PreviewOrderListBox.ItemsSource = null;
