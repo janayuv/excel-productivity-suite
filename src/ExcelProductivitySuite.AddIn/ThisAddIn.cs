@@ -81,9 +81,22 @@ namespace ExcelProductivitySuite.AddIn
                 try
                 {
                     this.Application.WorkbookBeforeClose += Application_WorkbookBeforeClose;
+                    this.Application.SheetSelectionChange += Application_SheetSelectionChange;
                 }
                 catch { }
             }
+        }
+
+        private void Application_SheetSelectionChange(object sh, Microsoft.Office.Interop.Excel.Range target)
+        {
+            try
+            {
+                if (_context != null && _context.IsReadingViewActive)
+                {
+                    _context.UpdateReadingViewHighlight();
+                }
+            }
+            catch { }
         }
 
         private void Application_WorkbookBeforeClose(Microsoft.Office.Interop.Excel.Workbook wb, ref bool cancel)
@@ -103,6 +116,13 @@ namespace ExcelProductivitySuite.AddIn
             try
             {
                 this.Application.WorkbookBeforeClose -= Application_WorkbookBeforeClose;
+                this.Application.SheetSelectionChange -= Application_SheetSelectionChange;
+            }
+            catch { }
+
+            try
+            {
+                _context?.DisableReadingView();
             }
             catch { }
 

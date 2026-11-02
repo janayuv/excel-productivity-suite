@@ -602,13 +602,32 @@
                   screentip="Date Picker Insertion"
                   supertip="Select a calendar date and insert formatted text into the active cell cursor."
                   onAction="OnRibbonButtonClicked" />
-          <button id="btnGridFocus"
-                  label="Grid Focus"
-                  size="normal"
-                  imageMso="TableSelectRowAndColumn"
-                  screentip="Reading Grid Focus"
-                  supertip="Row &amp; column crosshair tracking assistant for effortlessly navigating wide tables."
-                  onAction="OnRibbonButtonClicked" />
+          <splitButton id="splitReadingView" size="normal">
+            <button id="btnReadingView"
+                    label="Reading View"
+                    imageMso="TableSelectRowAndColumn"
+                    screentip="Toggle Reading View (Reading Layout)"
+                    supertip="Automatically highlight the active cell's row and column in real-time as you navigate."
+                    onAction="OnRibbonButtonClicked" />
+            <menu id="menuReadingView" itemSize="normal">
+              <button id="btnReadingViewToggle"
+                      label="Toggle Reading View (On / Off)"
+                      imageMso="TableSelectRowAndColumn"
+                      screentip="Toggle Live Highlighting"
+                      onAction="OnRibbonButtonClicked" />
+              <button id="btnReadingViewSettings"
+                      label="Reading View Settings..."
+                      imageMso="AppointmentColorDialog"
+                      screentip="Configure Colors &amp; Transparency"
+                      supertip="Change highlight shape (crosshair, row only, column only), color swatches, and opacity."
+                      onAction="OnRibbonButtonClicked" />
+              <button id="btnGridFocus"
+                      label="Reading Grid Focus HUD..."
+                      imageMso="TableSelectRowAndColumn"
+                      screentip="Active Cell Coordinate Inspector"
+                      onAction="OnRibbonButtonClicked" />
+            </menu>
+          </splitButton>
           <button id="btnDataEntryForm"
                   label="Data Form"
                   size="normal"

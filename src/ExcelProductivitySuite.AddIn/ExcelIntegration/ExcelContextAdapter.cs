@@ -10,6 +10,7 @@ using ExcelProductivitySuite.Engine.Formulas;
 using ExcelProductivitySuite.Engine.Navigation;
 using ExcelProductivitySuite.Engine.Ranges;
 using Excel = Microsoft.Office.Interop.Excel;
+using Office = Microsoft.Office.Core;
 
 namespace ExcelProductivitySuite.AddIn.ExcelIntegration
 {
@@ -22,6 +23,17 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
         public IUndoManager UndoManager => _undoManager;
         public Action? NavigationPaneToggleAction { get; set; }
         private string? _previousActiveSheetName;
+
+        private ReadingViewSettings _readingViewSettings = ReadingLayoutEngine.LoadSettings();
+        private bool _isReadingViewActive = false;
+
+        public ReadingViewSettings ReadingViewSettings
+        {
+            get => _readingViewSettings;
+            set => _readingViewSettings = value ?? ReadingViewSettings.CreateDefault();
+        }
+
+        public bool IsReadingViewActive => _isReadingViewActive;
 
         public ExcelContextAdapter(Excel.Application app, IUndoManager? undoManager = null)
         {
@@ -1422,6 +1434,188 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
             {
                 ShowMessage($"Could not display Navigation Pane: {ex.Message}", "Navigation Pane Error", isError: true);
             }
+        }
+
+        public void EnableReadingView(ReadingViewSettings? settings = null)
+        {
+            if (settings != null)
+            {
+                _readingViewSettings = settings.Clone();
+            }
+            _readingViewSettings.IsEnabled = true;
+            _isReadingViewActive = true;
+            ReadingLayoutEngine.SaveSettings(_readingViewSettings);
+            UpdateReadingViewHighlight();
+        }
+
+        public void DisableReadingView()
+        {
+            _isReadingViewActive = false;
+            _readingViewSettings.IsEnabled = false;
+            ReadingLayoutEngine.SaveSettings(_readingViewSettings);
+            try
+            {
+                if (HasActiveWorksheet && _app.ActiveSheet is Excel.Worksheet ws)
+                {
+                    RemoveReadingViewShapes(ws);
+                }
+            }
+            catch { }
+        }
+
+        public void ToggleReadingView()
+        {
+            if (_isReadingViewActive)
+            {
+                DisableReadingView();
+            }
+            else
+            {
+                EnableReadingView();
+            }
+        }
+
+        private void RemoveReadingViewShapes(Excel.Worksheet ws)
+        {
+            try
+            {
+                string[] names = { ReadingLayoutEngine.ShapeNameRow, ReadingLayoutEngine.ShapeNameCol, ReadingLayoutEngine.ShapeNameCell };
+                foreach (var name in names)
+                {
+                    try
+                    {
+                        var shape = ws.Shapes.Item(name);
+                        if (shape != null)
+                        {
+                            shape.Delete();
+                        }
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+        }
+
+        public void UpdateReadingViewHighlight()
+        {
+            if (!_isReadingViewActive || !HasActiveWorksheet) return;
+
+            try
+            {
+                var ws = (Excel.Worksheet)_app.ActiveSheet;
+                var cell = _app.ActiveCell;
+                if (cell == null) return;
+
+                double cellLeft = Convert.ToDouble(cell.Left);
+                double cellTop = Convert.ToDouble(cell.Top);
+                double cellWidth = Convert.ToDouble(cell.Width);
+                double cellHeight = Convert.ToDouble(cell.Height);
+
+                double maxLeft = 0;
+                double maxTop = 0;
+                double maxWidth = 3000;
+                double maxHeight = 30000;
+
+                if (_readingViewSettings.Scope == ReadingHighlightScope.UsedRangeOnly)
+                {
+                    try
+                    {
+                        var ur = ws.UsedRange;
+                        if (ur != null)
+                        {
+                            maxLeft = Convert.ToDouble(ur.Left);
+                            maxTop = Convert.ToDouble(ur.Top);
+                            maxWidth = Convert.ToDouble(ur.Width);
+                            maxHeight = Convert.ToDouble(ur.Height);
+                        }
+                    }
+                    catch { }
+                }
+
+                var geo = ReadingLayoutEngine.CalculateGeometry(
+                    cellLeft, cellTop, cellWidth, cellHeight,
+                    maxLeft, maxTop, maxWidth, maxHeight,
+                    _readingViewSettings);
+
+                // Remove existing shapes
+                RemoveReadingViewShapes(ws);
+
+                int colorRgb = _readingViewSettings.ColorRgb;
+                float transparency = (float)Math.Max(0.0, Math.Min(1.0, _readingViewSettings.Transparency));
+
+                // 1. Row Shape
+                if (geo.HasRow)
+                {
+                    try
+                    {
+                        var rowShape = ws.Shapes.AddShape(
+                            Office.MsoAutoShapeType.msoShapeRectangle,
+                            (float)geo.RowLeft, (float)geo.RowTop, (float)geo.RowWidth, (float)geo.RowHeight);
+                        rowShape.Name = ReadingLayoutEngine.ShapeNameRow;
+                        rowShape.Placement = Excel.XlPlacement.xlFreeFloating;
+                        rowShape.Fill.Solid();
+                        rowShape.Fill.ForeColor.RGB = colorRgb;
+                        rowShape.Fill.Transparency = transparency;
+                        if (_readingViewSettings.BorderEnabled)
+                        {
+                            rowShape.Line.Visible = Office.MsoTriState.msoTrue;
+                            rowShape.Line.ForeColor.RGB = _readingViewSettings.BorderColorRgb;
+                            rowShape.Line.Weight = 1.0f;
+                        }
+                        else
+                        {
+                            rowShape.Line.Visible = Office.MsoTriState.msoFalse;
+                        }
+                    }
+                    catch { }
+                }
+
+                // 2. Column Shape
+                if (geo.HasColumn)
+                {
+                    try
+                    {
+                        var colShape = ws.Shapes.AddShape(
+                            Office.MsoAutoShapeType.msoShapeRectangle,
+                            (float)geo.ColLeft, (float)geo.ColTop, (float)geo.ColWidth, (float)geo.ColHeight);
+                        colShape.Name = ReadingLayoutEngine.ShapeNameCol;
+                        colShape.Placement = Excel.XlPlacement.xlFreeFloating;
+                        colShape.Fill.Solid();
+                        colShape.Fill.ForeColor.RGB = colorRgb;
+                        colShape.Fill.Transparency = transparency;
+                        if (_readingViewSettings.BorderEnabled)
+                        {
+                            colShape.Line.Visible = Office.MsoTriState.msoTrue;
+                            colShape.Line.ForeColor.RGB = _readingViewSettings.BorderColorRgb;
+                            colShape.Line.Weight = 1.0f;
+                        }
+                        else
+                        {
+                            colShape.Line.Visible = Office.MsoTriState.msoFalse;
+                        }
+                    }
+                    catch { }
+                }
+
+                // 3. Active Cell Focus Border
+                if (geo.HasCell && _readingViewSettings.BorderEnabled)
+                {
+                    try
+                    {
+                        var cellShape = ws.Shapes.AddShape(
+                            Office.MsoAutoShapeType.msoShapeRectangle,
+                            (float)geo.CellLeft, (float)geo.CellTop, (float)geo.CellWidth, (float)geo.CellHeight);
+                        cellShape.Name = ReadingLayoutEngine.ShapeNameCell;
+                        cellShape.Placement = Excel.XlPlacement.xlFreeFloating;
+                        cellShape.Fill.Visible = Office.MsoTriState.msoFalse;
+                        cellShape.Line.Visible = Office.MsoTriState.msoTrue;
+                        cellShape.Line.ForeColor.RGB = _readingViewSettings.BorderColorRgb;
+                        cellShape.Line.Weight = 2.0f;
+                    }
+                    catch { }
+                }
+            }
+            catch { }
         }
 
         public object?[,]? GetActiveWorksheetRangeValues(string sheetName, string? rangeAddress = null)

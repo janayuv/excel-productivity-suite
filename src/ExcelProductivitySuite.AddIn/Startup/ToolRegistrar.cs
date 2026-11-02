@@ -1317,6 +1317,41 @@ namespace ExcelProductivitySuite.AddIn.Startup
                 roadmapBatch: "Batch 10"
             ));
 
+            // Reading View (Reading Layout) Toggle
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_NAV_READING_VIEW_TOGGLE",
+                title: "Reading View (Reading Layout)",
+                description: "Toggle live row & column crosshair highlighting as you navigate cells in the worksheet.",
+                category: CommandCategory.NavigationAndProductivity,
+                executeAction: ctx =>
+                {
+                    ctx.ToggleReadingView();
+                },
+                keywords: new[] { "reading view", "reading layout", "crosshair", "highlight row column", "active cell tracking", "grid focus" },
+                officeIconName: "TableSelectRowAndColumn",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "L",
+                roadmapBatch: "Batch 10+"
+            ));
+
+            // Reading View Settings Dialog
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_NAV_READING_VIEW_SETTINGS",
+                title: "Reading View Settings",
+                description: "Configure Reading View highlight shape (crosshair, row only, column only), color palette, and transparency.",
+                category: CommandCategory.NavigationAndProductivity,
+                executeAction: ctx =>
+                {
+                    var dlg = new ReadingViewSettingsDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "reading view settings", "reading layout settings", "crosshair color", "highlight options", "transparency" },
+                officeIconName: "AppointmentColorDialog",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "L",
+                roadmapBatch: "Batch 10+"
+            ));
+
             // Table Data Entry Form
             registry.RegisterCommand(new SuiteCommand(
                 id: "CMD_NAV_DATA_ENTRY_FORM",

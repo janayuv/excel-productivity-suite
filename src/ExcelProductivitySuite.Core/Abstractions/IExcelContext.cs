@@ -268,6 +268,36 @@ namespace ExcelProductivitySuite.Core.Abstractions
         void ShowNavigationPane();
 
         /// <summary>
+        /// Gets or sets the active Reading View / Layout configuration settings.
+        /// </summary>
+        ReadingViewSettings ReadingViewSettings { get; set; }
+
+        /// <summary>
+        /// Gets whether the live Reading View crosshair highlighter is currently active.
+        /// </summary>
+        bool IsReadingViewActive { get; }
+
+        /// <summary>
+        /// Toggles Reading View live crosshair highlight on or off.
+        /// </summary>
+        void ToggleReadingView();
+
+        /// <summary>
+        /// Enables live Reading View crosshair highlighting.
+        /// </summary>
+        void EnableReadingView(ReadingViewSettings? settings = null);
+
+        /// <summary>
+        /// Disables live Reading View crosshair highlighting and removes all overlay shapes.
+        /// </summary>
+        void DisableReadingView();
+
+        /// <summary>
+        /// Updates the Reading View crosshair highlight overlay to match the active cell position.
+        /// </summary>
+        void UpdateReadingViewHighlight();
+
+        /// <summary>
         /// Selects disparate individual cells on the active worksheet.
         /// </summary>
         void SelectCells(IEnumerable<(int row, int col)> cells);

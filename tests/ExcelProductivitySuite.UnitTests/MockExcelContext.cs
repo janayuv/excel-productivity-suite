@@ -370,6 +370,38 @@ namespace ExcelProductivitySuite.UnitTests
             NavigationPaneShown = true;
         }
 
+        public ReadingViewSettings ReadingViewSettings { get; set; } = ReadingViewSettings.CreateDefault();
+        public bool IsReadingViewActive { get; set; } = false;
+        public int ReadingViewHighlightUpdateCount { get; set; } = 0;
+
+        public void ToggleReadingView()
+        {
+            IsReadingViewActive = !IsReadingViewActive;
+            ReadingViewSettings.IsEnabled = IsReadingViewActive;
+        }
+
+        public void EnableReadingView(ReadingViewSettings? settings = null)
+        {
+            if (settings != null)
+            {
+                ReadingViewSettings = settings;
+            }
+            IsReadingViewActive = true;
+            ReadingViewSettings.IsEnabled = true;
+            UpdateReadingViewHighlight();
+        }
+
+        public void DisableReadingView()
+        {
+            IsReadingViewActive = false;
+            ReadingViewSettings.IsEnabled = false;
+        }
+
+        public void UpdateReadingViewHighlight()
+        {
+            ReadingViewHighlightUpdateCount++;
+        }
+
         public IReadOnlyList<string> GetBlankWorksheetNames() => BlankSheets;
 
         public int DeleteWorksheets(IEnumerable<string> sheetNames)
