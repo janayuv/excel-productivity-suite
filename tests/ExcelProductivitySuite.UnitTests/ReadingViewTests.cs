@@ -158,5 +158,27 @@ namespace ExcelProductivitySuite.UnitTests
             ctx.DisableReadingView();
             Assert.IsFalse(ctx.IsReadingViewActive);
         }
+
+        [TestMethod]
+        public void MockExcelContext_GridFocus_AliasesWorkEqually()
+        {
+            var ctx = new MockExcelContext();
+
+            Assert.IsFalse(ctx.IsGridFocusActive);
+
+            ctx.EnableGridFocus();
+            Assert.IsTrue(ctx.IsGridFocusActive);
+            Assert.IsTrue(ctx.IsReadingViewActive);
+
+            ctx.ToggleGridFocus();
+            Assert.IsFalse(ctx.IsGridFocusActive);
+            Assert.IsFalse(ctx.IsReadingViewActive);
+
+            ctx.ToggleGridFocus();
+            Assert.IsTrue(ctx.IsGridFocusActive);
+
+            ctx.DisableGridFocus();
+            Assert.IsFalse(ctx.IsGridFocusActive);
+        }
     }
 }

@@ -1299,25 +1299,60 @@ namespace ExcelProductivitySuite.AddIn.Startup
                 roadmapBatch: "Batch 10"
             ));
 
-            // Reading Grid Focus Crosshair
+            // Grid Focus (Reading Layout) Primary Toggle
             registry.RegisterCommand(new SuiteCommand(
                 id: "CMD_NAV_GRID_FOCUS",
-                title: "Reading Grid Focus",
-                description: "Row & column crosshair tracking assistant for effortlessly navigating wide tables.",
+                title: "Grid Focus",
+                description: "Toggle live active row & column crosshair highlighting as you navigate cells in the worksheet (Reading Layout).",
                 category: CommandCategory.NavigationAndProductivity,
                 executeAction: ctx =>
                 {
-                    var dlg = new ReadingGridFocusDialog(ctx);
-                    dlg.ShowModal(ctx);
+                    ctx.ToggleReadingView();
                 },
-                keywords: new[] { "grid focus", "crosshair highlighting", "reading mode", "highlight active row", "table navigation" },
+                keywords: new[] { "grid focus", "reading view", "reading layout", "crosshair", "highlight active row", "highlight active column", "reading focus", "focus cell" },
                 officeIconName: "TableSelectRowAndColumn",
                 status: FeatureStatus.ImplementedAndVerified,
                 moduleCode: "L",
                 roadmapBatch: "Batch 10"
             ));
 
-            // Reading View (Reading Layout) Toggle
+            // Grid Focus Settings Dialog
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_NAV_GRID_FOCUS_SETTINGS",
+                title: "Grid Focus Settings",
+                description: "Configure Grid Focus highlight shape (crosshair, row only, column only), color palette, boundary scope, and transparency.",
+                category: CommandCategory.NavigationAndProductivity,
+                executeAction: ctx =>
+                {
+                    var dlg = new ReadingViewSettingsDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "grid focus settings", "reading layout settings", "crosshair color", "highlight options", "transparency", "reading view settings" },
+                officeIconName: "AppointmentColorDialog",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "L",
+                roadmapBatch: "Batch 10"
+            ));
+
+            // Grid Focus Coordinate Inspector HUD
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_NAV_GRID_FOCUS_INSPECTOR",
+                title: "Grid Focus Coordinate Inspector",
+                description: "Active cell coordinate HUD, column and row header inspector, and grid navigation assistant.",
+                category: CommandCategory.NavigationAndProductivity,
+                executeAction: ctx =>
+                {
+                    var dlg = new ReadingGridFocusDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "grid focus inspector", "coordinate hud", "cell address", "header inspector", "table navigation d-pad", "cell coordinates" },
+                officeIconName: "ZoomPrint",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "L",
+                roadmapBatch: "Batch 10"
+            ));
+
+            // Reading View (Reading Layout) Toggle Alias
             registry.RegisterCommand(new SuiteCommand(
                 id: "CMD_NAV_READING_VIEW_TOGGLE",
                 title: "Reading View (Reading Layout)",
@@ -1334,7 +1369,7 @@ namespace ExcelProductivitySuite.AddIn.Startup
                 roadmapBatch: "Batch 10+"
             ));
 
-            // Reading View Settings Dialog
+            // Reading View Settings Dialog Alias
             registry.RegisterCommand(new SuiteCommand(
                 id: "CMD_NAV_READING_VIEW_SETTINGS",
                 title: "Reading View Settings",

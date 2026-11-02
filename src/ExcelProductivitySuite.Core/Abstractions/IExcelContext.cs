@@ -278,9 +278,19 @@ namespace ExcelProductivitySuite.Core.Abstractions
         bool IsReadingViewActive { get; }
 
         /// <summary>
+        /// Gets whether Grid Focus (Reading Layout) crosshair highlighting is currently active.
+        /// </summary>
+        bool IsGridFocusActive { get; }
+
+        /// <summary>
         /// Toggles Reading View live crosshair highlight on or off.
         /// </summary>
         void ToggleReadingView();
+
+        /// <summary>
+        /// Toggles Grid Focus (Reading Layout) live crosshair highlight on or off.
+        /// </summary>
+        void ToggleGridFocus();
 
         /// <summary>
         /// Enables live Reading View crosshair highlighting.
@@ -288,9 +298,19 @@ namespace ExcelProductivitySuite.Core.Abstractions
         void EnableReadingView(ReadingViewSettings? settings = null);
 
         /// <summary>
+        /// Enables live Grid Focus (Reading Layout) crosshair highlighting.
+        /// </summary>
+        void EnableGridFocus(ReadingViewSettings? settings = null);
+
+        /// <summary>
         /// Disables live Reading View crosshair highlighting and removes all overlay shapes.
         /// </summary>
         void DisableReadingView();
+
+        /// <summary>
+        /// Disables live Grid Focus (Reading Layout) crosshair highlighting and removes all overlay shapes.
+        /// </summary>
+        void DisableGridFocus();
 
         /// <summary>
         /// Updates the Reading View crosshair highlight overlay to match the active cell position.

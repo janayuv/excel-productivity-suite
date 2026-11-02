@@ -34,6 +34,7 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
         }
 
         public bool IsReadingViewActive => _isReadingViewActive;
+        public bool IsGridFocusActive => _isReadingViewActive;
 
         public ExcelContextAdapter(Excel.Application app, IUndoManager? undoManager = null)
         {
@@ -1474,6 +1475,10 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
                 EnableReadingView();
             }
         }
+
+        public void EnableGridFocus(ReadingViewSettings? settings = null) => EnableReadingView(settings);
+        public void DisableGridFocus() => DisableReadingView();
+        public void ToggleGridFocus() => ToggleReadingView();
 
         private void RemoveReadingViewShapes(Excel.Worksheet ws)
         {

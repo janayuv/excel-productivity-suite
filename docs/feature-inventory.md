@@ -15,8 +15,8 @@ Following the comprehensive Undo/Redo hardening audit, the **Excel Productivity 
 
 The current implementation comprises:
 - **Total Cataloged Capabilities:** 200+ features planned across 12 modules
-- **Active & Verified Tools:** 110 commands (106 core productivity utilities + 4 suite navigation/system utilities)
-- **Unit Test Coverage:** 305 passing automated unit & performance tests (100% pass rate in 5.0s)
+- **Active & Verified Tools:** 112 commands (108 core productivity utilities + 4 suite navigation/system utilities)
+- **Unit Test Coverage:** 306 passing automated unit & performance tests (100% pass rate in 5.0s)
 - **Hardened Suite Undo/Redo Engine:** Real-time multi-level `Ctrl+Z` Undo and `Ctrl+Y` Redo for cell, text, range, formula, and data commands via thread-level Win32 keyboard hook and managed `UndoManager` with snapshot immutability, mixed formula preservation, multi-area / multi-workbook lifecycle isolation, 500,000-cell memory protection, and zero shortcut interference outside worksheet grid (`EXCEL7`).
 - **Real Excel COM Integration Tests:** 18 passing out-of-process Excel 2016+ scenarios (100% pass rate in 1.27s)
 - **Searchable Quick Tool Launcher (SuperSearch):** Integrated multi-category search, active/roadmap status filtering, module badges, and keyword scoring (`Ctrl+Shift+P` / KeyTip: `TL`)
@@ -129,9 +129,9 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 | `CMD_NAV_COLUMNS` | **Column Navigator** | L | Navigation & Productivity | `ExcelContextAdapter.cs`, `ColumnLetterConverter.cs` | `ColumnNavigatorDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
 | `CMD_NAV_CELL_PREVIEW` | **Cell Content Inspector** | L | Navigation & Productivity | `ExcelContextAdapter.cs` | `CellContentInspectorDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
 | `CMD_NAV_DATE_PICKER` | **Date Picker Insertion** | L | Navigation & Productivity | `DateFormatPresets.cs` | `DatePickerDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
-| `CMD_NAV_GRID_FOCUS` | **Reading Grid Focus** | L | Navigation & Productivity | `ExcelContextAdapter.cs` | `ReadingGridFocusDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
-| `CMD_NAV_READING_VIEW_TOGGLE` | **Reading View (Reading Layout)** | L | Navigation & Productivity | `ExcelContextAdapter.cs`, `ReadingLayoutEngine.cs` | SplitButton Toggle / Ribbon | `ReadingViewTests` | Implemented and verified |
-| `CMD_NAV_READING_VIEW_SETTINGS` | **Reading View Settings** | L | Navigation & Productivity | `ExcelContextAdapter.cs`, `ReadingLayoutEngine.cs` | `ReadingViewSettingsDialog.xaml` | `ReadingViewTests`, `DialogInstantiationTests` | Implemented and verified |
+| `CMD_NAV_GRID_FOCUS` | **Grid Focus (Reading Layout)** | L | Navigation & Productivity | `ExcelContextAdapter.cs`, `ReadingLayoutEngine.cs` | SplitButton Toggle / Ribbon | `ReadingViewTests` | Implemented and verified |
+| `CMD_NAV_GRID_FOCUS_SETTINGS` | **Grid Focus Settings** | L | Navigation & Productivity | `ExcelContextAdapter.cs`, `ReadingLayoutEngine.cs` | `ReadingViewSettingsDialog.xaml` | `ReadingViewTests`, `DialogInstantiationTests` | Implemented and verified |
+| `CMD_NAV_GRID_FOCUS_INSPECTOR` | **Grid Focus Coordinate Inspector** | L | Navigation & Productivity | `ExcelContextAdapter.cs` | `ReadingGridFocusDialog.xaml` | `RangeAndSheetTests`, `DialogInstantiationTests` | Implemented and verified |
 | `CMD_NAV_DATA_ENTRY_FORM` | **Table Data Entry Form** | L | Navigation & Productivity | `ExcelContextAdapter.cs` | `DataEntryFormDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
 | `CMD_FORMULA_AUDIT_PRECEDENTS` | **Audit Precedents** | G | Formulas & Calculation | `ExcelContextAdapter.cs` | `FormulaAuditPrecedentsDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
 | `CMD_FORMULA_AUDIT_DEPENDENTS` | **Audit Dependents** | G | Formulas & Calculation | `ExcelContextAdapter.cs` | `FormulaAuditDependentsDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
@@ -321,9 +321,9 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 - [x] `CMD_NAV_COLUMNS`: Column navigator and fast visibility toggler for wide tables. *(Active - Batch 10)*
 - [x] `CMD_NAV_CELL_PREVIEW`: Dedicated inspection card for viewing long cell contents. *(Active - Batch 10)*
 - [x] `CMD_NAV_DATE_PICKER`: Floating calendar date picker for rapid date entry. *(Active - Batch 10)*
-- [x] `CMD_NAV_GRID_FOCUS`: Row and column crosshair focus highlighting for reading wide datasets. *(Active - Batch 10)*
-- [x] `CMD_NAV_READING_VIEW_TOGGLE`: Live crosshair row/column reading layout overlay with real-time `SheetSelectionChange` tracking. *(Active - Reading View)*
-- [x] `CMD_NAV_READING_VIEW_SETTINGS`: Reading view configuration dialog (shapes, color swatches, transparency, border, live table preview). *(Active - Reading View)*
+- [x] `CMD_NAV_GRID_FOCUS`: Row and column crosshair live focus highlighting for reading wide datasets (Reading Layout). *(Active - Grid Focus)*
+- [x] `CMD_NAV_GRID_FOCUS_SETTINGS`: Grid Focus configuration dialog (shapes, color swatches, transparency, border, live table preview). *(Active - Grid Focus)*
+- [x] `CMD_NAV_GRID_FOCUS_INSPECTOR`: Grid Focus active coordinate HUD, row/col header inspector, and grid navigation assistant. *(Active - Grid Focus)*
 - [x] `CMD_NAV_DATA_ENTRY_FORM`: Dynamic modal data entry form for structured tables. *(Active - Batch 10)*
 - [x] `CMD_NAV_PANE`: Docked task pane and navigator for rapid navigation across open workbooks and worksheets. *(Active - Navigate Open Workbooks & Sheets)*
 - [ ] `CMD_NAV_FORMULA_EDITOR`: Multi-line expanded formula editing window with syntax layout. *(Planned - Batch 10+)*

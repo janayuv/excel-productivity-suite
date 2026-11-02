@@ -602,29 +602,30 @@
                   screentip="Date Picker Insertion"
                   supertip="Select a calendar date and insert formatted text into the active cell cursor."
                   onAction="OnRibbonButtonClicked" />
-          <splitButton id="splitReadingView" size="normal">
-            <button id="btnReadingView"
-                    label="Reading View"
+          <splitButton id="splitGridFocus" size="normal">
+            <button id="btnGridFocus"
+                    label="Grid Focus"
                     imageMso="TableSelectRowAndColumn"
-                    screentip="Toggle Reading View (Reading Layout)"
-                    supertip="Automatically highlight the active cell's row and column in real-time as you navigate."
+                    screentip="Toggle Grid Focus (Reading Layout)"
+                    supertip="Automatically highlight the active cell's row and column in real-time as you navigate (Reading View)."
                     onAction="OnRibbonButtonClicked" />
-            <menu id="menuReadingView" itemSize="normal">
-              <button id="btnReadingViewToggle"
-                      label="Toggle Reading View (On / Off)"
+            <menu id="menuGridFocus" itemSize="normal">
+              <button id="btnGridFocusToggle"
+                      label="Toggle Grid Focus (On / Off)"
                       imageMso="TableSelectRowAndColumn"
                       screentip="Toggle Live Highlighting"
                       onAction="OnRibbonButtonClicked" />
-              <button id="btnReadingViewSettings"
-                      label="Reading View Settings..."
+              <button id="btnGridFocusSettings"
+                      label="Grid Focus Settings..."
                       imageMso="AppointmentColorDialog"
                       screentip="Configure Colors &amp; Transparency"
                       supertip="Change highlight shape (crosshair, row only, column only), color swatches, and opacity."
                       onAction="OnRibbonButtonClicked" />
-              <button id="btnGridFocus"
-                      label="Reading Grid Focus HUD..."
-                      imageMso="TableSelectRowAndColumn"
-                      screentip="Active Cell Coordinate Inspector"
+              <button id="btnGridFocusInspector"
+                      label="Grid Focus Coordinate Inspector..."
+                      imageMso="ZoomPrint"
+                      screentip="Active Cell Coordinate Inspector HUD"
+                      supertip="Inspect active cell row/column headers, absolute address, and navigate with D-pad."
                       onAction="OnRibbonButtonClicked" />
             </menu>
           </splitButton>
@@ -786,6 +787,28 @@
                   screentip="Adjust Column Width"
                   supertip="Set uniform column widths in points, inches, or centimeters, or apply auto-fit."
                   onAction="OnRibbonButtonClicked" />
+          <separator id="sepPageSetup2" />
+          <splitButton id="splitGridFocusSheets" size="normal">
+            <button id="btnGridFocusSheets"
+                    label="Grid Focus"
+                    imageMso="TableSelectRowAndColumn"
+                    screentip="Toggle Grid Focus (Reading Layout)"
+                    supertip="Automatically highlight the active cell's row and column in real-time as you navigate (Reading View)."
+                    onAction="OnRibbonButtonClicked" />
+            <menu id="menuGridFocusSheets" itemSize="normal">
+              <button id="btnGridFocusToggleSheets"
+                      label="Toggle Grid Focus (On / Off)"
+                      imageMso="TableSelectRowAndColumn"
+                      screentip="Toggle Live Highlighting"
+                      onAction="OnRibbonButtonClicked" />
+              <button id="btnGridFocusSettingsSheets"
+                      label="Grid Focus Settings..."
+                      imageMso="AppointmentColorDialog"
+                      screentip="Configure Colors &amp; Transparency"
+                      supertip="Change highlight shape (crosshair, row only, column only), color swatches, and opacity."
+                      onAction="OnRibbonButtonClicked" />
+            </menu>
+          </splitButton>
         </group>
 
         <group id="grpImportExport" label="Import &amp; Export">

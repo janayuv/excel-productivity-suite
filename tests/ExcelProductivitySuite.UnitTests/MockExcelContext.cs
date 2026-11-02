@@ -372,6 +372,7 @@ namespace ExcelProductivitySuite.UnitTests
 
         public ReadingViewSettings ReadingViewSettings { get; set; } = ReadingViewSettings.CreateDefault();
         public bool IsReadingViewActive { get; set; } = false;
+        public bool IsGridFocusActive => IsReadingViewActive;
         public int ReadingViewHighlightUpdateCount { get; set; } = 0;
 
         public void ToggleReadingView()
@@ -379,6 +380,8 @@ namespace ExcelProductivitySuite.UnitTests
             IsReadingViewActive = !IsReadingViewActive;
             ReadingViewSettings.IsEnabled = IsReadingViewActive;
         }
+
+        public void ToggleGridFocus() => ToggleReadingView();
 
         public void EnableReadingView(ReadingViewSettings? settings = null)
         {
@@ -391,11 +394,15 @@ namespace ExcelProductivitySuite.UnitTests
             UpdateReadingViewHighlight();
         }
 
+        public void EnableGridFocus(ReadingViewSettings? settings = null) => EnableReadingView(settings);
+
         public void DisableReadingView()
         {
             IsReadingViewActive = false;
             ReadingViewSettings.IsEnabled = false;
         }
+
+        public void DisableGridFocus() => DisableReadingView();
 
         public void UpdateReadingViewHighlight()
         {

@@ -73,12 +73,12 @@ namespace ExcelProductivitySuite.UI.Dialogs
             bool isActive = _context?.IsReadingViewActive ?? _settings.IsEnabled;
             if (isActive)
             {
-                CurrentStatusBadge.Text = "Status: Reading View is currently ON (Live)";
+                CurrentStatusBadge.Text = "Status: Grid Focus is currently ON (Live)";
                 CurrentStatusBadge.Foreground = new SolidColorBrush(Color.FromRgb(16, 124, 65)); // Emerald
             }
             else
             {
-                CurrentStatusBadge.Text = "Status: Reading View is currently OFF";
+                CurrentStatusBadge.Text = "Status: Grid Focus is currently OFF";
                 CurrentStatusBadge.Foreground = new SolidColorBrush(Color.FromRgb(100, 116, 139)); // Slate
             }
         }
@@ -214,7 +214,7 @@ namespace ExcelProductivitySuite.UI.Dialogs
             }
 
             UpdateStatusBadge();
-            _context?.ShowMessage("Reading View has been turned off.", "Reading View");
+            _context?.ShowMessage("Grid Focus (Reading Layout) has been turned off.", "Grid Focus");
         }
 
         private void Close_Click(object sender, RoutedEventArgs e)

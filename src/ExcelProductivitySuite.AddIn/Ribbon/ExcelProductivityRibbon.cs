@@ -172,10 +172,16 @@ namespace ExcelProductivitySuite.AddIn.Ribbon
                 case "btnColumnNav": return "CMD_NAV_COLUMNS";
                 case "btnCellPreview": return "CMD_NAV_CELL_PREVIEW";
                 case "btnDatePicker": return "CMD_NAV_DATE_PICKER";
-                case "btnGridFocus": return "CMD_NAV_GRID_FOCUS";
+                case "btnGridFocus":
+                case "btnGridFocusToggle":
+                case "btnGridFocusSheets":
+                case "btnGridFocusToggleSheets":
                 case "btnReadingView":
-                case "btnReadingViewToggle": return "CMD_NAV_READING_VIEW_TOGGLE";
-                case "btnReadingViewSettings": return "CMD_NAV_READING_VIEW_SETTINGS";
+                case "btnReadingViewToggle": return "CMD_NAV_GRID_FOCUS";
+                case "btnGridFocusSettings":
+                case "btnGridFocusSettingsSheets":
+                case "btnReadingViewSettings": return "CMD_NAV_GRID_FOCUS_SETTINGS";
+                case "btnGridFocusInspector": return "CMD_NAV_GRID_FOCUS_INSPECTOR";
                 case "btnDataEntryForm": return "CMD_NAV_DATA_ENTRY_FORM";
                 case "btnExtractNumbers": return "CMD_TEXT_EXTRACT_NUMBERS";
                 case "btnExtractEmails": return "CMD_TEXT_EXTRACT_EMAILS";
