@@ -167,6 +167,8 @@ namespace ExcelProductivitySuite.AddIn.Ribbon
                 case "btnCreateSnapshot": return "CMD_RECOVERY_CREATE_SNAPSHOT";
                 case "btnRestoreSnapshot": return "CMD_RECOVERY_RESTORE_SNAPSHOT";
                 case "btnNamedRanges": return "CMD_NAV_NAMED_RANGES";
+                case "btnNavPane":
+                case "btnNavPaneSheets": return "CMD_NAV_PANE";
                 case "btnColumnNav": return "CMD_NAV_COLUMNS";
                 case "btnCellPreview": return "CMD_NAV_CELL_PREVIEW";
                 case "btnDatePicker": return "CMD_NAV_DATE_PICKER";

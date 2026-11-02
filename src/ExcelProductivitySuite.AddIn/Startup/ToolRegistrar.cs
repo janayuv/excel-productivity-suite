@@ -1210,6 +1210,23 @@ namespace ExcelProductivitySuite.AddIn.Startup
             // Module L: Navigation and User Productivity (Batch 10 Expansion)
             // =========================================================================
 
+            // Workbook & Sheet Navigation Pane
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_NAV_PANE",
+                title: "Workbook & Sheet Navigation Pane",
+                description: "Docked task pane and navigator for rapid navigation across open workbooks and worksheets.",
+                category: CommandCategory.NavigationAndProductivity,
+                executeAction: ctx =>
+                {
+                    ctx.ShowNavigationPane();
+                },
+                keywords: new[] { "navigation pane", "workbook navigator", "sheet sidebar", "fast navigation", "sheet list panel", "switch workbooks", "navigate sheets", "kutools navigation" },
+                officeIconName: "ViewNormalViewExcel",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "L",
+                roadmapBatch: "Batch 10+"
+            ));
+
             // Named Range Manager
             registry.RegisterCommand(new SuiteCommand(
                 id: "CMD_NAV_NAMED_RANGES",

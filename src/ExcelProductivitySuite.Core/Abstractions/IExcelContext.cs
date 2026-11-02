@@ -198,6 +198,76 @@ namespace ExcelProductivitySuite.Core.Abstractions
         object?[,]? GetWorkbookRangeValues(string workbookName, string sheetName, string? rangeAddress = null);
 
         /// <summary>
+        /// Retrieves comprehensive metadata for all currently open workbooks.
+        /// </summary>
+        IReadOnlyList<WorkbookSummaryInfo> GetOpenWorkbookDetails();
+
+        /// <summary>
+        /// Retrieves comprehensive metadata for all worksheets in the specified (or active) workbook.
+        /// </summary>
+        IReadOnlyList<WorksheetSummaryInfo> GetWorksheetDetails(string? workbookName = null);
+
+        /// <summary>
+        /// Activates the specified open workbook window in Excel.
+        /// </summary>
+        bool ActivateWorkbook(string workbookName);
+
+        /// <summary>
+        /// Closes the specified open workbook, optionally saving changes.
+        /// </summary>
+        bool CloseWorkbook(string workbookName, bool saveChanges = false);
+
+        /// <summary>
+        /// Saves the specified open workbook.
+        /// </summary>
+        bool SaveWorkbook(string workbookName);
+
+        /// <summary>
+        /// Saves all currently open workbooks that have unsaved changes.
+        /// </summary>
+        void SaveAllWorkbooks();
+
+        /// <summary>
+        /// Creates and activates a new blank workbook in Excel.
+        /// </summary>
+        bool CreateNewWorkbook();
+
+        /// <summary>
+        /// Activates the specified worksheet in the specified (or active) workbook.
+        /// </summary>
+        bool ActivateWorksheet(string sheetName, string? workbookName = null);
+
+        /// <summary>
+        /// Moves a worksheet up, down, to top, or to end in its workbook tab order.
+        /// </summary>
+        bool MoveWorksheet(string sheetName, SheetMoveDirection direction, string? workbookName = null);
+
+        /// <summary>
+        /// Toggles back to the previously active worksheet in the active workbook.
+        /// </summary>
+        bool ToggleLastActiveWorksheet(string? workbookName = null);
+
+        /// <summary>
+        /// Adds a new blank worksheet to the active (or specified) workbook.
+        /// </summary>
+        bool AddWorksheet(string? desiredName = null, string? workbookName = null);
+
+        /// <summary>
+        /// Deletes the specified worksheet from the active (or specified) workbook.
+        /// </summary>
+        bool DeleteWorksheet(string sheetName, string? workbookName = null);
+
+        /// <summary>
+        /// Renames a single worksheet in the active (or specified) workbook.
+        /// </summary>
+        bool RenameWorksheet(string oldName, string newName, string? workbookName = null);
+
+        /// <summary>
+        /// Shows or toggles the docked Workbook & Sheet Navigation Task Pane in Excel, or opens the navigation dialog.
+        /// </summary>
+        void ShowNavigationPane();
+
+        /// <summary>
         /// Selects disparate individual cells on the active worksheet.
         /// </summary>
         void SelectCells(IEnumerable<(int row, int col)> cells);

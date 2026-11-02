@@ -112,5 +112,19 @@ namespace ExcelProductivitySuite.UnitTests
                 }
             });
         }
+
+        [TestMethod]
+        public void WorkbookSheetNavigatorControl_ShouldInstantiateWithoutException()
+        {
+            RunOnSta(() =>
+            {
+                var mock = new MockExcelContext();
+                var control = new ExcelProductivitySuite.UI.Controls.WorkbookSheetNavigatorControl(mock, isTaskPane: true);
+                Assert.IsNotNull(control);
+                Assert.IsNotNull(control.ViewModel);
+                Assert.AreEqual(2, control.ViewModel.Workbooks.Count);
+                Assert.AreEqual(3, control.ViewModel.Worksheets.Count);
+            });
+        }
     }
 }

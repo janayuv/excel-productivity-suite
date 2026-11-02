@@ -1,5 +1,6 @@
 using System;
 using ExcelProductivitySuite.AddIn.ExcelIntegration;
+using ExcelProductivitySuite.AddIn.Navigation;
 using ExcelProductivitySuite.AddIn.Ribbon;
 using ExcelProductivitySuite.AddIn.Startup;
 using ExcelProductivitySuite.Core.Abstractions;
@@ -14,13 +15,40 @@ namespace ExcelProductivitySuite.AddIn
         private IExcelContext? _context;
         private ExcelProductivityRibbon? _ribbon;
         private ExcelKeyboardHook? _keyboardHook;
+        private Microsoft.Office.Tools.CustomTaskPane? _navTaskPane;
+
+        public void ToggleNavigationPane()
+        {
+            try
+            {
+                if (_navTaskPane == null)
+                {
+                    if (_context == null) return;
+                    var control = new WorkbookSheetNavigatorTaskPaneControl(_context);
+                    _navTaskPane = this.CustomTaskPanes.Add(control, "Workbook & Sheet Navigator");
+                    _navTaskPane.DockPosition = Office.MsoCTPDockPosition.msoCTPDockPositionLeft;
+                    _navTaskPane.Width = 340;
+                    _navTaskPane.Visible = true;
+                }
+                else
+                {
+                    _navTaskPane.Visible = !_navTaskPane.Visible;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceError($"[ExcelProductivitySuite] ToggleNavigationPane failed: {ex}");
+            }
+        }
 
         protected override Office.IRibbonExtensibility CreateRibbonExtensibilityObject()
         {
             try
             {
                 _registry = new CommandRegistry();
-                _context = new ExcelContextAdapter(() => this.Application);
+                var adapter = new ExcelContextAdapter(() => this.Application);
+                adapter.NavigationPaneToggleAction = ToggleNavigationPane;
+                _context = adapter;
                 _ribbon = new ExcelProductivityRibbon(_registry, _context);
                 ToolRegistrar.RegisterAllTools(_registry);
                 return _ribbon;
@@ -80,6 +108,7 @@ namespace ExcelProductivitySuite.AddIn
 
             _keyboardHook?.Dispose();
             _keyboardHook = null;
+            _navTaskPane = null;
         }
 
         #region VSTO generated code

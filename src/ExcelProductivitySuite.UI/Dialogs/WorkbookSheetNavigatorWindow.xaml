@@ -1,0 +1,14 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.WorkbookSheetNavigatorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        Title="Workbook &amp; Sheet Navigator - Excel Productivity Suite"
+        Height="720" Width="440"
+        MinHeight="480" MinWidth="340"
+        WindowStartupLocation="CenterScreen"
+        Background="#F8F9FA">
+
+    <Grid x:Name="HostGrid">
+        <!-- WorkbookSheetNavigatorControl hosted dynamically or in XAML -->
+    </Grid>
+</controls:BaseDialogWindow>

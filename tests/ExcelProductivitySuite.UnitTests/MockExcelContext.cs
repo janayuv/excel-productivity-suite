@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using ExcelProductivitySuite.Core.Abstractions;
 using ExcelProductivitySuite.Core.Models;
 using ExcelProductivitySuite.Engine.Files;
@@ -198,6 +199,175 @@ namespace ExcelProductivitySuite.UnitTests
         {
             Sheets.Clear();
             Sheets.AddRange(orderedSheetNames);
+        }
+
+        public List<WorkbookSummaryInfo> MockWorkbookSummaries { get; } = new()
+        {
+            new WorkbookSummaryInfo("Workbook1.xlsx", @"C:\Test\Workbook1.xlsx", true, true, 3),
+            new WorkbookSummaryInfo("Workbook2.xlsx", @"C:\Test\Workbook2.xlsx", false, false, 2)
+        };
+
+        private string? _mockPrevSheet = null;
+
+        public IReadOnlyList<WorkbookSummaryInfo> GetOpenWorkbookDetails() => MockWorkbookSummaries;
+
+        public IReadOnlyList<WorksheetSummaryInfo> GetWorksheetDetails(string? workbookName = null)
+        {
+            var list = new List<WorksheetSummaryInfo>();
+            for (int i = 0; i < Sheets.Count; i++)
+            {
+                string s = Sheets[i];
+                bool isVis = !SheetVisibility.TryGetValue(s, out var v) || v;
+                bool isActive = string.Equals(s, ActiveWorksheetName, StringComparison.OrdinalIgnoreCase);
+                list.Add(new WorksheetSummaryInfo(s, workbookName ?? ActiveWorkbookName ?? "Workbook1.xlsx", i + 1, isActive, isVis ? SheetVisibilityState.Visible : SheetVisibilityState.Hidden));
+            }
+            return list;
+        }
+
+        public bool ActivateWorkbook(string workbookName)
+        {
+            ActiveWorkbookName = workbookName;
+            for (int i = 0; i < MockWorkbookSummaries.Count; i++)
+            {
+                var wb = MockWorkbookSummaries[i];
+                bool isAct = string.Equals(wb.Name, workbookName, StringComparison.OrdinalIgnoreCase);
+                MockWorkbookSummaries[i] = new WorkbookSummaryInfo(wb.Name, wb.Path, isAct, wb.IsSaved, wb.SheetCount, wb.IsReadOnly);
+            }
+            return true;
+        }
+
+        public bool CloseWorkbook(string workbookName, bool saveChanges = false)
+        {
+            MockWorkbookSummaries.RemoveAll(w => string.Equals(w.Name, workbookName, StringComparison.OrdinalIgnoreCase));
+            OpenWorkbooks.RemoveAll(w => string.Equals(w, workbookName, StringComparison.OrdinalIgnoreCase));
+            return true;
+        }
+
+        public bool SaveWorkbook(string workbookName)
+        {
+            for (int i = 0; i < MockWorkbookSummaries.Count; i++)
+            {
+                var wb = MockWorkbookSummaries[i];
+                if (string.Equals(wb.Name, workbookName, StringComparison.OrdinalIgnoreCase))
+                {
+                    MockWorkbookSummaries[i] = new WorkbookSummaryInfo(wb.Name, wb.Path, wb.IsActive, true, wb.SheetCount, wb.IsReadOnly);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public void SaveAllWorkbooks()
+        {
+            for (int i = 0; i < MockWorkbookSummaries.Count; i++)
+            {
+                var wb = MockWorkbookSummaries[i];
+                MockWorkbookSummaries[i] = new WorkbookSummaryInfo(wb.Name, wb.Path, wb.IsActive, true, wb.SheetCount, wb.IsReadOnly);
+            }
+        }
+
+        public bool CreateNewWorkbook()
+        {
+            string name = $"Book{MockWorkbookSummaries.Count + 1}.xlsx";
+            MockWorkbookSummaries.Add(new WorkbookSummaryInfo(name, "[Unsaved]", true, false, 1));
+            OpenWorkbooks.Add(name);
+            ActivateWorkbook(name);
+            return true;
+        }
+
+        public bool ActivateWorksheet(string sheetName, string? workbookName = null)
+        {
+            if (Sheets.Contains(sheetName))
+            {
+                if (ActiveWorksheetName != null && !string.Equals(ActiveWorksheetName, sheetName, StringComparison.OrdinalIgnoreCase))
+                {
+                    _mockPrevSheet = ActiveWorksheetName;
+                }
+                ActiveWorksheetName = sheetName;
+                SheetVisibility[sheetName] = true;
+                return true;
+            }
+            return false;
+        }
+
+        public bool MoveWorksheet(string sheetName, SheetMoveDirection direction, string? workbookName = null)
+        {
+            int idx = Sheets.IndexOf(sheetName);
+            if (idx < 0) return false;
+
+            Sheets.RemoveAt(idx);
+            switch (direction)
+            {
+                case SheetMoveDirection.Top:
+                    Sheets.Insert(0, sheetName);
+                    break;
+                case SheetMoveDirection.End:
+                    Sheets.Add(sheetName);
+                    break;
+                case SheetMoveDirection.Up:
+                    int newUp = Math.Max(0, idx - 1);
+                    Sheets.Insert(newUp, sheetName);
+                    break;
+                case SheetMoveDirection.Down:
+                    int newDown = Math.Min(Sheets.Count, idx + 1);
+                    Sheets.Insert(newDown, sheetName);
+                    break;
+            }
+            return true;
+        }
+
+        public bool ToggleLastActiveWorksheet(string? workbookName = null)
+        {
+            if (_mockPrevSheet != null && Sheets.Contains(_mockPrevSheet))
+            {
+                return ActivateWorksheet(_mockPrevSheet, workbookName);
+            }
+            return false;
+        }
+
+        public bool AddWorksheet(string? desiredName = null, string? workbookName = null)
+        {
+            string name = desiredName ?? $"Sheet{Sheets.Count + 1}";
+            Sheets.Add(name);
+            SheetVisibility[name] = true;
+            ActivateWorksheet(name, workbookName);
+            return true;
+        }
+
+        public bool DeleteWorksheet(string sheetName, string? workbookName = null)
+        {
+            bool removed = Sheets.Remove(sheetName);
+            if (removed && string.Equals(ActiveWorksheetName, sheetName, StringComparison.OrdinalIgnoreCase))
+            {
+                ActiveWorksheetName = Sheets.FirstOrDefault();
+            }
+            return removed;
+        }
+
+        public bool RenameWorksheet(string oldName, string newName, string? workbookName = null)
+        {
+            int idx = Sheets.IndexOf(oldName);
+            if (idx >= 0)
+            {
+                Sheets[idx] = newName;
+                if (SheetVisibility.TryGetValue(oldName, out var v))
+                {
+                    SheetVisibility.Remove(oldName);
+                    SheetVisibility[newName] = v;
+                }
+                if (string.Equals(ActiveWorksheetName, oldName, StringComparison.OrdinalIgnoreCase))
+                {
+                    ActiveWorksheetName = newName;
+                }
+                return true;
+            }
+            return false;
+        }
+
+        public bool NavigationPaneShown { get; set; } = false;
+        public void ShowNavigationPane()
+        {
+            NavigationPaneShown = true;
         }
 
         public IReadOnlyList<string> GetBlankWorksheetNames() => BlankSheets;

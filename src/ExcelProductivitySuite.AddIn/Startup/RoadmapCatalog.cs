@@ -161,10 +161,6 @@ namespace ExcelProductivitySuite.AddIn.Startup
             // =========================================================================
             // Module L: Navigation and User Productivity (Batch 10 Expansion)
             // =========================================================================
-            AddPlanned(registry, "CMD_NAV_PANE", "Workbook & Sheet Navigation Pane",
-                "Docked task pane providing rapid navigation across workbooks, sheets, and tables.",
-                CommandCategory.NavigationAndProductivity, "L", "Batch 10+",
-                new[] { "navigation pane", "sheet sidebar", "fast navigation", "sheet list panel" }, "ViewNormalViewExcel");
 
             AddPlanned(registry, "CMD_NAV_FORMULA_EDITOR", "Expanded Multi-Line Formula Editor",
                 "Edit long, complex nested formulas with syntax highlighting, indentation, and formatting.",

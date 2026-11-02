@@ -1,0 +1,291 @@
+<UserControl x:Class="ExcelProductivitySuite.UI.Controls.WorkbookSheetNavigatorControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="360"
+             Background="#F8F9FA">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <Style x:Key="SmallToolButton" TargetType="{x:Type Button}" BasedOn="{StaticResource ModernSecondaryButtonStyle}">
+                <Setter Property="Height" Value="26" />
+                <Setter Property="Padding" Value="6,2" />
+                <Setter Property="FontSize" Value="11" />
+                <Setter Property="Margin" Value="0,0,4,0" />
+            </Style>
+
+            <Style x:Key="IconToolButton" TargetType="{x:Type Button}" BasedOn="{StaticResource ModernSecondaryButtonStyle}">
+                <Setter Property="Height" Value="26" />
+                <Setter Property="Width" Value="28" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="Margin" Value="0,0,4,0" />
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid Margin="8">
+        <Grid.RowDefinitions>
+            <!-- Row 0: Workbooks Section -->
+            <RowDefinition Height="2*" MinHeight="140" />
+            <!-- Row 1: Splitter -->
+            <RowDefinition Height="6" />
+            <!-- Row 2: Worksheets Section -->
+            <RowDefinition Height="3*" MinHeight="220" />
+            <!-- Row 3: Status / Footer -->
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- =================================================================== -->
+        <!-- TOP: Open Workbooks Panel -->
+        <!-- =================================================================== -->
+        <Border Grid.Row="0" Background="White" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="4" Padding="6">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!-- Section Header -->
+                <DockPanel Grid.Row="0" Margin="0,0,0,6">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="📚" FontSize="13" Margin="0,0,6,0" VerticalAlignment="Center" />
+                        <TextBlock Text="Open Workbooks" FontWeight="Bold" FontSize="12" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <TextBlock Text="{Binding WorkbookCountSummary}" DockPanel.Dock="Right" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center" HorizontalAlignment="Right" />
+                </DockPanel>
+
+                <!-- Workbooks Toolbar -->
+                <WrapPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,6">
+                    <Button Style="{StaticResource IconToolButton}" ToolTip="Activate Selected Workbook" Click="ActivateWorkbook_Click">
+                        <TextBlock Text="▶" Foreground="#107C41" FontWeight="Bold" />
+                    </Button>
+                    <Button Style="{StaticResource IconToolButton}" ToolTip="New Blank Workbook (Ctrl+N)" Click="NewWorkbook_Click">
+                        <TextBlock Text="➕" Foreground="#2563EB" />
+                    </Button>
+                    <Button Style="{StaticResource IconToolButton}" ToolTip="Save Selected Workbook" Click="SaveWorkbook_Click">
+                        <TextBlock Text="💾" Foreground="#059669" />
+                    </Button>
+                    <Button Style="{StaticResource SmallToolButton}" ToolTip="Save All Open Workbooks" Click="SaveAllWorkbooks_Click">
+                        <TextBlock Text="Save All" />
+                    </Button>
+                    <Button Style="{StaticResource IconToolButton}" ToolTip="Close Selected Workbook" Click="CloseWorkbook_Click">
+                        <TextBlock Text="✖" Foreground="#DC2626" />
+                    </Button>
+                    <Button Style="{StaticResource IconToolButton}" ToolTip="Open Containing Folder in Explorer" Click="OpenFolder_Click">
+                        <TextBlock Text="📁" />
+                    </Button>
+                    <Button Style="{StaticResource IconToolButton}" ToolTip="Copy Full File Path to Clipboard" Click="CopyPath_Click">
+                        <TextBlock Text="📋" />
+                    </Button>
+                    <Button Style="{StaticResource IconToolButton}" ToolTip="Refresh Workbooks and Sheets List" Click="Refresh_Click">
+                        <TextBlock Text="🔄" />
+                    </Button>
+                    <ComboBox x:Name="WbSortCombo" Style="{StaticResource ModernComboBoxStyle}" Width="100" Height="26" SelectionChanged="WbSort_SelectionChanged" Margin="4,0,0,0" ToolTip="Sort Workbooks">
+                        <ComboBoxItem Content="Open Order" IsSelected="True" />
+                        <ComboBoxItem Content="Name (A-Z)" />
+                        <ComboBoxItem Content="Name (Z-A)" />
+                    </ComboBox>
+                </WrapPanel>
+
+                <!-- Workbooks DataGrid -->
+                <DataGrid x:Name="WorkbooksGrid" Grid.Row="2"
+                          ItemsSource="{Binding Workbooks}"
+                          SelectedItem="{Binding SelectedWorkbook, Mode=TwoWay}"
+                          AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True"
+                          SelectionMode="Single" SelectionUnit="FullRow"
+                          BorderThickness="1" BorderBrush="#E5E7EB" Background="White"
+                          RowHeight="26"
+                          MouseDoubleClick="WorkbooksGrid_MouseDoubleClick">
+                    <DataGrid.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Activate Workbook" Click="ActivateWorkbook_Click" FontWeight="Bold" />
+                            <MenuItem Header="Save Workbook" Click="SaveWorkbook_Click" />
+                            <MenuItem Header="Save All Workbooks" Click="SaveAllWorkbooks_Click" />
+                            <Separator />
+                            <MenuItem Header="Open Containing Folder" Click="OpenFolder_Click" />
+                            <MenuItem Header="Copy File Path" Click="CopyPath_Click" />
+                            <Separator />
+                            <MenuItem Header="Close Workbook" Click="CloseWorkbook_Click" />
+                        </ContextMenu>
+                    </DataGrid.ContextMenu>
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="Wb" Width="30">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding IsActive, Converter={x:Null}}" HorizontalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="📄" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                                        <Setter Property="Text" Value="🟢" />
+                                                        <Setter Property="ToolTip" Value="Active Workbook" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Workbook Name" Binding="{Binding DisplayName}" Width="*" FontWeight="SemiBold" />
+                        <DataGridTextColumn Header="Sheets" Binding="{Binding SheetCount}" Width="45" />
+                        <DataGridTextColumn Header="Status" Binding="{Binding StatusDisplay}" Width="60" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
+
+        <!-- SPLITTER -->
+        <GridSplitter Grid.Row="1" Height="4" HorizontalAlignment="Stretch" VerticalAlignment="Center" Background="#D1D5DB" ShowsPreview="True" Cursor="SizeNS" />
+
+        <!-- =================================================================== -->
+        <!-- BOTTOM: Worksheets Panel -->
+        <!-- =================================================================== -->
+        <Border Grid.Row="2" Background="White" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="4" Padding="6">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!-- Section Header -->
+                <DockPanel Grid.Row="0" Margin="0,0,0,6">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="📑" FontSize="13" Margin="0,0,6,0" VerticalAlignment="Center" />
+                        <TextBlock Text="Worksheets" FontWeight="Bold" FontSize="12" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <TextBlock Text="{Binding WorksheetCountSummary}" DockPanel.Dock="Right" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center" HorizontalAlignment="Right" />
+                </DockPanel>
+
+                <!-- Filter & Search Bar -->
+                <Grid Grid.Row="1" Margin="0,0,0,6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="90" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="SearchBox" Grid.Column="0" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" Height="26" Padding="4,2" Margin="0,0,4,0" ToolTip="Search worksheet names in real time..." />
+                    <ComboBox x:Name="WsFilterCombo" Grid.Column="1" Style="{StaticResource ModernComboBoxStyle}" Height="26" SelectionChanged="WsFilter_SelectionChanged" Margin="0,0,4,0" ToolTip="Filter by visibility">
+                        <ComboBoxItem Content="All" IsSelected="True" />
+                        <ComboBoxItem Content="Visible" />
+                        <ComboBoxItem Content="Hidden" />
+                    </ComboBox>
+                    <Button Grid.Column="2" Style="{StaticResource SmallToolButton}" ToolTip="Quick Toggle between current and last active sheet" Click="ToggleLast_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="⚡" Margin="0,0,2,0" />
+                            <TextBlock Text="Toggle" FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+
+                <!-- Worksheets Action Toolbar -->
+                <WrapPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,6">
+                    <Button Style="{StaticResource IconToolButton}" ToolTip="Activate Selected Worksheet" Click="ActivateWorksheet_Click">
+                        <TextBlock Text="▶" Foreground="#107C41" FontWeight="Bold" />
+                    </Button>
+                    <Button Style="{StaticResource IconToolButton}" ToolTip="Move Sheet Up (Left)" Click="MoveUp_Click">
+                        <TextBlock Text="▲" Foreground="#4B5563" />
+                    </Button>
+                    <Button Style="{StaticResource IconToolButton}" ToolTip="Move Sheet Down (Right)" Click="MoveDown_Click">
+                        <TextBlock Text="▼" Foreground="#4B5563" />
+                    </Button>
+                    <Button Style="{StaticResource IconToolButton}" ToolTip="Move Sheet to First Position (Top)" Click="MoveTop_Click">
+                        <TextBlock Text="⏮" Foreground="#4B5563" />
+                    </Button>
+                    <Button Style="{StaticResource IconToolButton}" ToolTip="Move Sheet to Last Position (End)" Click="MoveEnd_Click">
+                        <TextBlock Text="⏭" Foreground="#4B5563" />
+                    </Button>
+                    <Button Style="{StaticResource IconToolButton}" ToolTip="Toggle Sheet Visibility (Hide / Unhide)" Click="ToggleVisibility_Click">
+                        <TextBlock Text="👁" Foreground="#6B7280" />
+                    </Button>
+                    <Button Style="{StaticResource IconToolButton}" ToolTip="Add New Worksheet" Click="AddSheet_Click">
+                        <TextBlock Text="➕" Foreground="#2563EB" />
+                    </Button>
+                    <Button Style="{StaticResource IconToolButton}" ToolTip="Rename Selected Worksheet" Click="RenameSheet_Click">
+                        <TextBlock Text="✏" Foreground="#D97706" />
+                    </Button>
+                    <Button Style="{StaticResource IconToolButton}" ToolTip="Delete Selected Worksheet" Click="DeleteSheet_Click">
+                        <TextBlock Text="🗑" Foreground="#DC2626" />
+                    </Button>
+                </WrapPanel>
+
+                <!-- Worksheets DataGrid -->
+                <DataGrid x:Name="WorksheetsGrid" Grid.Row="3"
+                          ItemsSource="{Binding Worksheets}"
+                          SelectedItem="{Binding SelectedWorksheet, Mode=TwoWay}"
+                          AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True"
+                          SelectionMode="Single" SelectionUnit="FullRow"
+                          BorderThickness="1" BorderBrush="#E5E7EB" Background="White"
+                          RowHeight="26"
+                          MouseDoubleClick="WorksheetsGrid_MouseDoubleClick">
+                    <DataGrid.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Activate Sheet" Click="ActivateWorksheet_Click" FontWeight="Bold" />
+                            <MenuItem Header="Toggle Last Active Sheet" Click="ToggleLast_Click" />
+                            <Separator />
+                            <MenuItem Header="Move Up" Click="MoveUp_Click" />
+                            <MenuItem Header="Move Down" Click="MoveDown_Click" />
+                            <MenuItem Header="Move to Top" Click="MoveTop_Click" />
+                            <MenuItem Header="Move to End" Click="MoveEnd_Click" />
+                            <Separator />
+                            <MenuItem Header="Hide / Unhide Sheet" Click="ToggleVisibility_Click" />
+                            <MenuItem Header="Rename Sheet..." Click="RenameSheet_Click" />
+                            <MenuItem Header="Add New Sheet..." Click="AddSheet_Click" />
+                            <Separator />
+                            <MenuItem Header="Delete Sheet" Click="DeleteSheet_Click" />
+                        </ContextMenu>
+                    </DataGrid.ContextMenu>
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="St" Width="30">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock HorizontalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="📄" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                                        <Setter Property="Text" Value="🟢" />
+                                                        <Setter Property="ToolTip" Value="Active Worksheet" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsHidden}" Value="True">
+                                                        <Setter Property="Text" Value="🔒" />
+                                                        <Setter Property="ToolTip" Value="Hidden Sheet" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="#" Binding="{Binding Index}" Width="30" />
+                        <DataGridTextColumn Header="Sheet Name" Binding="{Binding Name}" Width="*" FontWeight="SemiBold" />
+                        <DataGridTextColumn Header="Visibility" Binding="{Binding VisibilityDisplay}" Width="70" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
+
+        <!-- =================================================================== -->
+        <!-- ROW 3: Status / Footer -->
+        <!-- =================================================================== -->
+        <DockPanel Grid.Row="3" Margin="0,6,0,0">
+            <Button x:Name="PopOutButton" Content="Pop Out ↗" Style="{StaticResource SmallToolButton}" DockPanel.Dock="Right" ToolTip="Open as floating window" Visibility="Collapsed" Click="PopOut_Click" />
+            <TextBlock Text="{Binding StatusMessage}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+        </DockPanel>
+    </Grid>
+</UserControl>

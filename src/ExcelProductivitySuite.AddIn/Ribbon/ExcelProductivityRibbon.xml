@@ -566,6 +566,13 @@
 
         <!-- Group: Navigation & Productivity -->
         <group id="grpNavigation" label="Navigation &amp; Productivity">
+          <button id="btnNavPane"
+                  label="Navigation Pane"
+                  size="large"
+                  imageMso="ViewNormalViewExcel"
+                  screentip="Workbook &amp; Sheet Navigation Pane"
+                  supertip="Centrally view, switch between, organize, sort, and manage all open Excel workbooks and worksheets in real time."
+                  onAction="OnRibbonButtonClicked" />
           <button id="btnNamedRanges"
                   label="Named Ranges"
                   size="large"
@@ -617,6 +624,13 @@
       <tab id="tabWorkbookAndSheets" label="Workbook &amp; Sheets">
         
         <group id="grpSheets" label="Worksheet Tools">
+          <button id="btnNavPaneSheets"
+                  label="Navigation Pane"
+                  size="large"
+                  imageMso="ViewNormalViewExcel"
+                  screentip="Workbook &amp; Sheet Navigation Pane"
+                  supertip="Centrally view, switch between, organize, sort, and manage all open Excel workbooks and worksheets in real time."
+                  onAction="OnRibbonButtonClicked" />
           <button id="btnCombineSheets"
                   label="Combine Sheets"
                   size="large"

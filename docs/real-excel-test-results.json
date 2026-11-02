@@ -7,7 +7,7 @@
         "ExpectedResult":  "Cell B1 = \u0027Product-SKU-9924\u0027",
         "ActualResult":  "Cell B1 = \u0027Product-SKU-9924\u0027",
         "Passed":  true,
-        "ElapsedMs":  203.94
+        "ElapsedMs":  199.38
     },
     {
         "TestId":  "T02",
@@ -17,7 +17,7 @@
         "ExpectedResult":  "Apple,Banana,Cherry",
         "ActualResult":  "Apple,Banana,Cherry",
         "Passed":  true,
-        "ElapsedMs":  174.18
+        "ElapsedMs":  201.74
     },
     {
         "TestId":  "T03",
@@ -27,7 +27,7 @@
         "ExpectedResult":  "CORP/dept-finance;CORP/dept-hr",
         "ActualResult":  "CORP/dept-finance;CORP/dept-hr",
         "Passed":  true,
-        "ElapsedMs":  17.66
+        "ElapsedMs":  18.81
     },
     {
         "TestId":  "T04",
@@ -37,7 +37,7 @@
         "ExpectedResult":  "cell_0_0 at (1,1), cell_3_3 at (4,4)",
         "ActualResult":  "cell_0_0 at (1,1), cell_3_3 at (4,4)",
         "Passed":  true,
-        "ElapsedMs":  8.76
+        "ElapsedMs":  11.85
     },
     {
         "TestId":  "T05",
@@ -47,7 +47,7 @@
         "ExpectedResult":  "Invoice 1004 Paid",
         "ActualResult":  "Invoice 1004 Paid",
         "Passed":  true,
-        "ElapsedMs":  16.58
+        "ElapsedMs":  22.28
     },
     {
         "TestId":  "T06",
@@ -57,7 +57,7 @@
         "ExpectedResult":  "Error #DIV/0!, numeric 45210.75",
         "ActualResult":  "Error #DIV/0!, numeric 45210.75",
         "Passed":  true,
-        "ElapsedMs":  33.5
+        "ElapsedMs":  45.48
     },
     {
         "TestId":  "T07",
@@ -67,7 +67,7 @@
         "ExpectedResult":  "HasFormula=False, Value2=300",
         "ActualResult":  "HasFormula=False, Value2=300",
         "Passed":  true,
-        "ElapsedMs":  33.01
+        "ElapsedMs":  40.15
     },
     {
         "TestId":  "T08",
@@ -77,7 +77,7 @@
         "ExpectedResult":  "MergeCells = True",
         "ActualResult":  "MergeCells = True",
         "Passed":  true,
-        "ElapsedMs":  11.79
+        "ElapsedMs":  12.99
     },
     {
         "TestId":  "T09",
@@ -87,7 +87,7 @@
         "ExpectedResult":  "ListObject \u0027EmployeeTable\u0027 with 3 ListRows",
         "ActualResult":  "ListObject \u0027EmployeeTable\u0027 with 3 ListRows",
         "Passed":  true,
-        "ElapsedMs":  114.81
+        "ElapsedMs":  105.25
     },
     {
         "TestId":  "T10",
@@ -97,7 +97,7 @@
         "ExpectedResult":  "Row.Hidden=True, Column.Hidden=True",
         "ActualResult":  "Row.Hidden=True, Column.Hidden=True",
         "Passed":  true,
-        "ElapsedMs":  32.77
+        "ElapsedMs":  27.37
     },
     {
         "TestId":  "T11",
@@ -107,7 +107,7 @@
         "ExpectedResult":  "ProtectContents=True and write blocked",
         "ActualResult":  "ProtectContents=True, write blocked=True",
         "Passed":  true,
-        "ElapsedMs":  78.92
+        "ElapsedMs":  77.95
     },
     {
         "TestId":  "T12",
@@ -117,7 +117,7 @@
         "ExpectedResult":  "ProtectStructure=True and Add() blocked",
         "ActualResult":  "ProtectStructure=True, Add() blocked=True",
         "Passed":  true,
-        "ElapsedMs":  148.05
+        "ElapsedMs":  132.9
     },
     {
         "TestId":  "T13",
@@ -127,7 +127,7 @@
         "ExpectedResult":  "Areas.Count = 2 (triggers non-contiguous safety guard)",
         "ActualResult":  "Areas.Count = 2",
         "Passed":  true,
-        "ElapsedMs":  13.2
+        "ElapsedMs":  11.41
     },
     {
         "TestId":  "T14",
@@ -137,7 +137,7 @@
         "ExpectedResult":  "Conflict detected = True (prompts confirmation)",
         "ActualResult":  "Conflict detected = True",
         "Passed":  true,
-        "ElapsedMs":  16.71
+        "ElapsedMs":  21.92
     },
     {
         "TestId":  "T15",
@@ -147,7 +147,7 @@
         "ExpectedResult":  "Clean name \u003c= 31 chars without invalid characters",
         "ActualResult":  "\u0027Sales_East_2026_Q3__Draft_ Long\u0027 (Length: 31)",
         "Passed":  true,
-        "ElapsedMs":  16.38
+        "ElapsedMs":  14.59
     },
     {
         "TestId":  "T16",
@@ -155,9 +155,9 @@
         "InitialState":  "10,000 rows x 10 cols (100,000 cells) populated in real Excel worksheet",
         "Action":  "Read 100K via Value2, extract usernames in C#, write 100K back via Value2",
         "ExpectedResult":  "Total E2E \u003c 5,000 ms, Managed Transform \u003c 500 ms",
-        "ActualResult":  "Total E2E: 1243 ms (COM Read: 75 ms, Transform: 500 ms, Write: 365 ms)",
+        "ActualResult":  "Total E2E: 1229 ms (COM Read: 81 ms, Transform: 505 ms, Write: 350 ms)",
         "Passed":  true,
-        "ElapsedMs":  1243
+        "ElapsedMs":  1229
     },
     {
         "TestId":  "T17",
@@ -167,16 +167,16 @@
         "ExpectedResult":  "ScreenUpdating, EnableEvents, Calculation restored to original states",
         "ActualResult":  "ScreenUpdating=True, EnableEvents=True, Calculation=xlCalculationAutomatic",
         "Passed":  true,
-        "ElapsedMs":  30.64
+        "ElapsedMs":  25.02
     },
     {
         "TestId":  "T18",
         "Name":  "Process Lifecycle: Zero Orphaned Excel Processes",
-        "InitialState":  "Excel process PID 15440 active during test execution",
+        "InitialState":  "Excel process PID 11732 active during test execution",
         "Action":  "Release all COM references and query process table",
-        "ExpectedResult":  "Process PID 15440 cleanly terminated",
-        "ActualResult":  "Terminated cleanly (PID 15440 shut down)",
+        "ExpectedResult":  "Process PID 11732 cleanly terminated",
+        "ActualResult":  "Terminated cleanly (PID 11732 shut down)",
         "Passed":  true,
-        "ElapsedMs":  4090.04
+        "ElapsedMs":  2213.6
     }
 ]

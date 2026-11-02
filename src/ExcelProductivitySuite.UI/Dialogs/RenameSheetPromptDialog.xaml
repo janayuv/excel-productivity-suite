@@ -1,0 +1,41 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.RenameSheetPromptDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        Title="Rename Worksheet"
+        Height="220" Width="400"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock x:Name="PromptLabel" Grid.Row="0" Text="Enter new worksheet name:" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,8" />
+
+        <TextBox x:Name="NameInput" Grid.Row="1" Style="{StaticResource ModernTextBoxStyle}" TextChanged="NameInput_TextChanged" MaxLength="31" Margin="0,0,0,6" />
+
+        <TextBlock x:Name="ValidationMessage" Grid.Row="2" Text="" FontSize="11" Foreground="#DC2626" TextWrapping="Wrap" Margin="0,0,0,8" />
+
+        <DockPanel Grid.Row="4">
+            <Button Content="Cancel" Style="{StaticResource ModernSecondaryButtonStyle}" DockPanel.Dock="Right" Width="80" IsCancel="True" Click="Cancel_Click" />
+            <Button x:Name="OkButton" Content="OK" Style="{StaticResource ModernPrimaryButtonStyle}" DockPanel.Dock="Right" Width="80" Margin="0,0,8,0" IsDefault="True" Click="Ok_Click" />
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

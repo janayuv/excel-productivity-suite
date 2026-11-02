@@ -20,6 +20,8 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
         private Excel.Application _app => _appAccessor() ?? throw new InvalidOperationException("Excel Application instance is not available.");
 
         public IUndoManager UndoManager => _undoManager;
+        public Action? NavigationPaneToggleAction { get; set; }
+        private string? _previousActiveSheetName;
 
         public ExcelContextAdapter(Excel.Application app, IUndoManager? undoManager = null)
         {
@@ -942,6 +944,483 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
             {
                 ShowMessage($"Unable to read range from '{workbookName} - {sheetName}': {ex.Message}", "Read Error", isError: true);
                 return null;
+            }
+        }
+
+        public IReadOnlyList<WorkbookSummaryInfo> GetOpenWorkbookDetails()
+        {
+            var list = new List<WorkbookSummaryInfo>();
+            try
+            {
+                Excel.Workbook? activeWb = null;
+                try { activeWb = _app.ActiveWorkbook; } catch { }
+
+                foreach (Excel.Workbook wb in _app.Workbooks)
+                {
+                    try
+                    {
+                        string name = wb.Name;
+                        string path = wb.FullName;
+                        bool isActive = activeWb != null && string.Equals(activeWb.Name, name, StringComparison.OrdinalIgnoreCase);
+                        bool isSaved = wb.Saved;
+                        int sheetCount = wb.Sheets.Count;
+                        bool isReadOnly = wb.ReadOnly;
+                        list.Add(new WorkbookSummaryInfo(name, path, isActive, isSaved, sheetCount, isReadOnly));
+                    }
+                    catch
+                    {
+                        list.Add(new WorkbookSummaryInfo(wb.Name, null, false, true, 0));
+                    }
+                }
+            }
+            catch { }
+            return list;
+        }
+
+        public IReadOnlyList<WorksheetSummaryInfo> GetWorksheetDetails(string? workbookName = null)
+        {
+            var list = new List<WorksheetSummaryInfo>();
+            try
+            {
+                Excel.Workbook? wb = null;
+                if (!string.IsNullOrWhiteSpace(workbookName))
+                {
+                    foreach (Excel.Workbook b in _app.Workbooks)
+                    {
+                        if (string.Equals(b.Name, workbookName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            wb = b;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    wb = _app.ActiveWorkbook;
+                }
+
+                if (wb == null) return list;
+
+                Excel.Worksheet? activeWs = null;
+                try { activeWs = wb.ActiveSheet as Excel.Worksheet; } catch { }
+
+                foreach (Excel.Worksheet ws in wb.Worksheets)
+                {
+                    try
+                    {
+                        string name = ws.Name;
+                        int index = ws.Index;
+                        bool isActive = activeWs != null && string.Equals(activeWs.Name, name, StringComparison.OrdinalIgnoreCase);
+                        SheetVisibilityState vis = ws.Visible switch
+                        {
+                            Excel.XlSheetVisibility.xlSheetVisible => SheetVisibilityState.Visible,
+                            Excel.XlSheetVisibility.xlSheetHidden => SheetVisibilityState.Hidden,
+                            Excel.XlSheetVisibility.xlSheetVeryHidden => SheetVisibilityState.VeryHidden,
+                            _ => SheetVisibilityState.Visible
+                        };
+
+                        int? tabColor = null;
+                        try
+                        {
+                            if (ws.Tab != null)
+                            {
+                                object? c = ws.Tab.Color;
+                                if (c != null) tabColor = Convert.ToInt32(c);
+                            }
+                        }
+                        catch { }
+
+                        bool isProtected = false;
+                        try { isProtected = ws.ProtectContents; } catch { }
+
+                        list.Add(new WorksheetSummaryInfo(name, wb.Name, index, isActive, vis, tabColor, isProtected));
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+            return list;
+        }
+
+        public bool ActivateWorkbook(string workbookName)
+        {
+            try
+            {
+                foreach (Excel.Workbook wb in _app.Workbooks)
+                {
+                    if (string.Equals(wb.Name, workbookName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        wb.Activate();
+                        return true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Could not activate workbook '{workbookName}': {ex.Message}", "Activate Workbook", isError: true);
+            }
+            return false;
+        }
+
+        public bool CloseWorkbook(string workbookName, bool saveChanges = false)
+        {
+            try
+            {
+                foreach (Excel.Workbook wb in _app.Workbooks)
+                {
+                    if (string.Equals(wb.Name, workbookName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        wb.Close(saveChanges);
+                        return true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Could not close workbook '{workbookName}': {ex.Message}", "Close Workbook", isError: true);
+            }
+            return false;
+        }
+
+        public bool SaveWorkbook(string workbookName)
+        {
+            try
+            {
+                foreach (Excel.Workbook wb in _app.Workbooks)
+                {
+                    if (string.Equals(wb.Name, workbookName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        wb.Save();
+                        return true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Could not save workbook '{workbookName}': {ex.Message}", "Save Workbook", isError: true);
+            }
+            return false;
+        }
+
+        public void SaveAllWorkbooks()
+        {
+            try
+            {
+                foreach (Excel.Workbook wb in _app.Workbooks)
+                {
+                    try
+                    {
+                        if (!wb.Saved) wb.Save();
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+        }
+
+        public bool CreateNewWorkbook()
+        {
+            try
+            {
+                var wb = _app.Workbooks.Add();
+                wb.Activate();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Could not create new workbook: {ex.Message}", "New Workbook", isError: true);
+                return false;
+            }
+        }
+
+        public bool ActivateWorksheet(string sheetName, string? workbookName = null)
+        {
+            try
+            {
+                Excel.Workbook? wb = null;
+                if (!string.IsNullOrWhiteSpace(workbookName))
+                {
+                    foreach (Excel.Workbook b in _app.Workbooks)
+                    {
+                        if (string.Equals(b.Name, workbookName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            wb = b;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    wb = _app.ActiveWorkbook;
+                }
+
+                if (wb == null) return false;
+
+                try
+                {
+                    if (wb.ActiveSheet is Excel.Worksheet curWs)
+                    {
+                        if (!string.Equals(curWs.Name, sheetName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            _previousActiveSheetName = curWs.Name;
+                        }
+                    }
+                }
+                catch { }
+
+                foreach (Excel.Worksheet ws in wb.Worksheets)
+                {
+                    if (string.Equals(ws.Name, sheetName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (ws.Visible != Excel.XlSheetVisibility.xlSheetVisible)
+                        {
+                            ws.Visible = Excel.XlSheetVisibility.xlSheetVisible;
+                        }
+                        ws.Activate();
+                        return true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Could not switch to worksheet '{sheetName}': {ex.Message}", "Activate Worksheet", isError: true);
+            }
+            return false;
+        }
+
+        public bool MoveWorksheet(string sheetName, SheetMoveDirection direction, string? workbookName = null)
+        {
+            try
+            {
+                Excel.Workbook? wb = null;
+                if (!string.IsNullOrWhiteSpace(workbookName))
+                {
+                    foreach (Excel.Workbook b in _app.Workbooks)
+                    {
+                        if (string.Equals(b.Name, workbookName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            wb = b;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    wb = _app.ActiveWorkbook;
+                }
+
+                if (wb == null) return false;
+
+                Excel.Worksheet? ws = null;
+                foreach (Excel.Worksheet s in wb.Worksheets)
+                {
+                    if (string.Equals(s.Name, sheetName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        ws = s;
+                        break;
+                    }
+                }
+
+                if (ws == null) return false;
+
+                int curIndex = ws.Index;
+                int totalSheets = wb.Sheets.Count;
+
+                switch (direction)
+                {
+                    case SheetMoveDirection.Top:
+                        if (curIndex > 1)
+                        {
+                            ws.Move(Before: wb.Sheets[1]);
+                        }
+                        break;
+
+                    case SheetMoveDirection.End:
+                        if (curIndex < totalSheets)
+                        {
+                            ws.Move(After: wb.Sheets[totalSheets]);
+                        }
+                        break;
+
+                    case SheetMoveDirection.Up:
+                        if (curIndex > 1)
+                        {
+                            ws.Move(Before: wb.Sheets[curIndex - 1]);
+                        }
+                        break;
+
+                    case SheetMoveDirection.Down:
+                        if (curIndex < totalSheets)
+                        {
+                            ws.Move(After: wb.Sheets[curIndex + 1]);
+                        }
+                        break;
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Could not move worksheet '{sheetName}': {ex.Message}", "Move Worksheet", isError: true);
+                return false;
+            }
+        }
+
+        public bool ToggleLastActiveWorksheet(string? workbookName = null)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(_previousActiveSheetName)) return false;
+                string target = _previousActiveSheetName!;
+                return ActivateWorksheet(target, workbookName);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public bool AddWorksheet(string? desiredName = null, string? workbookName = null)
+        {
+            try
+            {
+                Excel.Workbook? wb = null;
+                if (!string.IsNullOrWhiteSpace(workbookName))
+                {
+                    foreach (Excel.Workbook b in _app.Workbooks)
+                    {
+                        if (string.Equals(b.Name, workbookName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            wb = b;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    wb = _app.ActiveWorkbook;
+                }
+
+                if (wb == null) return false;
+
+                var ws = (Excel.Worksheet)wb.Worksheets.Add(After: wb.Sheets[wb.Sheets.Count]);
+                if (!string.IsNullOrWhiteSpace(desiredName))
+                {
+                    try { ws.Name = desiredName; } catch { }
+                }
+                ws.Activate();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Could not add worksheet: {ex.Message}", "Add Worksheet", isError: true);
+                return false;
+            }
+        }
+
+        public bool DeleteWorksheet(string sheetName, string? workbookName = null)
+        {
+            try
+            {
+                Excel.Workbook? wb = null;
+                if (!string.IsNullOrWhiteSpace(workbookName))
+                {
+                    foreach (Excel.Workbook b in _app.Workbooks)
+                    {
+                        if (string.Equals(b.Name, workbookName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            wb = b;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    wb = _app.ActiveWorkbook;
+                }
+
+                if (wb == null) return false;
+
+                foreach (Excel.Worksheet ws in wb.Worksheets)
+                {
+                    if (string.Equals(ws.Name, sheetName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        bool origAlerts = _app.DisplayAlerts;
+                        try
+                        {
+                            _app.DisplayAlerts = false;
+                            ws.Delete();
+                        }
+                        finally
+                        {
+                            _app.DisplayAlerts = origAlerts;
+                        }
+                        return true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Could not delete worksheet '{sheetName}': {ex.Message}", "Delete Worksheet", isError: true);
+            }
+            return false;
+        }
+
+        public bool RenameWorksheet(string oldName, string newName, string? workbookName = null)
+        {
+            try
+            {
+                Excel.Workbook? wb = null;
+                if (!string.IsNullOrWhiteSpace(workbookName))
+                {
+                    foreach (Excel.Workbook b in _app.Workbooks)
+                    {
+                        if (string.Equals(b.Name, workbookName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            wb = b;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    wb = _app.ActiveWorkbook;
+                }
+
+                if (wb == null) return false;
+
+                foreach (Excel.Worksheet ws in wb.Worksheets)
+                {
+                    if (string.Equals(ws.Name, oldName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        ws.Name = newName;
+                        return true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Could not rename worksheet '{oldName}' to '{newName}': {ex.Message}", "Rename Worksheet", isError: true);
+            }
+            return false;
+        }
+
+        public void ShowNavigationPane()
+        {
+            try
+            {
+                if (NavigationPaneToggleAction != null)
+                {
+                    NavigationPaneToggleAction.Invoke();
+                }
+                else
+                {
+                    var win = new ExcelProductivitySuite.UI.Dialogs.WorkbookSheetNavigatorWindow(this);
+                    win.Show();
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Could not display Navigation Pane: {ex.Message}", "Navigation Pane Error", isError: true);
             }
         }
 
