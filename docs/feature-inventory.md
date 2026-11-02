@@ -15,8 +15,8 @@ Following the comprehensive Undo/Redo hardening audit, the **Excel Productivity 
 
 The current implementation comprises:
 - **Total Cataloged Capabilities:** 200+ features planned across 12 modules
-- **Active & Verified Tools:** 112 commands (108 core productivity utilities + 4 suite navigation/system utilities)
-- **Unit Test Coverage:** 306 passing automated unit & performance tests (100% pass rate in 5.0s)
+- **Active & Verified Tools:** 113 commands (109 core productivity utilities + 4 suite navigation/system utilities)
+- **Unit Test Coverage:** 313 passing automated unit & performance tests (100% pass rate in 4.5s)
 - **Hardened Suite Undo/Redo Engine:** Real-time multi-level `Ctrl+Z` Undo and `Ctrl+Y` Redo for cell, text, range, formula, and data commands via thread-level Win32 keyboard hook and managed `UndoManager` with snapshot immutability, mixed formula preservation, multi-area / multi-workbook lifecycle isolation, 500,000-cell memory protection, and zero shortcut interference outside worksheet grid (`EXCEL7`).
 - **Real Excel COM Integration Tests:** 18 passing out-of-process Excel 2016+ scenarios (100% pass rate in 1.27s)
 - **Searchable Quick Tool Launcher (SuperSearch):** Integrated multi-category search, active/roadmap status filtering, module badges, and keyword scoring (`Ctrl+Shift+P` / KeyTip: `TL`)
@@ -115,6 +115,7 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 | `CMD_FILE_IMPORT_CSV` | **Import CSV / Text** | I | Import, Export & Files | `CsvTextImporter.cs` | `ImportCsvDialog.xaml` | `RangeAndSheetTests`, `Benchmark_CsvTextImporter` | Implemented and verified |
 | `CMD_FILE_EXPORT_RANGE_CSV` | **Export Range** | I | Import, Export & Files | `RangeExporter.cs` | `ExportRangeDialog.xaml` | `RangeAndSheetTests`, `Benchmark_RangeExporter` | Implemented and verified |
 | `CMD_FILE_EXPORT_SHEETS_PDF` | **Export to PDF** | I | Import, Export & Files | `ExcelContextAdapter.cs` | `ExportSheetsPdfDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
+| `CMD_FILE_PRINT_MULTIPLE_WORKBOOKS` | **Print Multiple Workbooks Wizard** | I | Import, Export & Files | `ExcelContextAdapter.cs`, `PrintWorkbooksEngine.cs` | `PrintMultipleWorkbooksDialog.xaml` | `PrintMultipleWorkbooksTests`, `DialogInstantiationTests` | Implemented and verified |
 | `CMD_FILE_FOLDER_LISTING` | **Folder File Listing** | I | Import, Export & Files | `FolderInventoryScanner.cs` | `FolderListingDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
 | `CMD_FILE_INSERT_TEXT_FILE` | **Insert Text File** | I | Import, Export & Files | `TextFileReader.cs` | `InsertTextFileDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
 | `CMD_FILE_BATCH_CONVERT` | **Batch Convert Files** | I | Import, Export & Files | `ExcelContextAdapter.cs` | `BatchConvertWorkbooksDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
@@ -291,6 +292,7 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 - [x] `CMD_FILE_IMPORT_CSV`: Import delimited text and CSV files with custom encodings. *(Active - Batch 8)*
 - [x] `CMD_FILE_EXPORT_RANGE_CSV`: Export selected range or active table to CSV or JSON file. *(Active - Batch 8)*
 - [x] `CMD_FILE_EXPORT_SHEETS_PDF`: Batch export selected sheets or workbook to PDF format. *(Active - Batch 8)*
+- [x] `CMD_FILE_PRINT_MULTIPLE_WORKBOOKS`: Batch print multiple Excel workbooks, specified worksheets, or CSV files across one or more directories. *(Active - Print Multiple Workbooks Wizard)*
 - [x] `CMD_FILE_BATCH_CONVERT`: Batch convert folders of .xls files to modern .xlsx format. *(Active - Batch 8)*
 - [x] `CMD_FILE_FOLDER_LISTING`: Generate file and folder directory inventory table in worksheet. *(Active - Batch 8)*
 - [x] `CMD_FILE_INSERT_TEXT_FILE`: Insert raw text from an external file into active cell cursor. *(Active - Batch 8)*

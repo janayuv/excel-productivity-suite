@@ -409,6 +409,52 @@ namespace ExcelProductivitySuite.UnitTests
             ReadingViewHighlightUpdateCount++;
         }
 
+        public List<string> MockPrinters { get; } = new List<string> { "Microsoft Print to PDF", "OneNote (Desktop)", "HP LaserJet Pro" };
+        public string? MockDefaultPrinter { get; set; } = "Microsoft Print to PDF";
+        public PrintWorkbooksResult? LastBatchPrintResult { get; private set; }
+
+        public IReadOnlyList<string> GetInstalledPrinterNames() => MockPrinters;
+        public string? GetDefaultPrinterName() => MockDefaultPrinter;
+
+        public PrintWorkbooksResult BatchPrintWorkbooks(
+            PrintWorkbooksConfig config,
+            IProgress<(int current, int total, string currentFile)>? progress = null,
+            System.Threading.CancellationToken cancellationToken = default)
+        {
+            var res = new PrintWorkbooksResult();
+            var (isValid, err) = ExcelProductivitySuite.Engine.Printing.PrintWorkbooksEngine.ValidateConfig(config);
+            if (!isValid)
+            {
+                res.Errors.Add(err ?? "Invalid configuration");
+                LastBatchPrintResult = res;
+                return res;
+            }
+
+            var selected = config.SelectedFiles.Where(f => f.IsSelected).ToList();
+            res.TotalWorkbooks = selected.Count;
+
+            int count = 0;
+            foreach (var item in selected)
+            {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    item.Status = PrintItemStatus.Skipped;
+                    res.SkippedWorkbooks++;
+                    continue;
+                }
+                count++;
+                progress?.Report((count, selected.Count, item.FileName));
+
+                item.Status = PrintItemStatus.Completed;
+                item.SheetsPrintedCount = 2;
+                res.PrintedWorkbooks++;
+                res.TotalSheetsPrinted += 2;
+            }
+            res.ProcessedItems = selected;
+            LastBatchPrintResult = res;
+            return res;
+        }
+
         public IReadOnlyList<string> GetBlankWorksheetNames() => BlankSheets;
 
         public int DeleteWorksheets(IEnumerable<string> sheetNames)

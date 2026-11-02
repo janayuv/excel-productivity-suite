@@ -157,6 +157,7 @@ namespace ExcelProductivitySuite.AddIn.Ribbon
                 case "btnImportCsv": return "CMD_FILE_IMPORT_CSV";
                 case "btnExportRange": return "CMD_FILE_EXPORT_RANGE_CSV";
                 case "btnExportPdf": return "CMD_FILE_EXPORT_SHEETS_PDF";
+                case "btnPrintWorkbooks": return "CMD_FILE_PRINT_MULTIPLE_WORKBOOKS";
                 case "btnFolderListing": return "CMD_FILE_FOLDER_LISTING";
                 case "btnInsertTextFile": return "CMD_FILE_INSERT_TEXT_FILE";
                 case "btnBatchConvert": return "CMD_FILE_BATCH_CONVERT";

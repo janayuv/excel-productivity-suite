@@ -826,6 +826,13 @@
                   screentip="Export to PDF"
                   supertip="Publish worksheets or entire active workbook as high-resolution PDF documents."
                   onAction="OnRibbonButtonClicked" />
+          <button id="btnPrintWorkbooks"
+                  label="Print Workbooks"
+                  size="large"
+                  imageMso="FilePrintQuick"
+                  screentip="Print Multiple Workbooks Wizard"
+                  supertip="Batch print multiple Excel workbooks, specified worksheets, or CSV files across one or more folders without opening them manually."
+                  onAction="OnRibbonButtonClicked" />
           <button id="btnExportRange"
                   label="Export Range"
                   size="normal"

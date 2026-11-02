@@ -318,6 +318,24 @@ namespace ExcelProductivitySuite.Core.Abstractions
         void UpdateReadingViewHighlight();
 
         /// <summary>
+        /// Gets the list of installed Windows printer names.
+        /// </summary>
+        IReadOnlyList<string> GetInstalledPrinterNames();
+
+        /// <summary>
+        /// Gets the system default printer name, if available.
+        /// </summary>
+        string? GetDefaultPrinterName();
+
+        /// <summary>
+        /// Batch prints multiple Excel workbooks according to configuration.
+        /// </summary>
+        PrintWorkbooksResult BatchPrintWorkbooks(
+            PrintWorkbooksConfig config,
+            IProgress<(int current, int total, string currentFile)>? progress = null,
+            System.Threading.CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Selects disparate individual cells on the active worksheet.
         /// </summary>
         void SelectCells(IEnumerable<(int row, int col)> cells);

@@ -1,13 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Windows;
+using System.Threading;
 using ExcelProductivitySuite.Core.Abstractions;
 using ExcelProductivitySuite.Core.Models;
 using ExcelProductivitySuite.Engine.Files;
 using ExcelProductivitySuite.Engine.Formulas;
 using ExcelProductivitySuite.Engine.Navigation;
+using ExcelProductivitySuite.Engine.Printing;
 using ExcelProductivitySuite.Engine.Ranges;
 using Excel = Microsoft.Office.Interop.Excel;
 using Office = Microsoft.Office.Core;
@@ -5120,6 +5123,208 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
                 ShowMessage($"Error performing redo: {ex.Message}", "Redo Error", isError: true);
                 return false;
             }
+        }
+
+        public IReadOnlyList<string> GetInstalledPrinterNames()
+        {
+            var list = new List<string>();
+            try
+            {
+                foreach (string printer in System.Drawing.Printing.PrinterSettings.InstalledPrinters)
+                {
+                    list.Add(printer);
+                }
+            }
+            catch { }
+            return list;
+        }
+
+        public string? GetDefaultPrinterName()
+        {
+            try
+            {
+                var settings = new System.Drawing.Printing.PrinterSettings();
+                return settings.PrinterName;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public PrintWorkbooksResult BatchPrintWorkbooks(
+            PrintWorkbooksConfig config,
+            IProgress<(int current, int total, string currentFile)>? progress = null,
+            CancellationToken cancellationToken = default)
+        {
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            var result = new PrintWorkbooksResult();
+
+            var (isValid, errorMsg) = PrintWorkbooksEngine.ValidateConfig(config);
+            if (!isValid)
+            {
+                result.Errors.Add(errorMsg ?? "Invalid configuration.");
+                return result;
+            }
+
+            var targets = config.SelectedFiles.Where(f => f.IsSelected).ToList();
+            result.TotalWorkbooks = targets.Count;
+
+            string? originalPrinter = null;
+            bool originalScreenUpdating = _app.ScreenUpdating;
+            bool originalDisplayAlerts = _app.DisplayAlerts;
+            bool originalEnableEvents = _app.EnableEvents;
+
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(config.PrinterName))
+                {
+                    try
+                    {
+                        originalPrinter = _app.ActivePrinter;
+                        _app.ActivePrinter = config.PrinterName;
+                    }
+                    catch { }
+                }
+
+                if (config.QuietMode)
+                {
+                    _app.ScreenUpdating = false;
+                    _app.DisplayAlerts = false;
+                }
+
+                if (config.DisableMacros)
+                {
+                    _app.EnableEvents = false;
+                }
+
+                int currentIdx = 0;
+                foreach (var item in targets)
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        item.Status = PrintItemStatus.Skipped;
+                        item.ErrorMessage = "Operation cancelled by user.";
+                        result.SkippedWorkbooks++;
+                        continue;
+                    }
+
+                    currentIdx++;
+                    progress?.Report((currentIdx, targets.Count, item.FileName));
+
+                    item.Status = PrintItemStatus.Printing;
+                    Excel.Workbook? wb = null;
+                    try
+                    {
+                        int updateLinks = config.DoNotUpdateLinks ? 0 : 3;
+                        wb = _app.Workbooks.Open(item.FilePath, UpdateLinks: updateLinks, ReadOnly: true);
+
+                        int sheetsPrintedInWb = 0;
+                        var (fromPage, toPage) = PrintWorkbooksEngine.ResolvePageRange(config.PageRangeMode, config.FromPage, config.ToPage);
+
+                        foreach (object sheetObj in wb.Sheets)
+                        {
+                            if (cancellationToken.IsCancellationRequested) break;
+
+                            string sheetName = string.Empty;
+                            bool isChart = sheetObj is Excel.Chart;
+
+                            if (sheetObj is Excel.Worksheet ws)
+                            {
+                                sheetName = ws.Name;
+                            }
+                            else if (sheetObj is Excel.Chart chart)
+                            {
+                                sheetName = chart.Name;
+                            }
+
+                            if (PrintWorkbooksEngine.ShouldPrintSheet(sheetName, isChart, config.SheetScope, config.SpecificSheetNames))
+                            {
+                                try
+                                {
+                                    if (fromPage.HasValue && toPage.HasValue)
+                                    {
+                                        if (sheetObj is Excel.Worksheet wsPrint)
+                                        {
+                                            wsPrint.PrintOut(From: fromPage.Value, To: toPage.Value, Copies: config.Copies);
+                                        }
+                                        else if (sheetObj is Excel.Chart chartPrint)
+                                        {
+                                            chartPrint.PrintOut(From: fromPage.Value, To: toPage.Value, Copies: config.Copies);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (sheetObj is Excel.Worksheet wsPrint)
+                                        {
+                                            wsPrint.PrintOut(Copies: config.Copies);
+                                        }
+                                        else if (sheetObj is Excel.Chart chartPrint)
+                                        {
+                                            chartPrint.PrintOut(Copies: config.Copies);
+                                        }
+                                    }
+                                    sheetsPrintedInWb++;
+                                }
+                                catch (Exception printEx)
+                                {
+                                    item.ErrorMessage = $"Sheet '{sheetName}': {printEx.Message}";
+                                }
+                            }
+                        }
+
+                        item.SheetsPrintedCount = sheetsPrintedInWb;
+                        item.Status = PrintItemStatus.Completed;
+                        result.PrintedWorkbooks++;
+                        result.TotalSheetsPrinted += sheetsPrintedInWb;
+                    }
+                    catch (Exception fileEx)
+                    {
+                        item.Status = PrintItemStatus.Failed;
+                        item.ErrorMessage = fileEx.Message;
+                        result.FailedWorkbooks++;
+                        result.Errors.Add($"{item.FileName}: {fileEx.Message}");
+                    }
+                    finally
+                    {
+                        if (wb != null)
+                        {
+                            try
+                            {
+                                wb.Close(SaveChanges: false);
+                                Marshal.ReleaseComObject(wb);
+                            }
+                            catch { }
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                if (originalPrinter != null)
+                {
+                    try { _app.ActivePrinter = originalPrinter; } catch { }
+                }
+                _app.ScreenUpdating = originalScreenUpdating;
+                _app.DisplayAlerts = originalDisplayAlerts;
+                _app.EnableEvents = originalEnableEvents;
+
+                sw.Stop();
+                result.Duration = sw.Elapsed;
+                result.ProcessedItems = targets;
+            }
+
+            if (config.GenerateSummaryReport && result.ProcessedItems.Count > 0)
+            {
+                try
+                {
+                    var matrix = PrintWorkbooksEngine.GenerateSummaryMatrix(result, result.ProcessedItems);
+                    CreateWorksheetWithData("Print_Summary", matrix, activate: true);
+                }
+                catch { }
+            }
+
+            return result;
         }
     }
 }

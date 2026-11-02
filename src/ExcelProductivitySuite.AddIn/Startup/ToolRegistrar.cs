@@ -1036,6 +1036,24 @@ namespace ExcelProductivitySuite.AddIn.Startup
                 roadmapBatch: "Batch 8"
             ));
 
+            // Print Multiple Workbooks Wizard
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_FILE_PRINT_MULTIPLE_WORKBOOKS",
+                title: "Print Multiple Workbooks Wizard",
+                description: "Batch print multiple Excel workbooks, specified worksheets, or CSV files across one or more directories without opening each file manually.",
+                category: CommandCategory.ImportExportAndFiles,
+                executeAction: ctx =>
+                {
+                    var dlg = new PrintMultipleWorkbooksDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "print multiple workbooks", "batch print", "print wizard", "print workbooks", "batch printing", "print sheets", "print folders", "silent print" },
+                officeIconName: "FilePrintQuick",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "I",
+                roadmapBatch: "Batch 8+"
+            ));
+
             // Folder File Inventory Listing
             registry.RegisterCommand(new SuiteCommand(
                 id: "CMD_FILE_FOLDER_LISTING",
