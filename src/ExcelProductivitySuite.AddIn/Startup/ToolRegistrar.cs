@@ -517,6 +517,24 @@ namespace ExcelProductivitySuite.AddIn.Startup
                 roadmapBatch: "Batch 3"
             ));
 
+            // Delete All Empty Rows (ASAP Utilities Tool #232)
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_DELETE_ALL_EMPTY_ROWS",
+                title: "Delete All Empty Rows",
+                description: "Remove all completely empty rows within the dataset on your worksheet (ASAP Utilities Tool #232).",
+                category: CommandCategory.RangeAndCells,
+                executeAction: ctx =>
+                {
+                    var dlg = new DeleteAllEmptyRowsDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "delete all empty rows", "remove blank rows", "delete empty rows", "asap utilities 232", "asap 232", "tip 232", "clean blank rows", "columns & rows", "delete empty lines", "strip empty rows" },
+                officeIconName: "SheetRowsDelete",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "B",
+                roadmapBatch: "Active"
+            ));
+
             // 9. Compare Ranges - Module C: Find, Select, and Compare
             registry.RegisterCommand(new SuiteCommand(
                 id: "CMD_RANGE_COMPARE",

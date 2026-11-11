@@ -19,22 +19,30 @@ namespace ExcelProductivitySuite.Engine.Ranges
         private static readonly string SettingsFilePath = Path.Combine(SettingsDir, "SequenceDefinitions.json");
 
         /// <summary>
-        /// Gets the standard built-in sequence presets.
+        /// Gets the standard built-in sequence presets covering numeric, alphabetic, roman, hex, cycles, and dynamic date codes.
         /// </summary>
         public static List<SequenceNumberDefinition> GetDefaultPresets()
         {
-            int currentYear = DateTime.Now.Year;
-
             return new List<SequenceNumberDefinition>
             {
-                new SequenceNumberDefinition("Simple Numbers (1, 2, 3...)", 1, 1, 1, "", "", null, 1, true),
-                new SequenceNumberDefinition("Leading Zeros (0001, 0002...)", 1, 1, 4, "", "", null, 1, true),
-                new SequenceNumberDefinition("Invoice Code (INV-0001)", 1, 1, 4, "INV-", "", null, 1, true),
-                new SequenceNumberDefinition("Order Number (ORD-" + currentYear + "-0001)", 1, 1, 4, $"ORD-{currentYear}-", "", null, 1, true),
-                new SequenceNumberDefinition("Employee ID (EMP-001)", 1, 1, 3, "EMP-", "", null, 1, true),
-                new SequenceNumberDefinition("Repeating Cycle (1 to 5)", 1, 1, 1, "", "", 5, 1, true),
-                new SequenceNumberDefinition("Repeating Pairs (1, 1, 2, 2...)", 1, 1, 1, "", "", null, 2, true),
-                new SequenceNumberDefinition("Item Suffix (Item-01-A)", 1, 1, 2, "Item-", "-A", null, 1, true)
+                new SequenceNumberDefinition("Simple Numbers (1, 2, 3...)", 1, 1, 1, "", "", null, 1, true, SequenceType.Numeric),
+                new SequenceNumberDefinition("Leading Zeros (0001, 0002...)", 1, 1, 4, "", "", null, 1, true, SequenceType.Numeric),
+                new SequenceNumberDefinition("Invoice Code (INV-{YYYY}-0001)", 1, 1, 4, "INV-{YYYY}-", "", null, 1, true, SequenceType.Numeric),
+                new SequenceNumberDefinition("Monthly Order (ORD-{YYYY}{MM}-0001)", 1, 1, 4, "ORD-{YYYY}{MM}-", "", null, 1, true, SequenceType.Numeric),
+                new SequenceNumberDefinition("Employee ID (EMP-001)", 1, 1, 3, "EMP-", "", null, 1, true, SequenceType.Numeric),
+                new SequenceNumberDefinition("Uppercase Letters (A, B, C...)", 1, 1, 1, "", "", null, 1, true, SequenceType.AlphaUpper),
+                new SequenceNumberDefinition("Lowercase Letters (a, b, c...)", 1, 1, 1, "", "", null, 1, true, SequenceType.AlphaLower),
+                new SequenceNumberDefinition("Revision Code (REV-A, REV-B...)", 1, 1, 1, "REV-", "", null, 1, true, SequenceType.AlphaUpper),
+                new SequenceNumberDefinition("Roman Numerals (I, II, III...)", 1, 1, 1, "", "", null, 1, true, SequenceType.RomanUpper),
+                new SequenceNumberDefinition("Lowercase Roman (i, ii, iii...)", 1, 1, 1, "", "", null, 1, true, SequenceType.RomanLower),
+                new SequenceNumberDefinition("Fiscal Quarter Cycle (Q1, Q2, Q3, Q4)", 1, 1, 1, "", "", 4, 1, true, SequenceType.CustomList,
+                    new List<string> { "Q1", "Q2", "Q3", "Q4" }),
+                new SequenceNumberDefinition("Weekday Cycle (Mon, Tue, Wed...)", 1, 1, 1, "", "", 5, 1, true, SequenceType.CustomList,
+                    new List<string> { "Mon", "Tue", "Wed", "Thu", "Fri" }),
+                new SequenceNumberDefinition("Hexadecimal Code (0x0001, 0x0002...)", 1, 1, 4, "0x", "", null, 1, true, SequenceType.Hexadecimal),
+                new SequenceNumberDefinition("Repeating Cycle (1 to 5)", 1, 1, 1, "", "", 5, 1, true, SequenceType.Numeric),
+                new SequenceNumberDefinition("Repeating Pairs (1, 1, 2, 2...)", 1, 1, 1, "", "", null, 2, true, SequenceType.Numeric),
+                new SequenceNumberDefinition("Item Suffix (Item-01-A)", 1, 1, 2, "Item-", "-A", null, 1, true, SequenceType.Numeric)
             };
         }
 
@@ -43,13 +51,27 @@ namespace ExcelProductivitySuite.Engine.Ranges
         /// </summary>
         public static List<string> GenerateSequence(SequenceNumberDefinition def, int count, out long nextNumber)
         {
-            return GenerateSequence(def, count, false, out nextNumber);
+            return GenerateSequence(def, count, false, null, null, out nextNumber);
         }
 
         /// <summary>
-        /// Generates a list of formatted sequential strings of the specified length.
+        /// Generates a list of formatted sequential strings of the specified length starting from current or start number.
         /// </summary>
         public static List<string> GenerateSequence(SequenceNumberDefinition def, int count, bool continueFromCurrent, out long nextNumber)
+        {
+            return GenerateSequence(def, count, continueFromCurrent, null, null, out nextNumber);
+        }
+
+        /// <summary>
+        /// Generates a list of formatted sequential strings with optional reference date and sheet name for dynamic tokens.
+        /// </summary>
+        public static List<string> GenerateSequence(
+            SequenceNumberDefinition def,
+            int count,
+            bool continueFromCurrent,
+            DateTime? referenceDate,
+            string? sheetName,
+            out long nextNumber)
         {
             if (def == null) throw new ArgumentNullException(nameof(def));
             count = Math.Max(0, count);
@@ -60,7 +82,7 @@ namespace ExcelProductivitySuite.Engine.Ranges
 
             for (int i = 0; i < count; i++)
             {
-                result.Add(def.FormatValue(val));
+                result.Add(def.FormatValue(val, referenceDate, sheetName));
                 rep++;
                 if (rep >= def.RepeatCount)
                 {
@@ -79,7 +101,7 @@ namespace ExcelProductivitySuite.Engine.Ranges
         }
 
         /// <summary>
-        /// Populates a 2D matrix with sequence numbers based on traversal order and fill criteria.
+        /// Populates a 2D matrix with sequence numbers based on traversal order, filtering, grouping, and randomization options.
         /// </summary>
         public static object?[,] FormatMatrix(
             object?[,] matrix,
@@ -98,69 +120,214 @@ namespace ExcelProductivitySuite.Engine.Ranges
             int cStart = matrix.GetLowerBound(1);
             int cEnd = matrix.GetUpperBound(1);
 
-            int rows = rEnd - rStart + 1;
-            int cols = cEnd - cStart + 1;
-
             object?[,] output = (object?[,])matrix.Clone();
-            int updated = 0;
+
+            // 1. Determine cell traversal coordinates in desired order
+            var coords = new List<(int r, int c)>();
+
+            switch (options.FillOrder)
+            {
+                case SequenceFillOrder.Vertical:
+                    for (int c = cStart; c <= cEnd; c++)
+                    {
+                        for (int r = rStart; r <= rEnd; r++)
+                        {
+                            coords.Add((r, c));
+                        }
+                    }
+                    break;
+
+                case SequenceFillOrder.Horizontal:
+                    for (int r = rStart; r <= rEnd; r++)
+                    {
+                        for (int c = cStart; c <= cEnd; c++)
+                        {
+                            coords.Add((r, c));
+                        }
+                    }
+                    break;
+
+                case SequenceFillOrder.SerpentineVertical:
+                    for (int c = cStart; c <= cEnd; c++)
+                    {
+                        int colIdx = c - cStart;
+                        if (colIdx % 2 == 0)
+                        {
+                            for (int r = rStart; r <= rEnd; r++)
+                                coords.Add((r, c));
+                        }
+                        else
+                        {
+                            for (int r = rEnd; r >= rStart; r--)
+                                coords.Add((r, c));
+                        }
+                    }
+                    break;
+
+                case SequenceFillOrder.SerpentineHorizontal:
+                    for (int r = rStart; r <= rEnd; r++)
+                    {
+                        int rowIdx = r - rStart;
+                        if (rowIdx % 2 == 0)
+                        {
+                            for (int c = cStart; c <= cEnd; c++)
+                                coords.Add((r, c));
+                        }
+                        else
+                        {
+                            for (int c = cEnd; c >= cStart; c--)
+                                coords.Add((r, c));
+                        }
+                    }
+                    break;
+            }
+
+            // 2. Filter eligible coordinates based on StepRows and Blank-only criteria
+            var eligibleCoords = new List<(int r, int c)>();
             int skipped = 0;
 
-            long val = options.ContinueFromLast ? def.CurrentNumber : def.StartNumber;
-            int rep = 0;
-
-            void ProcessCell(int r, int c)
+            foreach (var (r, c) in coords)
             {
+                if (options.StepRows > 1 && ((r - rStart) % options.StepRows) != 0)
+                {
+                    skipped++;
+                    continue;
+                }
+
                 object? existing = output[r, c];
                 bool isBlank = existing == null || string.IsNullOrWhiteSpace(existing.ToString());
 
                 if (options.OnlyFillBlankCells && !isBlank)
                 {
                     skipped++;
-                    return;
+                    continue;
                 }
 
-                output[r, c] = def.FormatValue(val);
-                updated++;
-
-                rep++;
-                if (rep >= def.RepeatCount)
-                {
-                    rep = 0;
-                    val += def.Increment;
-                    if (def.EndNumber.HasValue)
-                    {
-                        if (def.Increment > 0 && val > def.EndNumber.Value) val = def.StartNumber;
-                        else if (def.Increment < 0 && val < def.EndNumber.Value) val = def.StartNumber;
-                    }
-                }
+                eligibleCoords.Add((r, c));
             }
 
-            if (options.FillOrder == SequenceFillOrder.Vertical)
+            if (eligibleCoords.Count == 0)
             {
-                // Down columns first, then next column
-                for (int c = cStart; c <= cEnd; c++)
+                updatedCount = 0;
+                skippedCount = skipped;
+                nextNumber = options.ContinueFromLast ? def.CurrentNumber : def.StartNumber;
+                return output;
+            }
+
+            // 3. Process insertion
+            long val = options.ContinueFromLast ? def.CurrentNumber : def.StartNumber;
+            int rep = 0;
+            int updated = 0;
+
+            // Scenario A: Randomize order within the target cells
+            if (options.RandomizeOrder && !options.RestartOnValueChange)
+            {
+                var valuesToInsert = new List<object?>();
+                long genVal = val;
+                int genRep = 0;
+
+                for (int i = 0; i < eligibleCoords.Count; i++)
                 {
-                    for (int r = rStart; r <= rEnd; r++)
+                    string formatted = def.FormatValue(genVal, options.ReferenceDate, options.WorksheetName);
+                    if (def.OutputAsNumeric && def.Type == SequenceType.Numeric && long.TryParse(formatted, out long num))
                     {
-                        ProcessCell(r, c);
+                        valuesToInsert.Add(num);
+                    }
+                    else
+                    {
+                        valuesToInsert.Add(formatted);
+                    }
+
+                    genRep++;
+                    if (genRep >= def.RepeatCount)
+                    {
+                        genRep = 0;
+                        genVal += def.Increment;
+                        if (def.EndNumber.HasValue)
+                        {
+                            if (def.Increment > 0 && genVal > def.EndNumber.Value) genVal = def.StartNumber;
+                            else if (def.Increment < 0 && genVal < def.EndNumber.Value) genVal = def.StartNumber;
+                        }
                     }
                 }
+
+                // Fisher-Yates shuffle
+                var rng = new Random();
+                for (int i = valuesToInsert.Count - 1; i > 0; i--)
+                {
+                    int j = rng.Next(i + 1);
+                    var temp = valuesToInsert[i];
+                    valuesToInsert[i] = valuesToInsert[j];
+                    valuesToInsert[j] = temp;
+                }
+
+                for (int i = 0; i < eligibleCoords.Count; i++)
+                {
+                    var (r, c) = eligibleCoords[i];
+                    output[r, c] = valuesToInsert[i];
+                    updated++;
+                }
+
+                nextNumber = genVal;
             }
             else
             {
-                // Across rows first, then next row
-                for (int r = rStart; r <= rEnd; r++)
+                // Scenario B: Sequential fill with optional Grouped Restart on value change
+                string? prevKeyStr = null;
+                bool hasPrevKey = false;
+
+                foreach (var (r, c) in eligibleCoords)
                 {
-                    for (int c = cStart; c <= cEnd; c++)
+                    if (options.RestartOnValueChange)
                     {
-                        ProcessCell(r, c);
+                        int keyCol = c + options.RestartKeyColumnOffset;
+                        if (keyCol >= cStart && keyCol <= cEnd)
+                        {
+                            object? currentKeyVal = matrix[r, keyCol];
+                            string currentKeyStr = currentKeyVal?.ToString() ?? string.Empty;
+
+                            if (hasPrevKey && !string.Equals(currentKeyStr, prevKeyStr, StringComparison.OrdinalIgnoreCase))
+                            {
+                                val = def.StartNumber;
+                                rep = 0;
+                            }
+
+                            prevKeyStr = currentKeyStr;
+                            hasPrevKey = true;
+                        }
+                    }
+
+                    string formatted = def.FormatValue(val, options.ReferenceDate, options.WorksheetName);
+
+                    if (def.OutputAsNumeric && def.Type == SequenceType.Numeric && long.TryParse(formatted, out long num))
+                    {
+                        output[r, c] = num;
+                    }
+                    else
+                    {
+                        output[r, c] = formatted;
+                    }
+
+                    updated++;
+
+                    rep++;
+                    if (rep >= def.RepeatCount)
+                    {
+                        rep = 0;
+                        val += def.Increment;
+                        if (def.EndNumber.HasValue)
+                        {
+                            if (def.Increment > 0 && val > def.EndNumber.Value) val = def.StartNumber;
+                            else if (def.Increment < 0 && val < def.EndNumber.Value) val = def.StartNumber;
+                        }
                     }
                 }
+
+                nextNumber = val;
             }
 
             updatedCount = updated;
             skippedCount = skipped;
-            nextNumber = val;
             return output;
         }
 
@@ -206,7 +373,71 @@ namespace ExcelProductivitySuite.Engine.Ranges
             catch { }
         }
 
-        private static string SerializeJson(List<SequenceNumberDefinition> list)
+        /// <summary>
+        /// Exports a collection of sequence definitions to a JSON file.
+        /// </summary>
+        public static bool ExportToFile(string filePath, IEnumerable<SequenceNumberDefinition> sequences, out string? error)
+        {
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                error = "File path is required.";
+                return false;
+            }
+
+            try
+            {
+                string json = SerializeJson(sequences.ToList());
+                File.WriteAllText(filePath, json, Encoding.UTF8);
+                error = null;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                error = ex.Message;
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Imports sequence definitions from a JSON file.
+        /// </summary>
+        public static bool ImportFromFile(string filePath, out List<SequenceNumberDefinition> imported, out string? error)
+        {
+            imported = new List<SequenceNumberDefinition>();
+
+            if (!File.Exists(filePath))
+            {
+                error = "Selected file does not exist.";
+                return false;
+            }
+
+            try
+            {
+                string json = File.ReadAllText(filePath, Encoding.UTF8);
+                var list = DeserializeJson(json);
+                if (list != null && list.Count > 0)
+                {
+                    foreach (var item in list)
+                    {
+                        item.Id = Guid.NewGuid().ToString("N");
+                        item.IsBuiltIn = false;
+                    }
+                    imported = list;
+                    error = null;
+                    return true;
+                }
+
+                error = "No valid sequence definitions found in file.";
+                return false;
+            }
+            catch (Exception ex)
+            {
+                error = ex.Message;
+                return false;
+            }
+        }
+
+        public static string SerializeJson(List<SequenceNumberDefinition> list)
         {
             var sb = new StringBuilder();
             sb.AppendLine("[");
@@ -216,6 +447,8 @@ namespace ExcelProductivitySuite.Engine.Ranges
                 sb.AppendLine("  {");
                 sb.AppendLine($"    \"Id\": \"{Escape(s.Id)}\",");
                 sb.AppendLine($"    \"Name\": \"{Escape(s.Name)}\",");
+                sb.AppendLine($"    \"Type\": \"{s.Type}\",");
+                sb.AppendLine($"    \"CustomListItems\": \"{Escape(string.Join("|", s.CustomListItems ?? new List<string>()))}\",");
                 sb.AppendLine($"    \"StartNumber\": {s.StartNumber},");
                 sb.AppendLine($"    \"EndNumber\": {(s.EndNumber.HasValue ? s.EndNumber.Value.ToString() : "null")},");
                 sb.AppendLine($"    \"Increment\": {s.Increment},");
@@ -224,6 +457,8 @@ namespace ExcelProductivitySuite.Engine.Ranges
                 sb.AppendLine($"    \"Suffix\": \"{Escape(s.Suffix)}\",");
                 sb.AppendLine($"    \"RepeatCount\": {s.RepeatCount},");
                 sb.AppendLine($"    \"CurrentNumber\": {s.CurrentNumber},");
+                sb.AppendLine($"    \"UseDynamicPlaceholders\": {(s.UseDynamicPlaceholders ? "true" : "false")},");
+                sb.AppendLine($"    \"OutputAsNumeric\": {(s.OutputAsNumeric ? "true" : "false")},");
                 sb.AppendLine($"    \"IsBuiltIn\": {(s.IsBuiltIn ? "true" : "false")}");
                 sb.Append("  }");
                 if (i < list.Count - 1) sb.Append(",");
@@ -233,7 +468,7 @@ namespace ExcelProductivitySuite.Engine.Ranges
             return sb.ToString();
         }
 
-        private static List<SequenceNumberDefinition>? DeserializeJson(string json)
+        public static List<SequenceNumberDefinition>? DeserializeJson(string json)
         {
             if (string.IsNullOrWhiteSpace(json)) return null;
 
@@ -266,6 +501,17 @@ namespace ExcelProductivitySuite.Engine.Ranges
                     {
                         case "Id": current.Id = val.Trim('\"'); break;
                         case "Name": current.Name = val.Trim('\"'); break;
+                        case "Type":
+                            if (Enum.TryParse<SequenceType>(val.Trim('\"'), true, out var st))
+                                current.Type = st;
+                            break;
+                        case "CustomListItems":
+                            string itemsStr = val.Trim('\"');
+                            if (!string.IsNullOrEmpty(itemsStr))
+                            {
+                                current.CustomListItems = itemsStr.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                            }
+                            break;
                         case "StartNumber": if (long.TryParse(val, out long sn)) current.StartNumber = sn; break;
                         case "EndNumber": if (long.TryParse(val, out long en)) current.EndNumber = en; else current.EndNumber = null; break;
                         case "Increment": if (long.TryParse(val, out long inc)) current.Increment = inc; break;
@@ -274,6 +520,8 @@ namespace ExcelProductivitySuite.Engine.Ranges
                         case "Suffix": current.Suffix = val.Trim('\"'); break;
                         case "RepeatCount": if (int.TryParse(val, out int rc)) current.RepeatCount = rc; break;
                         case "CurrentNumber": if (long.TryParse(val, out long cn)) current.CurrentNumber = cn; break;
+                        case "UseDynamicPlaceholders": current.UseDynamicPlaceholders = bool.TryParse(val, out bool udp) && udp; break;
+                        case "OutputAsNumeric": current.OutputAsNumeric = bool.TryParse(val, out bool oan) && oan; break;
                         case "IsBuiltIn": current.IsBuiltIn = bool.TryParse(val, out bool bi) && bi; break;
                     }
                 }

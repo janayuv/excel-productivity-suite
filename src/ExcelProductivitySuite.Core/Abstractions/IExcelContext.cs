@@ -685,6 +685,18 @@ namespace ExcelProductivitySuite.Core.Abstractions
         OperationResult TransformRange(TransformRangeOptions options);
 
         /// <summary>
+        /// Scans the active worksheet, selection, or all worksheets for completely empty rows.
+        /// Corresponds to ASAP Utilities Tool #232 (Columns & Rows > Delete All Empty Rows).
+        /// </summary>
+        EmptyRowsScanResult ScanEmptyRows(DeleteEmptyRowsOptions options);
+
+        /// <summary>
+        /// Batch deletes all completely empty rows in the specified scope (active worksheet, selection, or all sheets).
+        /// Corresponds to ASAP Utilities Tool #232 (Columns & Rows > Delete All Empty Rows).
+        /// </summary>
+        DeleteEmptyRowsResult DeleteAllEmptyRows(DeleteEmptyRowsOptions options);
+
+        /// <summary>
         /// Central undo/redo manager tracking cell and range modifications across suite operations.
         /// </summary>
         IUndoManager UndoManager { get; }

@@ -656,6 +656,76 @@ namespace ExcelProductivitySuite.UnitTests
             return OperationResult.Succeeded($"Transformed {rows}x{cols} range.", total);
         }
 
+        public DeleteEmptyRowsOptions? LastDeleteEmptyRowsOptions { get; set; }
+        public int MockDeletedEmptyRowsOverride { get; set; } = -1;
+        public Dictionary<string, object?[,]?> MockSheetMatrices { get; } = new(StringComparer.OrdinalIgnoreCase);
+
+        public EmptyRowsScanResult ScanEmptyRows(DeleteEmptyRowsOptions options)
+        {
+            options ??= new DeleteEmptyRowsOptions();
+            string sheetName = ActiveWorksheetName ?? "Sheet1";
+            var matrix = CurrentValues;
+            int startRow = SelectionStartRow > 0 ? SelectionStartRow : 1;
+            int startCol = SelectionStartColumn > 0 ? SelectionStartColumn : 1;
+
+            return DeleteEmptyRowsEngine.ScanWorksheetMatrix(
+                sheetName,
+                matrix,
+                startRow,
+                startCol,
+                options.TreatWhitespaceAsEmpty,
+                options.TreatEmptyFormulaAsEmpty);
+        }
+
+        public DeleteEmptyRowsResult DeleteAllEmptyRows(DeleteEmptyRowsOptions options)
+        {
+            options ??= new DeleteEmptyRowsOptions();
+            LastDeleteEmptyRowsOptions = options;
+
+            if (IsCurrentSheetProtected)
+            {
+                return DeleteEmptyRowsResult.Failed("The active worksheet is protected. Please unprotect the sheet before deleting rows.");
+            }
+
+            if (MockDeletedEmptyRowsOverride >= 0)
+            {
+                return DeleteEmptyRowsResult.Succeeded(MockDeletedEmptyRowsOverride, $"Successfully deleted {MockDeletedEmptyRowsOverride} empty row(s).");
+            }
+
+            if (options.Scope == DeleteEmptyRowsScope.AllWorksheetsInWorkbook)
+            {
+                int totalDeleted = 0;
+                var details = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+                foreach (var sheet in Sheets)
+                {
+                    var matrix = MockSheetMatrices.TryGetValue(sheet, out var m) ? m : CurrentValues;
+                    var compacted = DeleteEmptyRowsEngine.CompactMatrix(matrix, out int count, options.TreatWhitespaceAsEmpty, options.TreatEmptyFormulaAsEmpty);
+                    if (count > 0)
+                    {
+                        totalDeleted += count;
+                        details[sheet] = count;
+                    }
+                }
+
+                CurrentValues = DeleteEmptyRowsEngine.CompactMatrix(CurrentValues, out int activeCount, options.TreatWhitespaceAsEmpty, options.TreatEmptyFormulaAsEmpty);
+                return DeleteEmptyRowsResult.Succeeded(totalDeleted, $"Successfully deleted {totalDeleted} empty row(s) across {details.Count} worksheet(s).", details);
+            }
+            else
+            {
+                string sheetName = ActiveWorksheetName ?? "Sheet1";
+                var compacted = DeleteEmptyRowsEngine.CompactMatrix(CurrentValues, out int count, options.TreatWhitespaceAsEmpty, options.TreatEmptyFormulaAsEmpty);
+                CurrentValues = compacted;
+
+                var details = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+                {
+                    [sheetName] = count
+                };
+
+                return DeleteEmptyRowsResult.Succeeded(count, $"Successfully deleted {count} empty row(s) from '{sheetName}'.", details);
+            }
+        }
+
         public int BatchConvertWorkbooks(IEnumerable<string> filePaths, string outputDirectory, string targetExtension)
         {
             var files = new List<string>(filePaths);

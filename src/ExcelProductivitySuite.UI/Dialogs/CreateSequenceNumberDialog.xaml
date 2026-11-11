@@ -6,10 +6,10 @@
         xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
         mc:Ignorable="d"
         Title="Create Sequence Number - Excel Productivity Suite"
-        Height="520" Width="620"
-        MinHeight="480" MinWidth="560"
+        Height="590" Width="700"
+        MinHeight="520" MinWidth="640"
         WindowStartupLocation="CenterOwner"
-        ResizeMode="NoResize"
+        ResizeMode="CanResizeWithGrip"
         Background="#F8F9FA">
 
     <Window.Resources>
@@ -19,6 +19,26 @@
                 <ResourceDictionary Source="../Themes/Typography.xaml" />
                 <ResourceDictionary Source="../Themes/Controls.xaml" />
             </ResourceDictionary.MergedDictionaries>
+            <Style x:Key="PillInsertButtonStyle" TargetType="Button">
+                <Setter Property="Background" Value="#EDF2F7" />
+                <Setter Property="Foreground" Value="#2D3748" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="BorderBrush" Value="#CBD5E0" />
+                <Setter Property="FontSize" Value="10" />
+                <Setter Property="FontWeight" Value="Medium" />
+                <Setter Property="Padding" Value="6,2" />
+                <Setter Property="Margin" Value="0,0,4,0" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="11" Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
         </ResourceDictionary>
     </Window.Resources>
 
@@ -37,7 +57,7 @@
                 </Border>
                 <StackPanel>
                     <TextBlock x:Name="DialogTitleText" Text="Create Sequence Number" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
-                    <TextBlock Text="Configure prefix, start number, increment interval, zero-padding, and suffix" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                    <TextBlock Text="Configure sequence type, dynamic date variables, prefix/suffix, step increment, and zero-padding" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
                 </StackPanel>
             </StackPanel>
         </DockPanel>
@@ -47,67 +67,97 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="14" />
-                <ColumnDefinition Width="200" />
+                <ColumnDefinition Width="220" />
             </Grid.ColumnDefinitions>
 
             <!-- Left: Settings -->
             <GroupBox Grid.Column="0" Header="Sequence Parameters" Style="{StaticResource ModernGroupBoxStyle}">
-                <Grid Margin="4">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="110" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <Grid Margin="4">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="110" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
 
-                    <!-- Name -->
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Sequence Name:" VerticalAlignment="Center" FontSize="11" Margin="0,0,8,8" />
-                    <TextBox x:Name="NameText" Grid.Row="0" Grid.Column="1" Text="Custom Sequence" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,0,8" TextChanged="Input_Changed" />
+                        <!-- Name -->
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Sequence Name:" VerticalAlignment="Center" FontSize="11" Margin="0,0,8,8" />
+                        <TextBox x:Name="NameText" Grid.Row="0" Grid.Column="1" Text="Custom Sequence" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,0,8" TextChanged="Input_Changed" />
 
-                    <!-- Prefix -->
-                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Prefix:" VerticalAlignment="Center" FontSize="11" Margin="0,0,8,8" />
-                    <TextBox x:Name="PrefixText" Grid.Row="1" Grid.Column="1" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,0,8" TextChanged="Input_Changed" />
+                        <!-- Type -->
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Sequence Type:" VerticalAlignment="Center" FontSize="11" Margin="0,0,8,8" />
+                        <ComboBox x:Name="SequenceTypeCombo" Grid.Row="1" Grid.Column="1" Style="{StaticResource ModernComboBoxStyle}" Margin="0,0,0,8" SelectionChanged="SequenceTypeCombo_SelectionChanged" />
 
-                    <!-- Start Number -->
-                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Start Number:" VerticalAlignment="Center" FontSize="11" Margin="0,0,8,8" />
-                    <TextBox x:Name="StartNumberText" Grid.Row="2" Grid.Column="1" Text="1" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,0,8" TextChanged="Input_Changed" />
+                        <!-- Custom List Items (Conditional) -->
+                        <TextBlock x:Name="CustomItemsLabel" Grid.Row="2" Grid.Column="0" Text="List Items:" VerticalAlignment="Top" FontSize="11" Margin="0,4,8,8" Visibility="Collapsed" />
+                        <TextBox x:Name="CustomItemsText" Grid.Row="2" Grid.Column="1" Height="50" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,0,8" Visibility="Collapsed" Text="Q1, Q2, Q3, Q4" TextChanged="Input_Changed" />
 
-                    <!-- End Number (Optional) -->
-                    <DockPanel Grid.Row="3" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center">
-                        <CheckBox x:Name="EndNumberCheck" Content="End Number:" FontSize="11" Style="{StaticResource ModernCheckBoxStyle}" Checked="EndNumberCheck_Changed" Unchecked="EndNumberCheck_Changed" />
-                    </DockPanel>
-                    <TextBox x:Name="EndNumberText" Grid.Row="3" Grid.Column="1" Text="100" Style="{StaticResource ModernTextBoxStyle}" IsEnabled="False" Margin="0,0,0,8" TextChanged="Input_Changed" />
+                        <!-- Dynamic Variable Insertion Pills -->
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Insert Variable:" VerticalAlignment="Center" FontSize="10" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,8,6" />
+                        <WrapPanel Grid.Row="3" Grid.Column="1" Margin="0,0,0,6">
+                            <Button Content="+ Year" Style="{StaticResource PillInsertButtonStyle}" Click="InsertPlaceholder_Click" Tag="{}{YYYY}" ToolTip="Current 4-digit Year (e.g. 2026)" />
+                            <Button Content="+ Month" Style="{StaticResource PillInsertButtonStyle}" Click="InsertPlaceholder_Click" Tag="{}{MM}" ToolTip="Current 2-digit Month (e.g. 11)" />
+                            <Button Content="+ Day" Style="{StaticResource PillInsertButtonStyle}" Click="InsertPlaceholder_Click" Tag="{}{DD}" ToolTip="Current 2-digit Day (e.g. 02)" />
+                            <Button Content="+ Date" Style="{StaticResource PillInsertButtonStyle}" Click="InsertPlaceholder_Click" Tag="{}{DATE:yyyyMMdd}" ToolTip="Full Date formatted yyyyMMdd" />
+                            <Button Content="+ Sheet" Style="{StaticResource PillInsertButtonStyle}" Click="InsertPlaceholder_Click" Tag="{}{SHEET}" ToolTip="Active Worksheet Name" />
+                        </WrapPanel>
 
-                    <!-- Increment -->
-                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Increment:" VerticalAlignment="Center" FontSize="11" Margin="0,0,8,8" />
-                    <TextBox x:Name="IncrementText" Grid.Row="4" Grid.Column="1" Text="1" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,0,8" TextChanged="Input_Changed" />
+                        <!-- Prefix -->
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Prefix:" VerticalAlignment="Center" FontSize="11" Margin="0,0,8,8" />
+                        <TextBox x:Name="PrefixText" Grid.Row="4" Grid.Column="1" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,0,8" TextChanged="Input_Changed" GotFocus="TextBox_GotFocus" />
 
-                    <!-- No. of Digits -->
-                    <TextBlock Grid.Row="5" Grid.Column="0" Text="No. of Digits:" VerticalAlignment="Center" FontSize="11" Margin="0,0,8,8" />
-                    <TextBox x:Name="DigitsText" Grid.Row="5" Grid.Column="1" Text="4" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,0,8" TextChanged="Input_Changed" />
+                        <!-- Start Number / Value -->
+                        <TextBlock x:Name="StartNumberLabel" Grid.Row="5" Grid.Column="0" Text="Start Value:" VerticalAlignment="Center" FontSize="11" Margin="0,0,8,8" />
+                        <TextBox x:Name="StartNumberText" Grid.Row="5" Grid.Column="1" Text="1" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,0,8" TextChanged="Input_Changed" />
 
-                    <!-- Suffix -->
-                    <TextBlock Grid.Row="6" Grid.Column="0" Text="Suffix:" VerticalAlignment="Center" FontSize="11" Margin="0,0,8,8" />
-                    <TextBox x:Name="SuffixText" Grid.Row="6" Grid.Column="1" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,0,8" TextChanged="Input_Changed" />
+                        <!-- End Number (Optional) -->
+                        <DockPanel Grid.Row="6" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center">
+                            <CheckBox x:Name="EndNumberCheck" Content="End Limit:" FontSize="11" Style="{StaticResource ModernCheckBoxStyle}" Checked="EndNumberCheck_Changed" Unchecked="EndNumberCheck_Changed" />
+                        </DockPanel>
+                        <TextBox x:Name="EndNumberText" Grid.Row="6" Grid.Column="1" Text="100" Style="{StaticResource ModernTextBoxStyle}" IsEnabled="False" Margin="0,0,0,8" TextChanged="Input_Changed" />
 
-                    <!-- Repeat Count -->
-                    <TextBlock Grid.Row="7" Grid.Column="0" Text="Repeat Count:" VerticalAlignment="Center" FontSize="11" Margin="0,0,8,0" />
-                    <TextBox x:Name="RepeatCountText" Grid.Row="7" Grid.Column="1" Text="1" Style="{StaticResource ModernTextBoxStyle}" TextChanged="Input_Changed" />
-                </Grid>
+                        <!-- Increment -->
+                        <TextBlock Grid.Row="7" Grid.Column="0" Text="Increment:" VerticalAlignment="Center" FontSize="11" Margin="0,0,8,8" />
+                        <TextBox x:Name="IncrementText" Grid.Row="7" Grid.Column="1" Text="1" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,0,8" TextChanged="Input_Changed" />
+
+                        <!-- No. of Digits -->
+                        <TextBlock x:Name="DigitsLabel" Grid.Row="8" Grid.Column="0" Text="No. of Digits:" VerticalAlignment="Center" FontSize="11" Margin="0,0,8,8" />
+                        <TextBox x:Name="DigitsText" Grid.Row="8" Grid.Column="1" Text="4" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,0,8" TextChanged="Input_Changed" />
+
+                        <!-- Suffix -->
+                        <TextBlock Grid.Row="9" Grid.Column="0" Text="Suffix:" VerticalAlignment="Center" FontSize="11" Margin="0,0,8,8" />
+                        <TextBox x:Name="SuffixText" Grid.Row="9" Grid.Column="1" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,0,8" TextChanged="Input_Changed" GotFocus="TextBox_GotFocus" />
+
+                        <!-- Repeat Count -->
+                        <TextBlock Grid.Row="10" Grid.Column="0" Text="Repeat Count:" VerticalAlignment="Center" FontSize="11" Margin="0,0,8,8" />
+                        <TextBox x:Name="RepeatCountText" Grid.Row="10" Grid.Column="1" Text="1" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,0,8" TextChanged="Input_Changed" />
+
+                        <!-- Output Options -->
+                        <StackPanel Grid.Row="11" Grid.Column="1" Margin="0,2,0,0">
+                            <CheckBox x:Name="UsePlaceholdersCheck" Content="Evaluate date/sheet variables ({YYYY}, {MM}...)" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" Margin="0,0,0,4" Checked="OutputOptions_Changed" Unchecked="OutputOptions_Changed" />
+                            <CheckBox x:Name="OutputNumericCheck" Content="Store as native Excel number (numeric sequences)" IsChecked="False" Style="{StaticResource ModernCheckBoxStyle}" Checked="OutputOptions_Changed" Unchecked="OutputOptions_Changed" />
+                        </StackPanel>
+                    </Grid>
+                </ScrollViewer>
             </GroupBox>
 
             <!-- Right: Live Sample Preview -->
-            <GroupBox Grid.Column="2" Header="Sample Preview" Style="{StaticResource ModernGroupBoxStyle}">
+            <GroupBox Grid.Column="2" Header="Live Output Preview" Style="{StaticResource ModernGroupBoxStyle}">
                 <DockPanel Margin="4">
-                    <TextBlock DockPanel.Dock="Top" Text="Sequence output:" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6" />
+                    <TextBlock DockPanel.Dock="Top" Text="Upcoming sequence items:" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6" />
                     <ListBox x:Name="PreviewList" Background="White" BorderBrush="#DEE2E6" BorderThickness="1" FontSize="12" FontFamily="Consolas, Segoe UI">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
@@ -121,7 +171,7 @@
 
         <!-- Footer -->
         <DockPanel Grid.Row="2" Margin="0,14,0,0">
-            <TextBlock x:Name="ValidationStatusLabel" Text="" VerticalAlignment="Center" FontSize="11" Foreground="#DC3545" />
+            <TextBlock x:Name="ValidationStatusLabel" Text="" VerticalAlignment="Center" FontSize="11" Foreground="#DC3545" MaxWidth="460" TextTrimming="CharacterEllipsis" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Content="OK" Width="85" Height="28" Margin="0,0,8,0" Style="{StaticResource ModernPrimaryButtonStyle}" Click="Ok_Click" IsDefault="True" />
                 <Button Content="Cancel" Width="80" Height="28" Style="{StaticResource ModernSecondaryButtonStyle}" Click="Cancel_Click" IsCancel="True" />

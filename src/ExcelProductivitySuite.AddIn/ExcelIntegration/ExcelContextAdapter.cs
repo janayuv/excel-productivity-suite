@@ -4626,11 +4626,14 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
                 return OperationResult.Failed("No cells are selected.");
             }
 
+            options.WorksheetName = sheet.Name;
+            options.ReferenceDate = DateTime.Now;
+
             try
             {
-                // FAST PATH: Single contiguous area without merged cells and without blank-cell filtering
+                // FAST PATH: Single contiguous area without merged cells, non-filtered, non-grouped
                 bool isMerged = selRange.MergeCells is true || selRange.MergeCells is null || (selRange.MergeCells is object o && Convert.IsDBNull(o));
-                if (selRange.Areas.Count == 1 && !isMerged && !options.OnlyFillBlankCells && !options.SkipHiddenCells)
+                if (selRange.Areas.Count == 1 && !isMerged && !options.OnlyFillBlankCells && !options.SkipHiddenCells && !options.RestartOnValueChange && options.StepRows <= 1)
                 {
                     object?[,] beforeValues = NormalizeTo2DArray(selRange.Value2);
                     object?[,] newMatrix = SequenceNumberEngine.FormatMatrix(
@@ -4646,78 +4649,97 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
                     using (new ExcelStateScope(_app))
                     {
                         selRange.Value2 = newMatrix;
+                        if (sequence.OutputAsNumeric && sequence.Type == SequenceType.Numeric && sequence.Digits > 1)
+                        {
+                            try { selRange.NumberFormat = new string('0', sequence.Digits); } catch { }
+                        }
                     }
 
                     sequence.CurrentNumber = nextNum;
                     return OperationResult.Succeeded($"Successfully inserted {updated} sequence numbers.", updated, skipped);
                 }
 
-                // ADVANCED PATH: Merged cells, non-contiguous multi-area selections, or blank-cell filtering
+                // ADVANCED PATH: Merged cells, non-contiguous multi-area selections, blank filtering, serpentine traversal, or grouping
                 var targetCells = new List<Excel.Range>();
                 var seenMergeAreas = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+                void ProcessCell(Excel.Range area, int r, int c)
+                {
+                    if (options.StepRows > 1 && ((r - 1) % options.StepRows) != 0)
+                        return;
+
+                    Excel.Range cell = area.Cells[r, c];
+                    if (options.SkipHiddenCells && ((bool)cell.EntireRow.Hidden || (bool)cell.EntireColumn.Hidden))
+                        return;
+
+                    if (cell.MergeCells is true)
+                    {
+                        Excel.Range mergeArea = cell.MergeArea;
+                        string mergeAddr = mergeArea.get_Address();
+                        if (seenMergeAreas.Contains(mergeAddr)) return;
+                        seenMergeAreas.Add(mergeAddr);
+                        cell = (Excel.Range)mergeArea.Cells[1, 1];
+                    }
+
+                    if (options.OnlyFillBlankCells)
+                    {
+                        object? val = cell.Value2;
+                        if (val != null && !string.IsNullOrWhiteSpace(val.ToString())) return;
+                    }
+
+                    targetCells.Add(cell);
+                }
 
                 foreach (Excel.Range area in selRange.Areas)
                 {
                     int rCount = area.Rows.Count;
                     int cCount = area.Columns.Count;
 
-                    if (options.FillOrder == SequenceFillOrder.Vertical)
+                    switch (options.FillOrder)
                     {
-                        for (int c = 1; c <= cCount; c++)
-                        {
+                        case SequenceFillOrder.Vertical:
+                            for (int c = 1; c <= cCount; c++)
+                                for (int r = 1; r <= rCount; r++)
+                                    ProcessCell(area, r, c);
+                            break;
+
+                        case SequenceFillOrder.Horizontal:
                             for (int r = 1; r <= rCount; r++)
-                            {
-                                Excel.Range cell = area.Cells[r, c];
-                                if (options.SkipHiddenCells && ((bool)cell.EntireRow.Hidden || (bool)cell.EntireColumn.Hidden))
-                                    continue;
+                                for (int c = 1; c <= cCount; c++)
+                                    ProcessCell(area, r, c);
+                            break;
 
-                                if (cell.MergeCells is true)
-                                {
-                                    Excel.Range mergeArea = cell.MergeArea;
-                                    string mergeAddr = mergeArea.get_Address();
-                                    if (seenMergeAreas.Contains(mergeAddr)) continue;
-                                    seenMergeAreas.Add(mergeAddr);
-                                    cell = (Excel.Range)mergeArea.Cells[1, 1];
-                                }
-
-                                if (options.OnlyFillBlankCells)
-                                {
-                                    object? val = cell.Value2;
-                                    if (val != null && !string.IsNullOrWhiteSpace(val.ToString())) continue;
-                                }
-
-                                targetCells.Add(cell);
-                            }
-                        }
-                    }
-                    else // Horizontal
-                    {
-                        for (int r = 1; r <= rCount; r++)
-                        {
+                        case SequenceFillOrder.SerpentineVertical:
                             for (int c = 1; c <= cCount; c++)
                             {
-                                Excel.Range cell = area.Cells[r, c];
-                                if (options.SkipHiddenCells && ((bool)cell.EntireRow.Hidden || (bool)cell.EntireColumn.Hidden))
-                                    continue;
-
-                                if (cell.MergeCells is true)
+                                if (c % 2 != 0)
                                 {
-                                    Excel.Range mergeArea = cell.MergeArea;
-                                    string mergeAddr = mergeArea.get_Address();
-                                    if (seenMergeAreas.Contains(mergeAddr)) continue;
-                                    seenMergeAreas.Add(mergeAddr);
-                                    cell = (Excel.Range)mergeArea.Cells[1, 1];
+                                    for (int r = 1; r <= rCount; r++)
+                                        ProcessCell(area, r, c);
                                 }
-
-                                if (options.OnlyFillBlankCells)
+                                else
                                 {
-                                    object? val = cell.Value2;
-                                    if (val != null && !string.IsNullOrWhiteSpace(val.ToString())) continue;
+                                    for (int r = rCount; r >= 1; r--)
+                                        ProcessCell(area, r, c);
                                 }
-
-                                targetCells.Add(cell);
                             }
-                        }
+                            break;
+
+                        case SequenceFillOrder.SerpentineHorizontal:
+                            for (int r = 1; r <= rCount; r++)
+                            {
+                                if (r % 2 != 0)
+                                {
+                                    for (int c = 1; c <= cCount; c++)
+                                        ProcessCell(area, r, c);
+                                }
+                                else
+                                {
+                                    for (int c = cCount; c >= 1; c--)
+                                        ProcessCell(area, r, c);
+                                }
+                            }
+                            break;
                     }
                 }
 
@@ -4732,26 +4754,116 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
                     int rep = 0;
                     int updated = 0;
 
-                    foreach (var cell in targetCells)
+                    if (options.RandomizeOrder && !options.RestartOnValueChange)
                     {
-                        string formatted = sequence.FormatValue(currentVal);
-                        cell.Value2 = formatted;
-                        updated++;
+                        var valuesList = new List<object>();
+                        long genVal = currentVal;
+                        int genRep = 0;
 
-                        rep++;
-                        if (rep >= sequence.RepeatCount)
+                        for (int i = 0; i < targetCells.Count; i++)
                         {
-                            rep = 0;
-                            currentVal += sequence.Increment;
-                            if (sequence.EndNumber.HasValue)
+                            string formatted = sequence.FormatValue(genVal, options.ReferenceDate, options.WorksheetName);
+                            if (sequence.OutputAsNumeric && sequence.Type == SequenceType.Numeric && long.TryParse(formatted, out long num))
                             {
-                                if (sequence.Increment > 0 && currentVal > sequence.EndNumber.Value) currentVal = sequence.StartNumber;
-                                else if (sequence.Increment < 0 && currentVal < sequence.EndNumber.Value) currentVal = sequence.StartNumber;
+                                valuesList.Add(num);
+                            }
+                            else
+                            {
+                                valuesList.Add(formatted);
+                            }
+
+                            genRep++;
+                            if (genRep >= sequence.RepeatCount)
+                            {
+                                genRep = 0;
+                                genVal += sequence.Increment;
+                                if (sequence.EndNumber.HasValue)
+                                {
+                                    if (sequence.Increment > 0 && genVal > sequence.EndNumber.Value) genVal = sequence.StartNumber;
+                                    else if (sequence.Increment < 0 && genVal < sequence.EndNumber.Value) genVal = sequence.StartNumber;
+                                }
                             }
                         }
+
+                        var rng = new Random();
+                        for (int i = valuesList.Count - 1; i > 0; i--)
+                        {
+                            int j = rng.Next(i + 1);
+                            var tmp = valuesList[i];
+                            valuesList[i] = valuesList[j];
+                            valuesList[j] = tmp;
+                        }
+
+                        for (int i = 0; i < targetCells.Count; i++)
+                        {
+                            var cell = targetCells[i];
+                            cell.Value2 = valuesList[i];
+                            if (sequence.OutputAsNumeric && sequence.Type == SequenceType.Numeric && sequence.Digits > 1)
+                            {
+                                try { cell.NumberFormat = new string('0', sequence.Digits); } catch { }
+                            }
+                            updated++;
+                        }
+
+                        sequence.CurrentNumber = genVal;
+                    }
+                    else
+                    {
+                        string? prevKeyStr = null;
+                        bool hasPrevKey = false;
+
+                        foreach (var cell in targetCells)
+                        {
+                            if (options.RestartOnValueChange)
+                            {
+                                try
+                                {
+                                    Excel.Range keyCell = cell.Offset[0, options.RestartKeyColumnOffset];
+                                    object? keyVal = keyCell?.Value2;
+                                    string keyStr = keyVal?.ToString() ?? string.Empty;
+                                    if (hasPrevKey && !string.Equals(keyStr, prevKeyStr, StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        currentVal = sequence.StartNumber;
+                                        rep = 0;
+                                    }
+                                    prevKeyStr = keyStr;
+                                    hasPrevKey = true;
+                                }
+                                catch { }
+                            }
+
+                            string formatted = sequence.FormatValue(currentVal, options.ReferenceDate, options.WorksheetName);
+                            if (sequence.OutputAsNumeric && sequence.Type == SequenceType.Numeric && long.TryParse(formatted, out long num))
+                            {
+                                cell.Value2 = num;
+                                if (sequence.Digits > 1)
+                                {
+                                    try { cell.NumberFormat = new string('0', sequence.Digits); } catch { }
+                                }
+                            }
+                            else
+                            {
+                                cell.Value2 = formatted;
+                            }
+
+                            updated++;
+
+                            rep++;
+                            if (rep >= sequence.RepeatCount)
+                            {
+                                rep = 0;
+                                currentVal += sequence.Increment;
+                                if (sequence.EndNumber.HasValue)
+                                {
+                                    if (sequence.Increment > 0 && currentVal > sequence.EndNumber.Value) currentVal = sequence.StartNumber;
+                                    else if (sequence.Increment < 0 && currentVal < sequence.EndNumber.Value) currentVal = sequence.StartNumber;
+                                }
+                            }
+                        }
+
+                        sequence.CurrentNumber = currentVal;
                     }
 
-                    sequence.CurrentNumber = currentVal;
                     return OperationResult.Succeeded($"Successfully inserted {updated} sequence numbers.", updated);
                 }
             }
@@ -5325,6 +5437,216 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
             }
 
             return result;
+        }
+
+        public EmptyRowsScanResult ScanEmptyRows(DeleteEmptyRowsOptions options)
+        {
+            options ??= new DeleteEmptyRowsOptions();
+
+            if (!HasActiveWorkbook || !HasActiveWorksheet)
+            {
+                return new EmptyRowsScanResult { WorksheetName = ActiveWorksheetName ?? string.Empty };
+            }
+
+            try
+            {
+                Excel.Worksheet? ws = _app.ActiveSheet as Excel.Worksheet;
+                if (ws == null) return new EmptyRowsScanResult();
+
+                if (options.Scope == DeleteEmptyRowsScope.CurrentSelection && _app.Selection is Excel.Range sel)
+                {
+                    int startRow = sel.Row;
+                    int startCol = sel.Column;
+                    object?[,] matrix = NormalizeTo2DArray(sel.Value2);
+                    return DeleteEmptyRowsEngine.ScanWorksheetMatrix(
+                        ws.Name,
+                        matrix,
+                        startRow,
+                        startCol,
+                        options.TreatWhitespaceAsEmpty,
+                        options.TreatEmptyFormulaAsEmpty);
+                }
+                else
+                {
+                    Excel.Range used = ws.UsedRange;
+                    if (used == null)
+                    {
+                        return new EmptyRowsScanResult { WorksheetName = ws.Name };
+                    }
+
+                    int startRow = used.Row;
+                    int startCol = used.Column;
+                    object?[,] matrix = NormalizeTo2DArray(used.Value2);
+
+                    return DeleteEmptyRowsEngine.ScanWorksheetMatrix(
+                        ws.Name,
+                        matrix,
+                        startRow,
+                        startCol,
+                        options.TreatWhitespaceAsEmpty,
+                        options.TreatEmptyFormulaAsEmpty);
+                }
+            }
+            catch
+            {
+                return new EmptyRowsScanResult
+                {
+                    WorksheetName = ActiveWorksheetName ?? string.Empty,
+                    TotalRowsScanned = 0
+                };
+            }
+        }
+
+        public DeleteEmptyRowsResult DeleteAllEmptyRows(DeleteEmptyRowsOptions options)
+        {
+            options ??= new DeleteEmptyRowsOptions();
+
+            if (!HasActiveWorkbook)
+            {
+                return DeleteEmptyRowsResult.Failed("No active workbook is open in Excel.");
+            }
+
+            var targetSheets = new List<Excel.Worksheet>();
+
+            if (options.Scope == DeleteEmptyRowsScope.AllWorksheetsInWorkbook)
+            {
+                foreach (Excel.Worksheet ws in _app.ActiveWorkbook.Worksheets)
+                {
+                    targetSheets.Add(ws);
+                }
+            }
+            else if (options.Scope == DeleteEmptyRowsScope.SelectedWorksheets && options.TargetWorksheets != null && options.TargetWorksheets.Count > 0)
+            {
+                foreach (Excel.Worksheet ws in _app.ActiveWorkbook.Worksheets)
+                {
+                    if (options.TargetWorksheets.Contains(ws.Name, StringComparer.OrdinalIgnoreCase))
+                    {
+                        targetSheets.Add(ws);
+                    }
+                }
+            }
+            else
+            {
+                Excel.Worksheet? activeWs = _app.ActiveSheet as Excel.Worksheet;
+                if (activeWs == null)
+                {
+                    return DeleteEmptyRowsResult.Failed("No active worksheet found.");
+                }
+                targetSheets.Add(activeWs);
+            }
+
+            var protectedSheets = targetSheets.Where(s => s.ProtectContents).Select(s => s.Name).ToList();
+            if (protectedSheets.Count > 0)
+            {
+                return DeleteEmptyRowsResult.Failed($"The following worksheet(s) are protected: {string.Join(", ", protectedSheets)}. Please unprotect them before deleting rows.");
+            }
+
+            int grandTotalDeleted = 0;
+            var perSheetDeleted = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+            using (new ExcelStateScope(_app))
+            {
+                foreach (var ws in targetSheets)
+                {
+                    try
+                    {
+                        Excel.Range? targetRange;
+                        if (options.Scope == DeleteEmptyRowsScope.CurrentSelection && targetSheets.Count == 1 && _app.Selection is Excel.Range sel)
+                        {
+                            targetRange = sel;
+                        }
+                        else
+                        {
+                            targetRange = ws.UsedRange;
+                        }
+
+                        if (targetRange == null) continue;
+
+                        int startRow = targetRange.Row;
+                        int startCol = targetRange.Column;
+                        object?[,] matrix = NormalizeTo2DArray(targetRange.Value2);
+
+                        var emptyRowIndices = DeleteEmptyRowsEngine.ScanEmptyRows(
+                            matrix,
+                            startRow,
+                            options.TreatWhitespaceAsEmpty,
+                            options.TreatEmptyFormulaAsEmpty);
+
+                        if (emptyRowIndices.Count == 0) continue;
+
+                        if (targetSheets.Count == 1)
+                        {
+                            try
+                            {
+                                RecordBeforeRangeChange(targetRange, matrix, isFormula: false, customDesc: "Delete All Empty Rows");
+                            }
+                            catch { }
+                        }
+
+                        var contiguousRanges = DeleteEmptyRowsEngine.GroupContiguousRanges(emptyRowIndices);
+
+                        if (options.Scope == DeleteEmptyRowsScope.CurrentSelection && targetRange.Columns.Count < ws.Columns.Count)
+                        {
+                            var reversedRanges = contiguousRanges.OrderByDescending(r => r.startRow).ToList();
+                            foreach (var (rStart, rEnd) in reversedRanges)
+                            {
+                                int relStart = rStart - startRow + 1;
+                                int relEnd = rEnd - startRow + 1;
+                                int rowsInBlock = relEnd - relStart + 1;
+
+                                Excel.Range block = targetRange.Rows[relStart];
+                                if (rowsInBlock > 1)
+                                {
+                                    Excel.Range endBlock = targetRange.Rows[relEnd];
+                                    block = ws.Range[block, endBlock];
+                                }
+                                block.Delete(Excel.XlDeleteShiftDirection.xlShiftUp);
+                            }
+                        }
+                        else
+                        {
+                            var chunks = DeleteEmptyRowsEngine.BuildChunkedAddresses(contiguousRanges, maxCharsPerChunk: 240, bottomToTop: true);
+
+                            foreach (var chunk in chunks)
+                            {
+                                try
+                                {
+                                    Excel.Range rowsToDelete = ws.Range[chunk];
+                                    rowsToDelete.EntireRow.Delete();
+                                }
+                                catch
+                                {
+                                    var splitParts = chunk.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                                    foreach (var part in splitParts)
+                                    {
+                                        try
+                                        {
+                                            ws.Range[part.Trim()].EntireRow.Delete();
+                                        }
+                                        catch { }
+                                    }
+                                }
+                            }
+                        }
+
+                        int sheetDeleted = emptyRowIndices.Count;
+                        grandTotalDeleted += sheetDeleted;
+                        perSheetDeleted[ws.Name] = sheetDeleted;
+                    }
+                    catch (Exception ex)
+                    {
+                        return DeleteEmptyRowsResult.Failed($"Error deleting rows on sheet '{ws.Name}': {ex.Message}");
+                    }
+                }
+            }
+
+            string successMsg = grandTotalDeleted == 0
+                ? "No empty rows were found to delete."
+                : (targetSheets.Count > 1
+                    ? $"Successfully deleted {grandTotalDeleted} empty row(s) across {perSheetDeleted.Count} worksheet(s)."
+                    : $"Successfully deleted {grandTotalDeleted} empty row(s) from '{targetSheets[0].Name}'.");
+
+            return DeleteEmptyRowsResult.Succeeded(grandTotalDeleted, successMsg, perSheetDeleted);
         }
     }
 }
