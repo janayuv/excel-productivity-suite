@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -10,9 +13,15 @@ namespace ExcelProductivitySuite.AddIn.Ribbon
     [ComVisible(true)]
     public class ExcelProductivityRibbon : Office.IRibbonExtensibility
     {
+        private const string IconResourcePrefix = "ExcelProductivitySuite.AddIn.Ribbon.Icons.";
+        private const int PicTypeBitmap = 1;
+        private const int BiRgb = 0;
+
         private Office.IRibbonUI? _ribbon;
         private readonly ICommandRegistry _registry;
         private readonly IExcelContext _context;
+        private readonly Dictionary<string, stdole.IPictureDisp> _imageCache =
+            new Dictionary<string, stdole.IPictureDisp>(StringComparer.OrdinalIgnoreCase);
 
         public ExcelProductivityRibbon(ICommandRegistry registry, IExcelContext context)
         {
@@ -63,6 +72,154 @@ namespace ExcelProductivitySuite.AddIn.Ribbon
             _ribbon = ribbonUI;
         }
 
+        /// <summary>
+        /// Resolves embedded Ribbon PNG icons into alpha-preserving <see cref="stdole.IPictureDisp"/> instances.
+        /// </summary>
+        public stdole.IPictureDisp? LoadImage(string imageName)
+        {
+            if (string.IsNullOrWhiteSpace(imageName))
+                return null;
+
+            string key = imageName.Trim();
+            if (_imageCache.TryGetValue(key, out var cached))
+                return cached;
+
+            string resourceName = ResolveIconResourceName(key);
+            var asm = Assembly.GetExecutingAssembly();
+            using (var stream = asm.GetManifestResourceStream(resourceName))
+            {
+                if (stream == null)
+                    return null;
+
+                using (var raw = new Bitmap(stream))
+                using (var pargb = raw.PixelFormat == PixelFormat.Format32bppPArgb
+                    ? (Bitmap)raw.Clone()
+                    : raw.Clone(new Rectangle(0, 0, raw.Width, raw.Height), PixelFormat.Format32bppPArgb))
+                {
+                    var picture = ConvertToPictureDisp(pargb);
+                    if (picture != null)
+                        _imageCache[key] = picture;
+                    return picture;
+                }
+            }
+        }
+
+        internal static string ResolveIconResourceName(string imageName)
+        {
+            string normalized = imageName.Trim().Replace('/', '.').Replace('\\', '.').TrimStart('.');
+            if (normalized.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
+                normalized = normalized.Substring(0, normalized.Length - 4);
+            if (!normalized.Contains("."))
+                normalized = "large." + normalized;
+            return $"{IconResourcePrefix}{normalized}.png";
+        }
+
+        private static stdole.IPictureDisp? ConvertToPictureDisp(Bitmap bitmap)
+        {
+            var bmi = new BitmapInfoHeader
+            {
+                biSize = Marshal.SizeOf(typeof(BitmapInfoHeader)),
+                biWidth = bitmap.Width,
+                biHeight = -bitmap.Height,
+                biPlanes = 1,
+                biBitCount = 32,
+                biCompression = BiRgb
+            };
+
+            IntPtr hBitmap = CreateDIBSection(IntPtr.Zero, ref bmi, 0, out IntPtr bitsPtr, IntPtr.Zero, 0);
+            if (hBitmap == IntPtr.Zero || bitsPtr == IntPtr.Zero)
+                return null;
+
+            bool ownershipTransferred = false;
+            try
+            {
+                var rect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
+                var data = bitmap.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format32bppPArgb);
+                try
+                {
+                    int rowBytes = bitmap.Width * 4;
+                    var buffer = new byte[rowBytes];
+                    for (int y = 0; y < bitmap.Height; y++)
+                    {
+                        IntPtr srcRow = IntPtr.Add(data.Scan0, y * data.Stride);
+                        IntPtr dstRow = IntPtr.Add(bitsPtr, y * rowBytes);
+                        Marshal.Copy(srcRow, buffer, 0, rowBytes);
+                        Marshal.Copy(buffer, 0, dstRow, rowBytes);
+                    }
+                }
+                finally
+                {
+                    bitmap.UnlockBits(data);
+                }
+
+                var pictDesc = new PictDescBitmap
+                {
+                    cbSizeOfStruct = Marshal.SizeOf(typeof(PictDescBitmap)),
+                    picType = PicTypeBitmap,
+                    hbitmap = hBitmap,
+                    hpal = IntPtr.Zero
+                };
+
+                Guid iid = typeof(stdole.IPictureDisp).GUID;
+                int hr = OleCreatePictureIndirect(ref pictDesc, ref iid, true, out object picture);
+                if (hr != 0 || picture == null)
+                    return null;
+
+                ownershipTransferred = true;
+                return (stdole.IPictureDisp)picture;
+            }
+            finally
+            {
+                if (!ownershipTransferred)
+                    DeleteObject(hBitmap);
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct BitmapInfoHeader
+        {
+            public int biSize;
+            public int biWidth;
+            public int biHeight;
+            public short biPlanes;
+            public short biBitCount;
+            public int biCompression;
+            public int biSizeImage;
+            public int biXPelsPerMeter;
+            public int biYPelsPerMeter;
+            public int biClrUsed;
+            public int biClrImportant;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct PictDescBitmap
+        {
+            public int cbSizeOfStruct;
+            public int picType;
+            public IntPtr hbitmap;
+            public IntPtr hpal;
+        }
+
+        [DllImport("gdi32.dll")]
+        private static extern IntPtr CreateDIBSection(
+            IntPtr hdc,
+            [In] ref BitmapInfoHeader pbmi,
+            uint iUsage,
+            out IntPtr ppvBits,
+            IntPtr hSection,
+            uint dwOffset);
+
+        [DllImport("gdi32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool DeleteObject(IntPtr hObject);
+
+        [DllImport("oleaut32.dll")]
+        private static extern int OleCreatePictureIndirect(
+            ref PictDescBitmap pictDesc,
+            ref Guid refiid,
+            [MarshalAs(UnmanagedType.Bool)] bool fOwn,
+            [MarshalAs(UnmanagedType.Interface)] out object ppvObj);
+
         public void OnRibbonButtonClicked(Office.IRibbonControl control)
         {
             if (control == null) return;
@@ -106,6 +263,7 @@ namespace ExcelProductivitySuite.AddIn.Ribbon
                 case "btnMergeKeepData": return "CMD_RANGE_MERGE_KEEP_DATA";
                 case "btnInsertBlankRows": return "CMD_RANGE_INSERT_BLANK_ROWS";
                 case "btnDeleteBlankRows": return "CMD_RANGE_DELETE_BLANK_ROWS";
+                case "btnDeleteAllEmptyRows": return "CMD_DELETE_ALL_EMPTY_ROWS";
                 case "btnFindDuplicates": return "CMD_FIND_DUPLICATES";
                 case "btnAdvancedFindReplace": return "CMD_ADVANCED_FIND_REPLACE";
                 case "btnSelectMaxMin": return "CMD_SELECT_MAX_MIN";

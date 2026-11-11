@@ -1,16 +1,274 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<customUI xmlns="http://schemas.microsoft.com/office/2009/07/customui" onLoad="OnRibbonLoad">
+<customUI xmlns="http://schemas.microsoft.com/office/2009/07/customui" onLoad="OnRibbonLoad" loadImage="LoadImage">
   <ribbon>
     <tabs>
+      <!-- Secondary Tab: Workbook & Sheets -->
+      <tab id="tabWorkbookAndSheets" label="Workbook &amp; Sheets">
+        
+        <group id="grpSheets" label="Worksheet Tools" image="large/GroupWorksheetToolsIcon">
+          <button id="btnNavPaneSheets"
+                  label="Navigation Pane"
+                  size="large"
+                  image="large/NavigationPaneIcon"
+                  screentip="Workbook &amp; Sheet Navigation Pane"
+                  supertip="Centrally view, switch between, organize, sort, and manage all open Excel workbooks and worksheets in real time."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnCombineSheets"
+                  label="Combine Sheets"
+                  size="large"
+                  image="large/CombineSheetsIcon"
+                  screentip="Combine Multiple Worksheets into One"
+                  supertip="Consolidate selected worksheets into a single master sheet with header alignment."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnSheetVisibility"
+                  label="Sheet Visibility"
+                  size="normal"
+                  image="small/UnhideAllSheetsIcon"
+                  screentip="Worksheet Visibility Manager"
+                  supertip="Manage Visible, Hidden, and VeryHidden worksheet states in bulk."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnBatchRename"
+                  label="Rename Sheets"
+                  size="normal"
+                  image="small/BatchRenameSheetsIcon"
+                  screentip="Batch Rename Worksheets"
+                  supertip="Rename multiple sheets simultaneously with prefix, suffix, and sequence rules."
+                  onAction="OnRibbonButtonClicked" />
+          <separator id="sepSheets1" />
+          <button id="btnSortSheetTabs"
+                  label="Sort Tabs"
+                  size="normal"
+                  image="small/SortSheetsIcon"
+                  screentip="Sort Worksheet Tabs"
+                  supertip="Reorder worksheet tabs alphabetically (A-Z / Z-A), numerically, or reversed."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnCreateSheetIndex"
+                  label="Sheet Index TOC"
+                  size="normal"
+                  image="small/SheetTOCIcon"
+                  screentip="Create Linked Sheet Index"
+                  supertip="Generate a Table of Contents worksheet with clickable hyperlinks to every sheet."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnDeleteBlankSheets"
+                  label="Delete Blanks"
+                  size="normal"
+                  image="small/DeleteBlankSheetsIcon"
+                  screentip="Delete Blank Worksheets"
+                  supertip="Scan and batch remove completely empty worksheets after confirmation."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnSequenceSheets"
+                  label="Sequence Sheets"
+                  size="normal"
+                  image="small/SequenceSheetsIcon"
+                  screentip="Create Sequentially Named Sheets"
+                  supertip="Batch generate worksheets following numbers, calendar months, days, or quarterly sequences."
+                  onAction="OnRibbonButtonClicked" />
+        </group>
+
+        <group id="grpWorkbooks" label="Workbook Operations" image="large/GroupWorkbookOperationsIcon">
+          <button id="btnCombineWorkbooksFiles"
+                  label="Combine Files"
+                  size="large"
+                  image="large/MergeWorkbooksIcon"
+                  screentip="Combine Workbooks into One"
+                  supertip="Batch import worksheets from multiple external Excel files into the active workbook."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnSplitWorkbookFiles"
+                  label="Split Files"
+                  size="large"
+                  image="large/SheetsToFilesIcon"
+                  screentip="Split Workbook into Separate Files"
+                  supertip="Save each worksheet as an independent Excel (.xlsx), PDF, or CSV file."
+                  onAction="OnRibbonButtonClicked" />
+          <separator id="sepWb1" />
+          <button id="btnSplitDataToSheets"
+                  label="Split to Sheets"
+                  size="normal"
+                  image="small/SplitByColumnIcon"
+                  screentip="Split Data to Worksheets"
+                  supertip="Distribute records across separate worksheets based on unique column values."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnCompareWorkbooks"
+                  label="Compare Workbooks"
+                  size="normal"
+                  image="small/CompareWorkbooksIcon"
+                  screentip="Compare Two Workbooks"
+                  supertip="Audit differences in worksheet names, dimensions, and cell values across workbooks."
+                  onAction="OnRibbonButtonClicked" />
+          <separator id="sepWb2" />
+          <button id="btnWbOpenFolder"
+                  label="Open Folder"
+                  size="normal"
+                  image="small/OpenFolderIcon"
+                  screentip="Open Containing Folder"
+                  supertip="Open the Windows File Explorer folder containing the active workbook with the file selected."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnWbCopyPath"
+                  label="Copy Path"
+                  size="normal"
+                  image="small/CopyPathIcon"
+                  screentip="Copy Workbook Path"
+                  supertip="Copy the full disk path of the active workbook to the Windows clipboard."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnWbProperties"
+                  label="Properties"
+                  size="normal"
+                  image="small/WorkbookPropertiesIcon"
+                  screentip="Workbook Extended Properties"
+                  supertip="View file size, creation timestamp, author, sheets count, and COM metadata."
+                  onAction="OnRibbonButtonClicked" />
+        </group>
+
+        <group id="grpPageSetup" label="Page Setup &amp; View" image="large/GroupPageSetupIcon">
+          <button id="btnCopyPageSetup"
+                  label="Copy Page Setup"
+                  size="large"
+                  image="large/CopyPageSetupIcon"
+                  screentip="Copy Page Setup"
+                  supertip="Copy page layout, print titles, margins, and headers/footers to other worksheets."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnFreezePanesMulti"
+                  label="Freeze Panes Multi"
+                  size="large"
+                  image="large/FreezePanesIcon"
+                  screentip="Synchronize Freeze Panes"
+                  supertip="Apply uniform pane freezing or unfreezing across multiple worksheets."
+                  onAction="OnRibbonButtonClicked" />
+          <separator id="sepPageSetup1" />
+          <button id="btnAdjustRowHeight"
+                  label="Row Height"
+                  size="normal"
+                  image="small/RowHeightIcon"
+                  screentip="Adjust Row Height"
+                  supertip="Set uniform row heights in points, inches, or centimeters, or apply smart auto-fit."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnAdjustColWidth"
+                  label="Column Width"
+                  size="normal"
+                  image="small/ColWidthIcon"
+                  screentip="Adjust Column Width"
+                  supertip="Set uniform column widths in points, inches, or centimeters, or apply auto-fit."
+                  onAction="OnRibbonButtonClicked" />
+          <separator id="sepPageSetup2" />
+          <splitButton id="splitGridFocusSheets" size="normal">
+            <button id="btnGridFocusSheets"
+                    label="Grid Focus"
+                    image="small/GridFocusIcon"
+                    screentip="Toggle Grid Focus (Reading Layout)"
+                    supertip="Automatically highlight the active cell's row and column in real-time as you navigate (Reading View)."
+                    onAction="OnRibbonButtonClicked" />
+            <menu id="menuGridFocusSheets" itemSize="normal">
+              <button id="btnGridFocusToggleSheets"
+                      label="Toggle Grid Focus (On / Off)"
+                      image="small/GridFocusIcon"
+                      screentip="Toggle Live Highlighting"
+                      onAction="OnRibbonButtonClicked" />
+              <button id="btnGridFocusSettingsSheets"
+                      label="Grid Focus Settings..."
+                      image="small/GridFocusSettingsIcon"
+                      screentip="Configure Colors &amp; Transparency"
+                      supertip="Change highlight shape (crosshair, row only, column only), color swatches, and opacity."
+                      onAction="OnRibbonButtonClicked" />
+            </menu>
+          </splitButton>
+        </group>
+
+        <group id="grpImportExport" label="Import &amp; Export" image="large/GroupImportExportIcon">
+          <button id="btnImportCsv"
+                  label="Import CSV"
+                  size="large"
+                  image="large/ImportCsvIcon"
+                  screentip="Import CSV / Delimited Text"
+                  supertip="Parse delimited text and CSV data with automatic formatting and schema preview."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnExportPdf"
+                  label="Export to PDF"
+                  size="large"
+                  image="large/ExportToPDFIcon"
+                  screentip="Export to PDF"
+                  supertip="Publish worksheets or entire active workbook as high-resolution PDF documents."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnPrintWorkbooks"
+                  label="Print Workbooks"
+                  size="large"
+                  image="large/PrintMultipleWorkbooksIcon"
+                  screentip="Print Multiple Workbooks Wizard"
+                  supertip="Batch print multiple Excel workbooks, specified worksheets, or CSV files across one or more folders without opening them manually."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnExportRange"
+                  label="Export Range"
+                  size="normal"
+                  image="small/ExportToCsvIcon"
+                  screentip="Export Range to File"
+                  supertip="Export selected cells to CSV, TSV, custom-delimited text, or structured JSON."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnFolderListing"
+                  label="Folder Listing"
+                  size="normal"
+                  image="small/InsertFileListIcon"
+                  screentip="Folder File Listing"
+                  supertip="Scan a folder directory and generate a structured inventory of files with hyperlinks."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnInsertTextFile"
+                  label="Insert Text"
+                  size="normal"
+                  image="small/InsertTextFileIcon"
+                  screentip="Insert Text File"
+                  supertip="Insert raw plain text, log files, or code directly into the active cell or column."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnBatchConvert"
+                  label="Batch Convert"
+                  size="normal"
+                  image="small/BatchConvertIcon"
+                  screentip="Batch Convert Workbooks"
+                  supertip="Convert entire folders of workbook files to modern XLSX, PDF, CSV, or legacy XLS format."
+                  onAction="OnRibbonButtonClicked" />
+        </group>
+
+        <!-- Group: Security & Recovery -->
+        <group id="grpSecurityRecovery" label="Security &amp; Recovery" image="large/GroupSecurityRecoveryIcon">
+          <button id="btnBatchProtect"
+                  label="Protect Sheets"
+                  size="large"
+                  image="large/ProtectSheetsIcon"
+                  screentip="Batch Protect Worksheets"
+                  supertip="Protect multiple worksheets simultaneously with password and granular permissions."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnBatchUnprotect"
+                  label="Unprotect Sheets"
+                  size="large"
+                  image="large/UnprotectSheetsIcon"
+                  screentip="Batch Unprotect Worksheets"
+                  supertip="Remove worksheet protection across multiple sheets using authorized password."
+                  onAction="OnRibbonButtonClicked" />
+          <separator id="sepSec1" />
+          <button id="btnCreateSnapshot"
+                  label="Take Snapshot"
+                  size="normal"
+                  image="small/CreateSnapshotIcon"
+                  screentip="Create Workbook Snapshot"
+                  supertip="Capture an instant non-disruptive recovery snapshot of the active workbook."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnRestoreSnapshot"
+                  label="Restore Snapshot"
+                  size="normal"
+                  image="small/RestoreSnapshotIcon"
+                  screentip="Restore Workbook Snapshot"
+                  supertip="Roll back the active workbook to a previously captured safe recovery point."
+                  onAction="OnRibbonButtonClicked" />
+        </group>
+
+      </tab>
+
       <!-- Primary Tab: Excel Productivity -->
-      <tab id="tabExcelProductivity" label="Excel Productivity" keytip="P" insertBeforeMso="TabHome">
+      <tab id="tabExcelProductivity" label="Excel Productivity" keytip="P">
         
         <!-- Group: Suite & Launcher -->
-        <group id="grpLauncher" label="Productivity Suite">
+        <group id="grpLauncher" label="Productivity Suite" image="large/GroupProductivitySuiteIcon">
           <button id="btnLauncher"
                   label="Tool Launcher"
                   size="large"
-                  imageMso="FindDialog"
+                  image="large/ToolLauncherIcon"
                   screentip="Quick Tool Launcher"
                   supertip="Instant search and launch for all Excel Productivity Suite tools (KeyTip: TL)."
                   keytip="TL"
@@ -18,7 +276,7 @@
           <button id="btnSuiteUndo"
                   label="Undo"
                   size="normal"
-                  imageMso="Undo"
+                  image="small/SuiteUndoIcon"
                   screentip="Undo Suite Action (Ctrl+Z)"
                   supertip="Revert the last cell, range, formula, or text operation performed by the suite."
                   keytip="ZU"
@@ -26,7 +284,7 @@
           <button id="btnSuiteRedo"
                   label="Redo"
                   size="normal"
-                  imageMso="Redo"
+                  image="small/SuiteRedoIcon"
                   screentip="Redo Suite Action (Ctrl+Y)"
                   supertip="Re-apply the last undone operation performed by the suite."
                   keytip="ZR"
@@ -34,32 +292,32 @@
           <button id="btnAbout"
                   label="About Suite"
                   size="normal"
-                  imageMso="Info"
+                  image="small/AboutSuiteIcon"
                   screentip="About Excel Productivity Suite"
                   supertip="View version, diagnostics, and environment configuration."
                   onAction="OnRibbonButtonClicked" />
         </group>
 
         <!-- Group: Text Operations -->
-        <group id="grpText" label="Text Operations">
+        <group id="grpText" label="Text Operations" image="large/GroupTextOperationsIcon">
           <button id="btnExtractText"
                   label="Extract Text"
                   size="large"
-                  imageMso="Cut"
+                  image="large/ExtractTextIcon"
                   screentip="Extract Text"
                   supertip="Extract substrings before, after, or between delimiters into cells with live preview."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnSplitText"
                   label="Split Cells"
                   size="large"
-                  imageMso="TableSplitCells"
+                  image="large/SplitIntoRowsIcon"
                   screentip="Split Cells"
                   supertip="Split cell contents across multiple adjacent columns or rows."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnCombineText"
                   label="Combine Cells"
                   size="large"
-                  imageMso="TableMergeCells"
+                  image="large/CombineRowsIcon"
                   screentip="Combine Cells"
                   supertip="Concatenate text across rows, columns, or selections with custom separators."
                   onAction="OnRibbonButtonClicked" />
@@ -67,49 +325,49 @@
           <button id="btnReverseText"
                   label="Reverse Text"
                   size="normal"
-                  imageMso="ChangeCase"
+                  image="small/ReverseTextIcon"
                   screentip="Reverse Text"
                   supertip="Reverse text strings by character order, words, or custom delimiters."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnRemoveChars"
                   label="Remove Characters"
                   size="normal"
-                  imageMso="Delete"
+                  image="small/RemoveCharactersIcon"
                   screentip="Remove Characters"
                   supertip="Strip numeric, alphabetic, symbols, control codes, or custom character sets."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnRemoveByPos"
                   label="Remove by Position"
                   size="normal"
-                  imageMso="Cut"
+                  image="small/RemoveByPositionIcon"
                   screentip="Remove Characters by Position"
                   supertip="Truncate characters from left, right, middle, or relative to delimiters."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnTrimSpaces"
                   label="Trim Spaces"
                   size="normal"
-                  imageMso="ParagraphSpacingAfter"
+                  image="small/TrimTextIcon"
                   screentip="Trim &amp; Normalize Spaces"
                   supertip="Clean excess whitespace, leading/trailing spaces, and non-breaking spaces."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnCleanText"
                   label="Clean Text"
                   size="normal"
-                  imageMso="ParagraphSpacingAfter"
+                  image="small/CleanTextIcon"
                   screentip="Clean Non-Printing Characters"
                   supertip="Strip unprintable control codes, zero-width spaces, and HTML entities."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnChangeCase"
                   label="Change Case"
                   size="normal"
-                  imageMso="ChangeCase"
+                  image="small/ChangeCaseIcon"
                   screentip="Change Text Case"
                   supertip="Transform text into UPPERCASE, lowercase, Proper Case, or Sentence case."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnAddText"
                   label="Add Text"
                   size="normal"
-                  imageMso="AdpAddExisting"
+                  image="small/AddTextIcon"
                   screentip="Add Text / Affixes"
                   supertip="Prepend prefix, append suffix, or insert text at a specific character position."
                   onAction="OnRibbonButtonClicked" />
@@ -117,21 +375,21 @@
           <button id="btnConvertNumbers"
                   label="Text to Numbers"
                   size="normal"
-                  imageMso="FormatNumberCurrency"
+                  image="small/ConvertTextToNumbersIcon"
                   screentip="Convert Numbers Stored as Text"
                   supertip="Convert numbers stored as text to native Excel numeric values."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnConvertDates"
                   label="Text to Dates"
                   size="normal"
-                  imageMso="FormatDate"
+                  image="small/ConvertDateFormatIcon"
                   screentip="Convert Text to Dates"
                   supertip="Parse date strings and standardize them into proper Excel date formats."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnSpellNumber"
                   label="Spell Number"
                   size="normal"
-                  imageMso="FunctionsLogicalInsertGallery"
+                  image="small/NumbersToWordsIcon"
                   screentip="Convert Numbers to Words"
                   supertip="Generate written English words for currency amounts or numbers."
                   onAction="OnRibbonButtonClicked" />
@@ -139,67 +397,67 @@
           <button id="btnExtractNumbers"
                   label="Extract Numbers"
                   size="normal"
-                  imageMso="Cut"
+                  image="small/ExtractNumbersIcon"
                   screentip="Extract Numbers"
                   supertip="Isolate integers, decimals, and negative numbers from alphanumeric strings."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnExtractEmails"
                   label="Extract Emails"
                   size="normal"
-                  imageMso="MailMergeSendEmail"
+                  image="small/ExtractEmailsIcon"
                   screentip="Extract Email Addresses"
                   supertip="Find and isolate valid email addresses from notes, descriptions, or contact blocks."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnExtractUrls"
                   label="Extract URLs"
                   size="normal"
-                  imageMso="HyperlinkInsert"
+                  image="small/ExtractUrlsIcon"
                   screentip="Extract URLs &amp; Hyperlinks"
                   supertip="Isolate web addresses, domain links, and hyperlinks from mixed text cells."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnBatchReplace"
                   label="Batch Replace"
                   size="normal"
-                  imageMso="ReplaceDialog"
+                  image="small/BatchReplaceIcon"
                   screentip="Batch Replace Strings"
                   supertip="Execute multiple find-and-replace rules simultaneously in a single unified pass."
                   onAction="OnRibbonButtonClicked" />
         </group>
 
         <!-- Group: Range & Cells -->
-        <group id="grpRange" label="Range &amp; Cells">
+        <group id="grpRange" label="Range &amp; Cells" image="large/GroupRangeCellsIcon">
           <button id="btnTransformRange"
                   label="Transform Range"
                   size="large"
-                  imageMso="TableCustom"
+                  image="large/TransformRangeIcon"
                   screentip="Transform Range"
                   supertip="Reshape single columns or rows into multi-column tables, or flatten tabular ranges into a single column or row with custom delimiters."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnTranspose"
                   label="Transpose"
                   size="large"
-                  imageMso="PivotTableSubtotals"
+                  image="large/TransposeRangeIcon"
                   screentip="Transpose Range"
                   supertip="Transpose rows to columns and columns to rows in-place, at target cell, or into a new sheet."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnFillBlanks"
                   label="Fill Blanks"
                   size="large"
-                  imageMso="FillDown"
+                  image="large/FillDownBlanksIcon"
                   screentip="Fill Blank Cells"
                   supertip="Fill blank cells with values from above, below, left, right, or fixed constants."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnInsertSequenceNumber"
                   label="Sequence Number"
                   size="large"
-                  imageMso="NumberingInsertGallery"
+                  image="large/InsertSequenceIcon"
                   screentip="Insert Sequence Number"
                   supertip="Quickly create, customize, and insert unique sequential numbers, prefixes, suffixes, leading zeros, and repeated sequences across cells or merged ranges."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnMergeKeepData"
                   label="Merge (Keep Data)"
                   size="large"
-                  imageMso="TableMergeCells"
+                  image="large/MergeCellsKeepDataIcon"
                   screentip="Merge Cells Preserving Data"
                   supertip="Combine cells row-by-row or into one block with custom delimiters without losing data."
                   onAction="OnRibbonButtonClicked" />
@@ -207,35 +465,35 @@
           <button id="btnFlipRange"
                   label="Flip Range"
                   size="normal"
-                  imageMso="ViewSideBySide"
+                  image="small/FlipHorizontalIcon"
                   screentip="Flip Range Horizontally or Vertically"
                   supertip="Reverse column order left-to-right or reverse row order top-to-bottom."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnSwapRanges"
                   label="Swap Ranges"
                   size="normal"
-                  imageMso="TableMergeCells"
+                  image="small/SwapRangesIcon"
                   screentip="Swap Two Ranges"
                   supertip="Exchange values and data between two selected ranges or areas."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnChangeSign"
                   label="Change Sign"
                   size="normal"
-                  imageMso="Calculator"
+                  image="small/ChangeSignIcon"
                   screentip="Change Sign (+/-)"
                   supertip="Invert or enforce positive/negative signs on all numeric cells in the range."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnRoundValues"
                   label="Round Values"
                   size="normal"
-                  imageMso="FormatNumberCurrency"
+                  image="small/RoundValuesIcon"
                   screentip="Round Values Without Formulas"
                   supertip="Round, ceil, floor, truncate, or snap numbers to multiples in-place without formulas."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnRandomSort"
                   label="Random Sort"
                   size="normal"
-                  imageMso="SortAscending"
+                  image="small/RandomSortIcon"
                   screentip="Randomly Sort Range"
                   supertip="Shuffle rows, columns, or cells in randomized order using Fisher-Yates."
                   onAction="OnRibbonButtonClicked" />
@@ -243,42 +501,49 @@
           <button id="btnInsertBlankRows"
                   label="Insert Blank Rows"
                   size="normal"
-                  imageMso="TableRowsInsertAbove"
+                  image="small/InsertBlankRowsIcon"
                   screentip="Insert Blank Rows by Rule"
                   supertip="Interleave blank rows at regular intervals or upon key column value change."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnDeleteBlankRows"
                   label="Delete Blank Rows"
                   size="normal"
-                  imageMso="TableDeleteRows"
+                  image="small/DeleteBlankRowsIcon"
                   screentip="Delete Blank Rows / Columns"
                   supertip="Batch remove completely empty rows or columns across selection or sheet."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnDeleteAllEmptyRows"
+                  label="Delete All Empty Rows"
+                  size="normal"
+                  image="small/DeleteAllEmptyRowsIcon"
+                  screentip="Delete All Empty Rows (ASAP Utilities #232)"
+                  supertip="Removes all completely empty rows within the dataset on your worksheet."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnCompareRanges"
                   label="Compare Ranges"
                   size="normal"
-                  imageMso="CompareDocuments"
+                  image="small/CompareRangesIcon"
                   screentip="Compare Ranges / Datasets"
                   supertip="Identify cell differences, mismatches, or missing items between two ranges or sheets."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnSelectSpecial"
                   label="Select Special"
                   size="normal"
-                  imageMso="SelectCell"
+                  image="small/SelectNonBlankCellsIcon"
                   screentip="Select Special Cells"
                   supertip="Locate and inspect cells matching criteria such as blank, errors, formulas, or max/min values."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnMergeRanges"
                   label="Merge Ranges"
                   size="normal"
-                  imageMso="TableMergeCells"
+                  image="small/MergeRangesIcon"
                   screentip="Merge Compatible Ranges"
                   supertip="Combine two ranges by appending rows or side-by-side with header alignment."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnRangeMath"
                   label="Math Operations"
                   size="normal"
-                  imageMso="Calculator"
+                  image="small/MathOperationsIcon"
                   screentip="Math Calculations on Range"
                   supertip="Apply arithmetic operations (+, -, *, /, ^, %) directly to cell values in bulk without formula overhead."
                   onAction="OnRibbonButtonClicked" />
@@ -286,74 +551,74 @@
           <button id="btnCopyMultipleRanges"
                   label="Copy Disjoint"
                   size="normal"
-                  imageMso="Copy"
+                  image="small/CopyVisibleCellsIcon"
                   screentip="Copy Multiple Ranges"
                   supertip="Combine non-contiguous selections vertically or side-by-side into a single contiguous output."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnPasteVisibleOnly"
                   label="Paste Visible"
                   size="normal"
-                  imageMso="Paste"
+                  image="small/PasteVisibleIcon"
                   screentip="Paste to Visible Cells"
                   supertip="Paste clipboard contents strictly into visible cells, bypassing filtered and hidden rows."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnUnmergeAndFill"
                   label="Unmerge &amp; Fill"
                   size="normal"
-                  imageMso="TableSplitCells"
+                  image="small/UnmergeAndFillIcon"
                   screentip="Unmerge &amp; Fill Values"
                   supertip="Unmerge composite cells and automatically populate all constituent cells with the original value."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnRandomSample"
                   label="Random Sample"
                   size="normal"
-                  imageMso="FunctionsStatisticalInsertGallery"
+                  image="small/RandomSampleIcon"
                   screentip="Random Sampling of Records"
                   supertip="Extract an unbiased random sample of N rows or P% of records from a dataset (with/without replacement, seedable for audits)."
                   onAction="OnRibbonButtonClicked" />
         </group>
 
         <!-- Group: Find & Select -->
-        <group id="grpFindSelect" label="Find &amp; Select">
+        <group id="grpFindSelect" label="Find &amp; Select" image="large/GroupFindSelectIcon">
           <button id="btnFindDuplicates"
                   label="Find Duplicates"
                   size="large"
-                  imageMso="FindDialog"
+                  image="large/SelectDuplicatesIcon"
                   screentip="Find Duplicate &amp; Unique Values"
                   supertip="Identify, select, or highlight duplicate vs unique values with occurrence rules."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnAdvancedFindReplace"
                   label="Multi-Sheet Find"
                   size="large"
-                  imageMso="ReplaceDialog"
+                  image="large/FindReplaceSheetsIcon"
                   screentip="Advanced Multi-Sheet Find &amp; Replace"
                   supertip="Search, preview, and batch replace strings across active or all worksheets."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnSelectMaxMin"
                   label="Select Max/Min"
                   size="normal"
-                  imageMso="SelectCell"
+                  image="small/SelectMaxCellIcon"
                   screentip="Select Maximum / Minimum Cells"
                   supertip="Locate and select the highest or lowest numeric values across selection, rows, or columns."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnRowDifferences"
                   label="Row Differences"
                   size="normal"
-                  imageMso="CompareDocuments"
+                  image="small/RowDifferencesIcon"
                   screentip="Select Row Differences"
                   supertip="Compare each cell in a row against a baseline reference cell and select mismatches."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnColumnDifferences"
                   label="Col Differences"
                   size="normal"
-                  imageMso="ConditionalFormattingHighlightCells"
+                  image="small/ColumnDifferencesIcon"
                   screentip="Select Column Differences"
                   supertip="Compare each cell in a column against a baseline reference cell and select mismatches."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnCommentInspector"
                   label="Comments"
                   size="normal"
-                  imageMso="ReviewShowOrHideMarkup"
+                  image="small/CommentInspectorIcon"
                   screentip="Comment Inspector &amp; Manager"
                   supertip="Inspect, filter, navigate, and audit cell comments across worksheets."
                   onAction="OnRibbonButtonClicked" />
@@ -361,32 +626,32 @@
           <button id="btnFindByFormat"
                   label="Find by Format"
                   size="normal"
-                  imageMso="ColorPicker"
+                  image="small/FindByFormatIcon"
                   screentip="Find &amp; Select by Format"
                   supertip="Locate and select cells matching specific background fill color, font color, bold, or italic styles."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnFindByValidation"
                   label="Validation Rules"
                   size="normal"
-                  imageMso="DataValidation"
+                  image="small/AuditValidationIcon"
                   screentip="Find &amp; Audit Data Validation"
                   supertip="Audit, inspect, filter, and select cells governed by Excel data validation rules."
                   onAction="OnRibbonButtonClicked" />
         </group>
 
         <!-- Group: Data & Sorting -->
-        <group id="grpCleaning" label="Data &amp; Sorting">
+        <group id="grpCleaning" label="Data &amp; Sorting" image="large/GroupDataSortingIcon">
           <button id="btnAdvancedSort"
                   label="Advanced Sort"
                   size="large"
-                  imageMso="CustomSort"
+                  image="large/AdvancedSortIcon"
                   screentip="Advanced Sort Rules"
                   supertip="Sort rows by text string length, month names, weekday names, or standard criteria."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnRemoveDuplicates"
                   label="Remove Duplicates"
                   size="large"
-                  imageMso="TableDeleteRows"
+                  image="large/RemoveDuplicateRowsIcon"
                   screentip="Remove Duplicates"
                   supertip="Identify and clear duplicate rows in selected data with keep-first or keep-last options."
                   onAction="OnRibbonButtonClicked" />
@@ -394,99 +659,99 @@
           <button id="btnExtractDistinct"
                   label="Extract Distinct"
                   size="normal"
-                  imageMso="FilterByResource"
+                  image="small/SelectUniquesIcon"
                   screentip="Extract Distinct Records"
                   supertip="Filter and copy unique records to a new worksheet without modifying source data."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnFilterByColor"
                   label="Filter by Color"
                   size="normal"
-                  imageMso="ColorPicker"
+                  image="small/SelectByColorIcon"
                   screentip="Filter &amp; Select by Color"
                   supertip="Identify and select cells matching a specified background fill or font color."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnCountByColor"
                   label="Count by Color"
                   size="normal"
-                  imageMso="FunctionsStatisticalInsertGallery"
+                  image="small/CountByColorIcon"
                   screentip="Count, Sum &amp; Average by Color"
                   supertip="Calculate statistical aggregations grouped by cell background or font color."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnAdvancedFilter"
                   label="Advanced Filter"
                   size="normal"
-                  imageMso="Filter"
+                  image="small/AdvancedFilterIcon"
                   screentip="Advanced Multi-Condition Filter"
                   supertip="Filter rows with multiple AND/OR conditions and export or select matches."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnFrequencyStats"
                   label="Frequency Stats"
                   size="normal"
-                  imageMso="FunctionsStatisticalInsertGallery"
+                  image="small/FrequencyStatsIcon"
                   screentip="Value Frequency Distribution"
                   supertip="Calculate occurrence frequency counts, percentages, and cumulative distributions."
                   onAction="OnRibbonButtonClicked" />
         </group>
 
         <!-- Group: Tables & Validation -->
-        <group id="grpTablesValidation" label="Tables &amp; Validation">
+        <group id="grpTablesValidation" label="Tables &amp; Validation" image="large/GroupTablesValidationIcon">
           <button id="btnMergeTables"
                   label="Merge Tables"
                   size="large"
-                  imageMso="Relationship"
+                  image="large/MergeTablesIcon"
                   screentip="Merge / Join Tables by Key"
                   supertip="Upsert and join secondary table records into primary table matching on a common key."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnPreventDuplicate"
                   label="Prevent Duplicates"
                   size="normal"
-                  imageMso="DataValidation"
+                  image="small/PreventDuplicatesIcon"
                   screentip="Prevent Duplicate Entries"
                   supertip="Apply dynamic Excel Data Validation to prevent duplicate inputs in the selected range."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnCreateDropdown"
                   label="Create Dropdown"
                   size="normal"
-                  imageMso="DataValidation"
+                  image="small/CreateDropdownIcon"
                   screentip="Create Dropdown List"
                   supertip="Create in-cell dropdown list validation from custom items or cell range references."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnClearValidation"
                   label="Clear Validation"
                   size="normal"
-                  imageMso="Delete"
+                  image="small/ClearValidationIcon"
                   screentip="Clear Data Validation"
                   supertip="Clear data validation rules and dropdown arrows across selection or worksheets."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnFindMissing"
                   label="Find Missing"
                   size="normal"
-                  imageMso="FindDialog"
+                  image="small/FindMissingIcon"
                   screentip="Find Missing &amp; Matching Records"
                   supertip="Reconcile two lists by key columns and isolate source-only, target-only, or matching items."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnFormulaToValue"
                   label="Formulas to Values"
                   size="normal"
-                  imageMso="PasteValues"
+                  image="small/FormulasToValuesIcon"
                   screentip="Convert Formulas to Values"
                   supertip="Replace active formulas with static calculated values in-place instantly."
                   onAction="OnRibbonButtonClicked" />
         </group>
 
         <!-- Group: Formulas & Auditing -->
-        <group id="grpFormulas" label="Formula Tools">
+        <group id="grpFormulas" label="Formula Tools" image="large/GroupFormulaToolsIcon">
           <button id="btnFormulaConvertRef"
                   label="Convert Refs"
                   size="large"
-                  imageMso="FormulaMoreFunctionsDialog"
+                  image="large/ToggleRefStyleIcon"
                   screentip="Convert Formula References"
                   supertip="Batch convert formula cell references between Absolute ($A$1), Row-Absolute (A$1), Col-Absolute ($A1), and Relative (A1)."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnFormulaTemplates"
                   label="Templates"
                   size="large"
-                  imageMso="FunctionsFinancialInsertGallery"
+                  image="large/FormulaTemplatesIcon"
                   screentip="Formula Templates Library"
                   supertip="Insert production-tested formulas for financial models, lookups, math, and date calculations."
                   onAction="OnRibbonButtonClicked" />
@@ -494,96 +759,96 @@
           <button id="btnFormulaExactCopy"
                   label="Exact Copy"
                   size="normal"
-                  imageMso="Copy"
+                  image="small/FormulaExactCopyIcon"
                   screentip="Exact Copy Formulas"
                   supertip="Copy formulas verbatim into new cells without adjusting relative references."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnFormulaLocateErrors"
                   label="Locate Errors"
                   size="normal"
-                  imageMso="TraceError"
+                  image="small/SelectErrorCellsIcon"
                   screentip="Locate Formula Errors"
                   supertip="Audit, navigate, and highlight formula calculation errors (#DIV/0!, #N/A, #VALUE!, etc.) across the worksheet."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnFormulaReplaceRef"
                   label="Replace Refs"
                   size="normal"
-                  imageMso="ReplaceDialog"
+                  image="small/ReplaceFormulaRefIcon"
                   screentip="Batch Replace Formula References"
                   supertip="Search and substitute sheet references, ranges, or functions across formulas."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnFormulaAuditPrecedents"
                   label="Precedents"
                   size="normal"
-                  imageMso="TracePrecedents"
+                  image="small/TracePrecedentsIcon"
                   screentip="Audit Formula Precedents"
                   supertip="Inspect, audit, and navigate all precedent cells contributing to the active cell formula."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnFormulaAuditDependents"
                   label="Dependents"
                   size="normal"
-                  imageMso="TraceDependents"
+                  image="small/TraceDependentsIcon"
                   screentip="Audit Formula Dependents"
                   supertip="Inspect, audit, and navigate all downstream cells that depend on the active cell value."
                   onAction="OnRibbonButtonClicked" />
         </group>
 
         <!-- Group: Formatting & Design -->
-        <group id="grpFormatting" label="Number &amp; Date Formatting">
+        <group id="grpFormatting" label="Number &amp; Date Formatting" image="large/GroupFormattingIcon">
           <button id="btnBatchNumberFormats"
                   label="Number Formats"
                   size="large"
-                  imageMso="FormatNumberCurrency"
+                  image="large/CurrencyFormatIcon"
                   screentip="Batch Number &amp; Currency Formatting"
                   supertip="Apply standardized financial, decimal, percentage, and currency masks across ranges."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnDateFormatStandards"
                   label="Standardize Dates"
                   size="large"
-                  imageMso="AppointmentColorDialog"
+                  image="large/ConvertDateFormatIcon"
                   screentip="Standardize Date Formats"
                   supertip="Format date cells to ISO 8601, European, US, or enterprise standards in bulk."
                   onAction="OnRibbonButtonClicked" />
         </group>
 
         <!-- Group: Charts & Analysis -->
-        <group id="grpChartsAnalysis" label="Charts &amp; Analysis">
+        <group id="grpChartsAnalysis" label="Charts &amp; Analysis" image="large/GroupChartsAnalysisIcon">
           <button id="btnQuickStats"
                   label="Quick Stats"
                   size="large"
-                  imageMso="AutoSum"
+                  image="large/QuickStatsIcon"
                   screentip="Quick Statistics Dashboard"
                   supertip="Instant statistical summary (Count, Sum, Mean, Median, Min, Max, StdDev, Variance) with one-click export."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnTargetVsActual"
                   label="Target vs Actual"
                   size="large"
-                  imageMso="ChartInsert"
+                  image="large/TargetVsActualIcon"
                   screentip="Target vs. Actual Chart"
                   supertip="Generate dual-series variance comparison chart (Clustered Column + Target Line) for performance tracking."
                   onAction="OnRibbonButtonClicked" />
         </group>
 
         <!-- Group: Navigation & Productivity -->
-        <group id="grpNavigation" label="Navigation &amp; Productivity">
+        <group id="grpNavigation" label="Navigation &amp; Productivity" image="large/GroupNavigationIcon">
           <button id="btnNavPane"
                   label="Navigation Pane"
                   size="large"
-                  imageMso="ViewNormalViewExcel"
+                  image="large/NavigationPaneIcon"
                   screentip="Workbook &amp; Sheet Navigation Pane"
                   supertip="Centrally view, switch between, organize, sort, and manage all open Excel workbooks and worksheets in real time."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnNamedRanges"
                   label="Named Ranges"
                   size="large"
-                  imageMso="NameDefine"
+                  image="large/NamedRangesIcon"
                   screentip="Named Range Manager"
                   supertip="Inspect, audit, filter, navigate, and manage all defined names in the workbook."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnColumnNav"
                   label="Column Nav"
                   size="large"
-                  imageMso="AdpColumns"
+                  image="large/ColumnNavIcon"
                   screentip="Column Navigator"
                   supertip="Fast navigation, inspection, and visibility toggling across wide worksheets."
                   onAction="OnRibbonButtonClicked" />
@@ -591,39 +856,39 @@
           <button id="btnCellPreview"
                   label="Cell Inspector"
                   size="normal"
-                  imageMso="ZoomPrint"
+                  image="small/CellInspectorIcon"
                   screentip="Cell Content Inspector"
                   supertip="Inspect complete unclipped contents, text metrics, formula expressions, and formatting."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnDatePicker"
                   label="Date Picker"
                   size="normal"
-                  imageMso="AppointmentColorDialog"
+                  image="small/InsertDateSequenceIcon"
                   screentip="Date Picker Insertion"
                   supertip="Select a calendar date and insert formatted text into the active cell cursor."
                   onAction="OnRibbonButtonClicked" />
           <splitButton id="splitGridFocus" size="normal">
             <button id="btnGridFocus"
                     label="Grid Focus"
-                    imageMso="TableSelectRowAndColumn"
+                    image="small/GridFocusIcon"
                     screentip="Toggle Grid Focus (Reading Layout)"
                     supertip="Automatically highlight the active cell's row and column in real-time as you navigate (Reading View)."
                     onAction="OnRibbonButtonClicked" />
             <menu id="menuGridFocus" itemSize="normal">
               <button id="btnGridFocusToggle"
                       label="Toggle Grid Focus (On / Off)"
-                      imageMso="TableSelectRowAndColumn"
+                      image="small/GridFocusIcon"
                       screentip="Toggle Live Highlighting"
                       onAction="OnRibbonButtonClicked" />
               <button id="btnGridFocusSettings"
                       label="Grid Focus Settings..."
-                      imageMso="AppointmentColorDialog"
+                      image="small/GridFocusSettingsIcon"
                       screentip="Configure Colors &amp; Transparency"
                       supertip="Change highlight shape (crosshair, row only, column only), color swatches, and opacity."
                       onAction="OnRibbonButtonClicked" />
               <button id="btnGridFocusInspector"
                       label="Grid Focus Coordinate Inspector..."
-                      imageMso="ZoomPrint"
+                      image="small/GridFocusInspectorIcon"
                       screentip="Active Cell Coordinate Inspector HUD"
                       supertip="Inspect active cell row/column headers, absolute address, and navigate with D-pad."
                       onAction="OnRibbonButtonClicked" />
@@ -632,267 +897,9 @@
           <button id="btnDataEntryForm"
                   label="Data Form"
                   size="normal"
-                  imageMso="FormNew"
+                  image="small/DataEntryFormIcon"
                   screentip="Table Data Entry Form"
                   supertip="Dynamic structured data entry and record navigation for active worksheet tables."
-                  onAction="OnRibbonButtonClicked" />
-        </group>
-
-      </tab>
-
-      <!-- Secondary Tab: Workbook & Sheets -->
-      <tab id="tabWorkbookAndSheets" label="Workbook &amp; Sheets">
-        
-        <group id="grpSheets" label="Worksheet Tools">
-          <button id="btnNavPaneSheets"
-                  label="Navigation Pane"
-                  size="large"
-                  imageMso="ViewNormalViewExcel"
-                  screentip="Workbook &amp; Sheet Navigation Pane"
-                  supertip="Centrally view, switch between, organize, sort, and manage all open Excel workbooks and worksheets in real time."
-                  onAction="OnRibbonButtonClicked" />
-          <button id="btnCombineSheets"
-                  label="Combine Sheets"
-                  size="large"
-                  imageMso="TableMergeCells"
-                  screentip="Combine Multiple Worksheets into One"
-                  supertip="Consolidate selected worksheets into a single master sheet with header alignment."
-                  onAction="OnRibbonButtonClicked" />
-          <button id="btnSheetVisibility"
-                  label="Sheet Visibility"
-                  size="normal"
-                  imageMso="ViewNormalViewExcel"
-                  screentip="Worksheet Visibility Manager"
-                  supertip="Manage Visible, Hidden, and VeryHidden worksheet states in bulk."
-                  onAction="OnRibbonButtonClicked" />
-          <button id="btnBatchRename"
-                  label="Rename Sheets"
-                  size="normal"
-                  imageMso="SheetRename"
-                  screentip="Batch Rename Worksheets"
-                  supertip="Rename multiple sheets simultaneously with prefix, suffix, and sequence rules."
-                  onAction="OnRibbonButtonClicked" />
-          <separator id="sepSheets1" />
-          <button id="btnSortSheetTabs"
-                  label="Sort Tabs"
-                  size="normal"
-                  imageMso="SortAscending"
-                  screentip="Sort Worksheet Tabs"
-                  supertip="Reorder worksheet tabs alphabetically (A-Z / Z-A), numerically, or reversed."
-                  onAction="OnRibbonButtonClicked" />
-          <button id="btnCreateSheetIndex"
-                  label="Sheet Index TOC"
-                  size="normal"
-                  imageMso="HyperlinkInsert"
-                  screentip="Create Linked Sheet Index"
-                  supertip="Generate a Table of Contents worksheet with clickable hyperlinks to every sheet."
-                  onAction="OnRibbonButtonClicked" />
-          <button id="btnDeleteBlankSheets"
-                  label="Delete Blanks"
-                  size="normal"
-                  imageMso="SheetDelete"
-                  screentip="Delete Blank Worksheets"
-                  supertip="Scan and batch remove completely empty worksheets after confirmation."
-                  onAction="OnRibbonButtonClicked" />
-          <button id="btnSequenceSheets"
-                  label="Sequence Sheets"
-                  size="normal"
-                  imageMso="SheetInsert"
-                  screentip="Create Sequentially Named Sheets"
-                  supertip="Batch generate worksheets following numbers, calendar months, days, or quarterly sequences."
-                  onAction="OnRibbonButtonClicked" />
-        </group>
-
-        <group id="grpWorkbooks" label="Workbook Operations">
-          <button id="btnCombineWorkbooksFiles"
-                  label="Combine Files"
-                  size="large"
-                  imageMso="FileOpen"
-                  screentip="Combine Workbooks into One"
-                  supertip="Batch import worksheets from multiple external Excel files into the active workbook."
-                  onAction="OnRibbonButtonClicked" />
-          <button id="btnSplitWorkbookFiles"
-                  label="Split Files"
-                  size="large"
-                  imageMso="TableSplitCells"
-                  screentip="Split Workbook into Separate Files"
-                  supertip="Save each worksheet as an independent Excel (.xlsx), PDF, or CSV file."
-                  onAction="OnRibbonButtonClicked" />
-          <separator id="sepWb1" />
-          <button id="btnSplitDataToSheets"
-                  label="Split to Sheets"
-                  size="normal"
-                  imageMso="TableSplitCells"
-                  screentip="Split Data to Worksheets"
-                  supertip="Distribute records across separate worksheets based on unique column values."
-                  onAction="OnRibbonButtonClicked" />
-          <button id="btnCompareWorkbooks"
-                  label="Compare Workbooks"
-                  size="normal"
-                  imageMso="ViewSideBySide"
-                  screentip="Compare Two Workbooks"
-                  supertip="Audit differences in worksheet names, dimensions, and cell values across workbooks."
-                  onAction="OnRibbonButtonClicked" />
-          <separator id="sepWb2" />
-          <button id="btnWbOpenFolder"
-                  label="Open Folder"
-                  size="normal"
-                  imageMso="FileOpen"
-                  screentip="Open Containing Folder"
-                  supertip="Open the Windows File Explorer folder containing the active workbook with the file selected."
-                  onAction="OnRibbonButtonClicked" />
-          <button id="btnWbCopyPath"
-                  label="Copy Path"
-                  size="normal"
-                  imageMso="Copy"
-                  screentip="Copy Workbook Path"
-                  supertip="Copy the full disk path of the active workbook to the Windows clipboard."
-                  onAction="OnRibbonButtonClicked" />
-          <button id="btnWbProperties"
-                  label="Properties"
-                  size="normal"
-                  imageMso="Info"
-                  screentip="Workbook Extended Properties"
-                  supertip="View file size, creation timestamp, author, sheets count, and COM metadata."
-                  onAction="OnRibbonButtonClicked" />
-        </group>
-
-        <group id="grpPageSetup" label="Page Setup &amp; View">
-          <button id="btnCopyPageSetup"
-                  label="Copy Page Setup"
-                  size="large"
-                  imageMso="PageSetupDialog"
-                  screentip="Copy Page Setup"
-                  supertip="Copy page layout, print titles, margins, and headers/footers to other worksheets."
-                  onAction="OnRibbonButtonClicked" />
-          <button id="btnFreezePanesMulti"
-                  label="Freeze Panes Multi"
-                  size="large"
-                  imageMso="FreezePanes"
-                  screentip="Synchronize Freeze Panes"
-                  supertip="Apply uniform pane freezing or unfreezing across multiple worksheets."
-                  onAction="OnRibbonButtonClicked" />
-          <separator id="sepPageSetup1" />
-          <button id="btnAdjustRowHeight"
-                  label="Row Height"
-                  size="normal"
-                  imageMso="TableRowsInsertAbove"
-                  screentip="Adjust Row Height"
-                  supertip="Set uniform row heights in points, inches, or centimeters, or apply smart auto-fit."
-                  onAction="OnRibbonButtonClicked" />
-          <button id="btnAdjustColWidth"
-                  label="Column Width"
-                  size="normal"
-                  imageMso="TableColumnsInsertLeft"
-                  screentip="Adjust Column Width"
-                  supertip="Set uniform column widths in points, inches, or centimeters, or apply auto-fit."
-                  onAction="OnRibbonButtonClicked" />
-          <separator id="sepPageSetup2" />
-          <splitButton id="splitGridFocusSheets" size="normal">
-            <button id="btnGridFocusSheets"
-                    label="Grid Focus"
-                    imageMso="TableSelectRowAndColumn"
-                    screentip="Toggle Grid Focus (Reading Layout)"
-                    supertip="Automatically highlight the active cell's row and column in real-time as you navigate (Reading View)."
-                    onAction="OnRibbonButtonClicked" />
-            <menu id="menuGridFocusSheets" itemSize="normal">
-              <button id="btnGridFocusToggleSheets"
-                      label="Toggle Grid Focus (On / Off)"
-                      imageMso="TableSelectRowAndColumn"
-                      screentip="Toggle Live Highlighting"
-                      onAction="OnRibbonButtonClicked" />
-              <button id="btnGridFocusSettingsSheets"
-                      label="Grid Focus Settings..."
-                      imageMso="AppointmentColorDialog"
-                      screentip="Configure Colors &amp; Transparency"
-                      supertip="Change highlight shape (crosshair, row only, column only), color swatches, and opacity."
-                      onAction="OnRibbonButtonClicked" />
-            </menu>
-          </splitButton>
-        </group>
-
-        <group id="grpImportExport" label="Import &amp; Export">
-          <button id="btnImportCsv"
-                  label="Import CSV"
-                  size="large"
-                  imageMso="GetExternalDataFromText"
-                  screentip="Import CSV / Delimited Text"
-                  supertip="Parse delimited text and CSV data with automatic formatting and schema preview."
-                  onAction="OnRibbonButtonClicked" />
-          <button id="btnExportPdf"
-                  label="Export to PDF"
-                  size="large"
-                  imageMso="FileSaveAsPdfOrXps"
-                  screentip="Export to PDF"
-                  supertip="Publish worksheets or entire active workbook as high-resolution PDF documents."
-                  onAction="OnRibbonButtonClicked" />
-          <button id="btnPrintWorkbooks"
-                  label="Print Workbooks"
-                  size="large"
-                  imageMso="FilePrintQuick"
-                  screentip="Print Multiple Workbooks Wizard"
-                  supertip="Batch print multiple Excel workbooks, specified worksheets, or CSV files across one or more folders without opening them manually."
-                  onAction="OnRibbonButtonClicked" />
-          <button id="btnExportRange"
-                  label="Export Range"
-                  size="normal"
-                  imageMso="SaveAsCsv"
-                  screentip="Export Range to File"
-                  supertip="Export selected cells to CSV, TSV, custom-delimited text, or structured JSON."
-                  onAction="OnRibbonButtonClicked" />
-          <button id="btnFolderListing"
-                  label="Folder Listing"
-                  size="normal"
-                  imageMso="OpenFolder"
-                  screentip="Folder File Listing"
-                  supertip="Scan a folder directory and generate a structured inventory of files with hyperlinks."
-                  onAction="OnRibbonButtonClicked" />
-          <button id="btnInsertTextFile"
-                  label="Insert Text"
-                  size="normal"
-                  imageMso="FileInsert"
-                  screentip="Insert Text File"
-                  supertip="Insert raw plain text, log files, or code directly into the active cell or column."
-                  onAction="OnRibbonButtonClicked" />
-          <button id="btnBatchConvert"
-                  label="Batch Convert"
-                  size="normal"
-                  imageMso="FileSaveAsExcelXlsx"
-                  screentip="Batch Convert Workbooks"
-                  supertip="Convert entire folders of workbook files to modern XLSX, PDF, CSV, or legacy XLS format."
-                  onAction="OnRibbonButtonClicked" />
-        </group>
-
-        <!-- Group: Security & Recovery -->
-        <group id="grpSecurityRecovery" label="Security &amp; Recovery">
-          <button id="btnBatchProtect"
-                  label="Protect Sheets"
-                  size="large"
-                  imageMso="ProtectSheet"
-                  screentip="Batch Protect Worksheets"
-                  supertip="Protect multiple worksheets simultaneously with password and granular permissions."
-                  onAction="OnRibbonButtonClicked" />
-          <button id="btnBatchUnprotect"
-                  label="Unprotect Sheets"
-                  size="large"
-                  imageMso="UnprotectSheet"
-                  screentip="Batch Unprotect Worksheets"
-                  supertip="Remove worksheet protection across multiple sheets using authorized password."
-                  onAction="OnRibbonButtonClicked" />
-          <separator id="sepSec1" />
-          <button id="btnCreateSnapshot"
-                  label="Take Snapshot"
-                  size="normal"
-                  imageMso="FileSaveAs"
-                  screentip="Create Workbook Snapshot"
-                  supertip="Capture an instant non-disruptive recovery snapshot of the active workbook."
-                  onAction="OnRibbonButtonClicked" />
-          <button id="btnRestoreSnapshot"
-                  label="Restore Snapshot"
-                  size="normal"
-                  imageMso="FileHistory"
-                  screentip="Restore Workbook Snapshot"
-                  supertip="Roll back the active workbook to a previously captured safe recovery point."
                   onAction="OnRibbonButtonClicked" />
         </group>
 

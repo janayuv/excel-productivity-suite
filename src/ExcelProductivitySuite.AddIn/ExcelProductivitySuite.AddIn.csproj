@@ -264,6 +264,8 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Ribbon\ExcelProductivityRibbon.xml" />
+    <EmbeddedResource Include="Ribbon\Icons\large\*.png" />
+    <EmbeddedResource Include="Ribbon\Icons\small\*.png" />
     <None Include="Ribbon\ExcelProductivityRibbon.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
