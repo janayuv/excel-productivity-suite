@@ -79,6 +79,8 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 | `CMD_RANGE_INSERT_BLANK_ROWS` | **Insert Blank Rows** | B | Range & Cells | `BlankRowManager.cs` | `InsertBlankRowsDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
 | `CMD_RANGE_DELETE_BLANK_ROWS` | **Delete Blank Rows** | B | Range & Cells | `BlankRowManager.cs` | `DeleteBlankRowsDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
 | `CMD_DELETE_ALL_EMPTY_ROWS` | **Delete All Empty Rows** (ASAP Utilities #232) | B | Range & Cells | `DeleteEmptyRowsEngine.cs` | `DeleteAllEmptyRowsDialog.xaml` | `DeleteAllEmptyRowsTests` | Implemented and verified |
+| `CMD_RANGE_INSERT_CHECKBOXES` | **Batch Insert Smart Checkboxes** (Kutools for Excel) | B | Range & Cells | `CheckboxEngine.cs` | `BatchInsertCheckboxesDialog.xaml` | `CheckboxTests` | Implemented and verified |
+| `CMD_RANGE_DELETE_CHECKBOXES` | **Batch Delete Checkboxes** (Kutools for Excel) | B | Range & Cells | `CheckboxEngine.cs` | `BatchDeleteCheckboxesDialog.xaml` | `CheckboxTests` | Implemented and verified |
 | `CMD_RANGE_COMPARE` | **Compare Ranges** | C | Find, Select & Compare | `RangeComparer.cs` | `CompareRangesDialog.xaml` | `RangeAndSheetTests`, `Benchmark_RangeComparer` | Implemented and verified |
 | `CMD_SELECT_SPECIAL` | **Select Special** | C | Find, Select & Compare | `RangeSelector.cs` | `SelectSpecialDialog.xaml` | `RangeAndSheetTests` | Implemented and verified |
 | `CMD_MERGE_RANGES` | **Merge Ranges** | B | Range & Cells | `RangeMerger.cs` | `MergeRangesDialog.xaml` | `RangeMergerTests`, `Benchmark_RangeMerger` | Implemented and verified |
@@ -202,6 +204,8 @@ An independent code inspection of `ExcelProductivitySuite.sln`, `docs/feature-ca
 - [x] `CMD_RANGE_INSERT_BLANK_ROWS`: Insert blank rows at regular intervals or value changes. *(Active - Batch 3)*
 - [x] `CMD_RANGE_DELETE_BLANK_ROWS`: Delete completely empty rows or columns safely. *(Active - Batch 3)*
 - [x] `CMD_DELETE_ALL_EMPTY_ROWS`: Delete all completely empty rows in worksheet dataset, selection, or all sheets (ASAP Utilities Tool #232). *(Active)*
+- [x] `CMD_RANGE_INSERT_CHECKBOXES`: Batch insert interactive form control checkboxes into selected cells with flexible cell linking and auto-labels (Kutools for Excel). *(Active)*
+- [x] `CMD_RANGE_DELETE_CHECKBOXES`: Batch delete checkboxes across selection or entire worksheet (Kutools for Excel). *(Active)*
 - [x] `CMD_RANGE_MATH_OPERATIONS`: Apply bulk arithmetic operations (+, -, *, /, ^, %) directly to numeric cells without formulas. *(Active - Batch 7)*
 - [x] `CMD_RANGE_COPY_NONCONTIGUOUS`: Copy disjoint multi-area selection into contiguous target. *(Active - Batch 12)*
 - [x] `CMD_RANGE_PASTE_VISIBLE_ONLY`: Paste clipboard data strictly into visible cells skipping hidden rows. *(Active - Batch 12)*

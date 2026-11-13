@@ -721,6 +721,23 @@ namespace ExcelProductivitySuite.Core.Abstractions
         /// Re-applies the most recent undone suite command.
         /// </summary>
         bool RedoLastAction();
+
+        /// <summary>
+        /// Batch inserts Form Control checkboxes into the designated worksheet cells with optional cell linking and captions.
+        /// Corresponds to Kutools for Excel: Batch Insert Smart Checkboxes.
+        /// </summary>
+        BatchInsertCheckboxResult InsertCheckboxes(BatchInsertCheckboxOptions options);
+
+        /// <summary>
+        /// Batch deletes checkboxes from the active worksheet or within the current selection.
+        /// Corresponds to Kutools for Excel: Batch Delete Checkboxes.
+        /// </summary>
+        BatchDeleteCheckboxResult DeleteCheckboxes(BatchDeleteCheckboxOptions options);
+
+        /// <summary>
+        /// Gets the total count of checkboxes on the active worksheet or intersecting the specified range address.
+        /// </summary>
+        int GetCheckboxCount(string? rangeAddress = null);
     }
 
     public class FormulaErrorInfo

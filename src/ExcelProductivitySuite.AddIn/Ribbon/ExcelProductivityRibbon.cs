@@ -264,6 +264,8 @@ namespace ExcelProductivitySuite.AddIn.Ribbon
                 case "btnInsertBlankRows": return "CMD_RANGE_INSERT_BLANK_ROWS";
                 case "btnDeleteBlankRows": return "CMD_RANGE_DELETE_BLANK_ROWS";
                 case "btnDeleteAllEmptyRows": return "CMD_DELETE_ALL_EMPTY_ROWS";
+                case "btnBatchInsertCheckboxes": return "CMD_RANGE_INSERT_CHECKBOXES";
+                case "btnBatchDeleteCheckboxes": return "CMD_RANGE_DELETE_CHECKBOXES";
                 case "btnFindDuplicates": return "CMD_FIND_DUPLICATES";
                 case "btnAdvancedFindReplace": return "CMD_ADVANCED_FIND_REPLACE";
                 case "btnSelectMaxMin": return "CMD_SELECT_MAX_MIN";

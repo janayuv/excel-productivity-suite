@@ -1,0 +1,73 @@
+<controls:BaseDialogWindow x:Class="ExcelProductivitySuite.UI.Dialogs.BatchDeleteCheckboxesDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
+        mc:Ignorable="d"
+        Title="Batch Delete Checkboxes - Excel Productivity Suite"
+        Height="360" Width="460"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="#F8F9FA">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Brushes.xaml" />
+                <ResourceDictionary Source="../Themes/Typography.xaml" />
+                <ResourceDictionary Source="../Themes/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="#DC3545" CornerRadius="4" Width="28" Height="28" Margin="0,0,10,0">
+                    <TextBlock Text="🗑" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Batch Delete Checkboxes" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="Remove all checkboxes within selected range or active worksheet" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Scope Selection -->
+        <GroupBox Grid.Row="1" Header="Deletion Scope" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,0,0,8">
+            <StackPanel Margin="6">
+                <RadioButton x:Name="RadioSelection" Content="Delete checkboxes in current selection" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,0,4" Checked="Scope_Changed" />
+                
+                <Grid x:Name="RangeSelectionPanel" Margin="20,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="RangeTextBox" Style="{StaticResource ModernTextBoxStyle}" VerticalContentAlignment="Center" />
+                    <Button Grid.Column="1" x:Name="SelectRangeButton" Style="{StaticResource RangeSelectButtonStyle}" Margin="4,0,0,0" ToolTip="Select range in worksheet" Click="SelectRange_Click" />
+                </Grid>
+
+                <RadioButton x:Name="RadioSheet" Content="Delete all checkboxes in active worksheet" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,0,4" Checked="Scope_Changed" />
+
+                <TextBlock x:Name="CountSummaryText" Text="Scanning for checkboxes..." FontSize="10" Foreground="{StaticResource TextSecondaryBrush}" Margin="2,4,0,0" />
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Footer -->
+        <DockPanel Grid.Row="2" Margin="0,10,0,0">
+            <TextBlock x:Name="StatusLabel" Text="Ready" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Delete" Style="{StaticResource ModernPrimaryButtonStyle}" Width="85" Margin="0,0,8,0" Click="DeleteButton_Click" IsDefault="True" />
+                <Button Content="Cancel" Style="{StaticResource ModernSecondaryButtonStyle}" Width="75" Click="CancelButton_Click" IsCancel="True" />
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</controls:BaseDialogWindow>

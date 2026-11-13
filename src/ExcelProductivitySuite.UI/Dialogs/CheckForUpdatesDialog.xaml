@@ -61,7 +61,7 @@
                             <TextBlock Text="A new version is available!" FontSize="15" FontWeight="Bold" Foreground="{StaticResource BrandPrimaryBrush}" />
                         </StackPanel>
                         <DockPanel LastChildFill="False">
-                            <TextBlock x:Name="VersionComparisonText" Text="Current: v5.8.0  ➔  Latest: v5.9.0" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                            <TextBlock x:Name="VersionComparisonText" Text="Current: v5.9.0  ➔  Latest: v5.10.0" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
                             <TextBlock x:Name="ReleaseDateText" DockPanel.Dock="Right" Text="Released Nov 2026" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
                         </DockPanel>
                     </StackPanel>
@@ -95,7 +95,7 @@
                         <TextBlock Text="✓" Foreground="#137333" FontSize="32" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <TextBlock Text="You're all caught up!" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{StaticResource TextPrimaryBrush}" />
-                    <TextBlock x:Name="CurrentVersionLabel" Text="Excel Productivity Suite v5.8.0 is currently the newest version." FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center" Margin="0,6,0,0" />
+                    <TextBlock x:Name="CurrentVersionLabel" Text="Excel Productivity Suite v5.9.0 is currently the newest version." FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center" Margin="0,6,0,0" />
                 </StackPanel>
 
                 <!-- State 5: Error -->

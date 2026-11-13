@@ -1082,5 +1082,121 @@ namespace ExcelProductivitySuite.UnitTests
             }
             return false;
         }
+
+        public class MockCheckboxInfo
+        {
+            public string CellAddress { get; set; } = string.Empty;
+            public string? LinkedCellAddress { get; set; }
+            public string Caption { get; set; } = string.Empty;
+            public bool Value { get; set; }
+            public int Row { get; set; }
+            public int Column { get; set; }
+        }
+
+        public List<MockCheckboxInfo> InsertedCheckboxes { get; } = new();
+        public List<BatchInsertCheckboxOptions> CheckboxInsertOptionsHistory { get; } = new();
+        public List<BatchDeleteCheckboxOptions> CheckboxDeleteOptionsHistory { get; } = new();
+
+        public BatchInsertCheckboxResult InsertCheckboxes(BatchInsertCheckboxOptions options)
+        {
+            if (options == null) throw new ArgumentNullException(nameof(options));
+            CheckboxInsertOptionsHistory.Add(options);
+
+            string address = string.IsNullOrWhiteSpace(options.SourceRangeAddress)
+                ? (SelectionAddress ?? "$A$1")
+                : options.SourceRangeAddress;
+
+            if (!CheckboxEngine.TryParseRangeAddress(address, out _, out int sr, out int sc, out int er, out int ec))
+            {
+                return BatchInsertCheckboxResult.Failed($"Invalid source range address '{address}'.");
+            }
+
+            int rows = er - sr + 1;
+            int cols = ec - sc + 1;
+            object?[,] cellValues = new object?[rows, cols];
+
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    int gr = sr + r - SelectionStartRow;
+                    int gc = sc + c - SelectionStartColumn;
+                    if (CurrentValues != null && gr >= 0 && gr < CurrentValues.GetLength(0) && gc >= 0 && gc < CurrentValues.GetLength(1))
+                    {
+                        cellValues[r, c] = CurrentValues[gr, gc];
+                    }
+                }
+            }
+
+            var plans = CheckboxEngine.PlanBatchInsert(cellValues!, sr, sc, options);
+            var affectedAddresses = new List<string>();
+
+            foreach (var plan in plans)
+            {
+                var chk = new MockCheckboxInfo
+                {
+                    Row = plan.Row,
+                    Column = plan.Column,
+                    CellAddress = plan.CellAddress,
+                    LinkedCellAddress = plan.LinkedCellAddress,
+                    Caption = plan.Caption,
+                    Value = plan.InitialChecked
+                };
+                InsertedCheckboxes.Add(chk);
+                affectedAddresses.Add(plan.CellAddress);
+
+                int gr = plan.Row - SelectionStartRow;
+                int gc = plan.Column - SelectionStartColumn;
+                if (CurrentValues != null && gr >= 0 && gr < CurrentValues.GetLength(0) && gc >= 0 && gc < CurrentValues.GetLength(1))
+                {
+                    if (plan.NewCellValue != null || plan.ClearOriginalCell)
+                    {
+                        CurrentValues[gr, gc] = plan.NewCellValue;
+                    }
+                }
+            }
+
+            return BatchInsertCheckboxResult.Successful(plans.Count, $"Successfully inserted {plans.Count} checkboxes.", affectedAddresses);
+        }
+
+        public BatchDeleteCheckboxResult DeleteCheckboxes(BatchDeleteCheckboxOptions options)
+        {
+            options ??= new BatchDeleteCheckboxOptions();
+            CheckboxDeleteOptionsHistory.Add(options);
+
+            int initialCount = InsertedCheckboxes.Count;
+            if (options.Scope == CheckboxDeleteScope.ActiveWorksheet)
+            {
+                InsertedCheckboxes.Clear();
+                return BatchDeleteCheckboxResult.Successful(initialCount, $"Deleted {initialCount} checkboxes.");
+            }
+
+            string address = string.IsNullOrWhiteSpace(options.RangeAddress)
+                ? (SelectionAddress ?? "$A$1")
+                : options.RangeAddress!;
+
+            if (CheckboxEngine.TryParseRangeAddress(address, out _, out int sr, out int sc, out int er, out int ec))
+            {
+                int removed = InsertedCheckboxes.RemoveAll(c => c.Row >= sr && c.Row <= er && c.Column >= sc && c.Column <= ec);
+                return BatchDeleteCheckboxResult.Successful(removed, $"Deleted {removed} checkboxes.");
+            }
+
+            return BatchDeleteCheckboxResult.Failed("Invalid range address.");
+        }
+
+        public int GetCheckboxCount(string? rangeAddress = null)
+        {
+            if (string.IsNullOrWhiteSpace(rangeAddress))
+            {
+                return InsertedCheckboxes.Count;
+            }
+
+            if (CheckboxEngine.TryParseRangeAddress(rangeAddress!, out _, out int sr, out int sc, out int er, out int ec))
+            {
+                return InsertedCheckboxes.Count(c => c.Row >= sr && c.Row <= er && c.Column >= sc && c.Column <= ec);
+            }
+
+            return 0;
+        }
     }
 }

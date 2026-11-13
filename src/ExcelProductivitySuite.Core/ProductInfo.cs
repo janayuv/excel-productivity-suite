@@ -6,7 +6,7 @@ namespace ExcelProductivitySuite.Core
     public static class ProductInfo
     {
         public const string ProductName = "Excel Productivity Suite";
-        public const string CurrentVersion = "5.8.0";
+        public const string CurrentVersion = "5.9.0";
         public const string Edition = "Professional Edition";
         public const string GitHubRepoOwner = "janayuv";
         public const string GitHubRepoName = "excel-productivity-suite";

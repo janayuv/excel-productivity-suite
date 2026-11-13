@@ -535,6 +535,42 @@ namespace ExcelProductivitySuite.AddIn.Startup
                 roadmapBatch: "Active"
             ));
 
+            // Batch Insert Smart Checkboxes - Module B: Range and Cell Operations (Kutools for Excel)
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_RANGE_INSERT_CHECKBOXES",
+                title: "Batch Insert Smart Checkboxes",
+                description: "Quickly insert multiple interactive checkboxes across cells with flexible cell linking modes and auto-label generation.",
+                category: CommandCategory.RangeAndCells,
+                executeAction: ctx =>
+                {
+                    var dlg = new BatchInsertCheckboxesDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "checkbox", "checkboxes", "insert checkboxes", "smart checkboxes", "batch insert checkboxes", "check box", "form control", "check mark", "checklist" },
+                officeIconName: "ControlFormCheckBox",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "B",
+                roadmapBatch: "Active"
+            ));
+
+            // Batch Delete Checkboxes - Module B: Range and Cell Operations (Kutools for Excel)
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_RANGE_DELETE_CHECKBOXES",
+                title: "Batch Delete Checkboxes",
+                description: "Batch remove all checkboxes within the current selection or across the entire active worksheet.",
+                category: CommandCategory.RangeAndCells,
+                executeAction: ctx =>
+                {
+                    var dlg = new BatchDeleteCheckboxesDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "delete checkboxes", "remove checkboxes", "clear checkboxes", "delete check boxes", "remove check marks" },
+                officeIconName: "Clear",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "B",
+                roadmapBatch: "Active"
+            ));
+
             // 9. Compare Ranges - Module C: Find, Select, and Compare
             registry.RegisterCommand(new SuiteCommand(
                 id: "CMD_RANGE_COMPARE",

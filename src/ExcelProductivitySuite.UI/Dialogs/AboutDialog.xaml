@@ -32,7 +32,7 @@
                 <TextBlock Text="⚡" Foreground="White" FontSize="28" HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Border>
             <TextBlock Text="Excel Productivity Suite" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" />
-            <TextBlock x:Name="VersionLabel" Text="Version 5.8.0 • Professional Edition" FontSize="12" Foreground="{StaticResource BrandPrimaryBrush}" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,2,0,0" />
+            <TextBlock x:Name="VersionLabel" Text="Version 5.9.0 • Professional Edition" FontSize="12" Foreground="{StaticResource BrandPrimaryBrush}" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,2,0,0" />
         </StackPanel>
 
         <!-- System Details Card -->

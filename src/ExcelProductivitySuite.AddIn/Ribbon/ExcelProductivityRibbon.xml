@@ -461,6 +461,13 @@
                   screentip="Insert Sequence Number"
                   supertip="Quickly create, customize, and insert unique sequential numbers, prefixes, suffixes, leading zeros, and repeated sequences across cells or merged ranges."
                   onAction="OnRibbonButtonClicked" />
+          <button id="btnBatchInsertCheckboxes"
+                  label="Insert Checkboxes"
+                  size="large"
+                  image="large/InsertCheckboxesIcon"
+                  screentip="Batch Insert Smart Checkboxes"
+                  supertip="Quickly insert multiple interactive checkboxes across cells with flexible cell linking modes and auto-label generation."
+                  onAction="OnRibbonButtonClicked" />
           <button id="btnMergeKeepData"
                   label="Merge (Keep Data)"
                   size="large"
@@ -525,6 +532,13 @@
                   image="small/DeleteAllEmptyRowsIcon"
                   screentip="Delete All Empty Rows (ASAP Utilities #232)"
                   supertip="Removes all completely empty rows within the dataset on your worksheet."
+                  onAction="OnRibbonButtonClicked" />
+          <button id="btnBatchDeleteCheckboxes"
+                  label="Delete Checkboxes"
+                  size="normal"
+                  image="small/DeleteCheckboxesIcon"
+                  screentip="Batch Delete Checkboxes"
+                  supertip="Batch remove all checkboxes within the current selection or across the entire active worksheet."
                   onAction="OnRibbonButtonClicked" />
           <button id="btnCompareRanges"
                   label="Compare Ranges"

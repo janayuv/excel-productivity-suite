@@ -5734,5 +5734,291 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
 
             return DeleteEmptyRowsResult.Succeeded(grandTotalDeleted, successMsg, perSheetDeleted);
         }
+
+        public BatchInsertCheckboxResult InsertCheckboxes(BatchInsertCheckboxOptions options)
+        {
+            if (options == null) throw new ArgumentNullException(nameof(options));
+
+            if (!HasActiveWorkbook)
+            {
+                return BatchInsertCheckboxResult.Failed("No active workbook is open in Excel.");
+            }
+
+            Excel.Worksheet? activeWs = _app.ActiveSheet as Excel.Worksheet;
+            if (activeWs == null)
+            {
+                return BatchInsertCheckboxResult.Failed("No active worksheet found.");
+            }
+
+            if (activeWs.ProtectContents)
+            {
+                return BatchInsertCheckboxResult.Failed($"Worksheet '{activeWs.Name}' is protected. Please unprotect it before inserting checkboxes.");
+            }
+
+            Excel.Range? sourceRange = null;
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(options.SourceRangeAddress))
+                {
+                    sourceRange = activeWs.Range[options.SourceRangeAddress];
+                }
+                else
+                {
+                    sourceRange = _app.Selection as Excel.Range;
+                }
+            }
+            catch (Exception ex)
+            {
+                return BatchInsertCheckboxResult.Failed($"Invalid source range address '{options.SourceRangeAddress}': {ex.Message}");
+            }
+
+            if (sourceRange == null)
+            {
+                return BatchInsertCheckboxResult.Failed("Please select a valid range of cells to insert checkboxes.");
+            }
+
+            Excel.Range? targetLinkStartCell = null;
+            if (options.LinkMode == CheckboxLinkMode.OtherCells)
+            {
+                if (string.IsNullOrWhiteSpace(options.TargetLinkRangeAddress))
+                {
+                    return BatchInsertCheckboxResult.Failed("Please specify a target cell or range to link the checkboxes to.");
+                }
+
+                try
+                {
+                    targetLinkStartCell = _app.Range[options.TargetLinkRangeAddress];
+                }
+                catch (Exception ex)
+                {
+                    return BatchInsertCheckboxResult.Failed($"Invalid target link address '{options.TargetLinkRangeAddress}': {ex.Message}");
+                }
+            }
+
+            int insertedCount = 0;
+            var affectedAddresses = new List<string>();
+
+            using (new ExcelStateScope(_app))
+            {
+                try
+                {
+                    Excel.CheckBoxes checkBoxes = (Excel.CheckBoxes)activeWs.CheckBoxes();
+                    int sourceStartRow = sourceRange.Row;
+                    int sourceStartCol = sourceRange.Column;
+                    int rowCount = sourceRange.Rows.Count;
+                    int colCount = sourceRange.Columns.Count;
+
+                    int targetStartRow = targetLinkStartCell?.Row ?? sourceStartRow;
+                    int targetStartCol = targetLinkStartCell?.Column ?? sourceStartCol;
+                    Excel.Worksheet targetWs = (targetLinkStartCell != null && targetLinkStartCell.Worksheet != null)
+                        ? (Excel.Worksheet)targetLinkStartCell.Worksheet
+                        : activeWs;
+
+                    for (int r = 1; r <= rowCount; r++)
+                    {
+                        for (int c = 1; c <= colCount; c++)
+                        {
+                            Excel.Range cell = (Excel.Range)sourceRange.Cells[r, c];
+                            double cellLeft = Convert.ToDouble(cell.Left);
+                            double cellTop = Convert.ToDouble(cell.Top);
+                            double cellWidth = Convert.ToDouble(cell.Width);
+                            double cellHeight = Convert.ToDouble(cell.Height);
+
+                            string cellText = cell.Text?.ToString() ?? cell.Value2?.ToString() ?? string.Empty;
+                            bool hasCaption = options.UseCellContentAsLabel && !string.IsNullOrWhiteSpace(cellText);
+
+                            CheckboxEngine.CalculateCheckboxBounds(
+                                cellLeft,
+                                cellTop,
+                                cellWidth,
+                                cellHeight,
+                                hasCaption,
+                                out double left,
+                                out double top,
+                                out double width,
+                                out double height);
+
+                            Excel.CheckBox chk = (Excel.CheckBox)checkBoxes.Add(left, top, width, height);
+                            chk.Placement = Excel.XlPlacement.xlMoveAndSize;
+
+                            if (hasCaption)
+                            {
+                                chk.Caption = cellText.Trim();
+                                if (options.ClearOriginalContentWhenLabeled && options.LinkMode != CheckboxLinkMode.OwnCell)
+                                {
+                                    cell.Value2 = null;
+                                }
+                            }
+                            else
+                            {
+                                chk.Caption = string.Empty;
+                            }
+
+                            chk.Value = options.InitialChecked ? 1 : -4146; // xlOn : xlOff
+
+                            if (options.LinkMode == CheckboxLinkMode.OwnCell)
+                            {
+                                string cellAddr = cell.get_Address(true, true, Excel.XlReferenceStyle.xlA1, Type.Missing, Type.Missing);
+                                chk.LinkedCell = cellAddr;
+                                if (options.DisplayLogicalValue)
+                                {
+                                    cell.Value2 = options.InitialChecked;
+                                }
+                            }
+                            else if (options.LinkMode == CheckboxLinkMode.OtherCells)
+                            {
+                                Excel.Range targetCell = (Excel.Range)targetWs.Cells[targetStartRow + (r - 1), targetStartCol + (c - 1)];
+                                string targetAddr = targetCell.get_Address(true, true, Excel.XlReferenceStyle.xlA1, true, Type.Missing);
+                                chk.LinkedCell = targetAddr;
+                                if (options.DisplayLogicalValue)
+                                {
+                                    targetCell.Value2 = options.InitialChecked;
+                                }
+                            }
+
+                            string address = cell.get_Address(false, false, Excel.XlReferenceStyle.xlA1, Type.Missing, Type.Missing);
+                            affectedAddresses.Add(address);
+                            insertedCount++;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return BatchInsertCheckboxResult.Failed($"Failed while inserting checkboxes: {ex.Message}");
+                }
+            }
+
+            return BatchInsertCheckboxResult.Successful(
+                insertedCount,
+                $"Successfully inserted {insertedCount} checkbox(es) into range.",
+                affectedAddresses);
+        }
+
+        public BatchDeleteCheckboxResult DeleteCheckboxes(BatchDeleteCheckboxOptions options)
+        {
+            options ??= new BatchDeleteCheckboxOptions();
+
+            if (!HasActiveWorkbook)
+            {
+                return BatchDeleteCheckboxResult.Failed("No active workbook is open in Excel.");
+            }
+
+            Excel.Worksheet? activeWs = _app.ActiveSheet as Excel.Worksheet;
+            if (activeWs == null)
+            {
+                return BatchDeleteCheckboxResult.Failed("No active worksheet found.");
+            }
+
+            if (activeWs.ProtectContents)
+            {
+                return BatchDeleteCheckboxResult.Failed($"Worksheet '{activeWs.Name}' is protected. Please unprotect it before deleting checkboxes.");
+            }
+
+            int deletedCount = 0;
+            using (new ExcelStateScope(_app))
+            {
+                try
+                {
+                    Excel.CheckBoxes checkBoxes = (Excel.CheckBoxes)activeWs.CheckBoxes();
+                    if (checkBoxes == null || checkBoxes.Count == 0)
+                    {
+                        return BatchDeleteCheckboxResult.Successful(0, "No checkboxes were found on the worksheet.");
+                    }
+
+                    if (options.Scope == CheckboxDeleteScope.ActiveWorksheet)
+                    {
+                        deletedCount = checkBoxes.Count;
+                        checkBoxes.Delete();
+                    }
+                    else
+                    {
+                        Excel.Range? targetRange = null;
+                        if (!string.IsNullOrWhiteSpace(options.RangeAddress))
+                        {
+                            targetRange = activeWs.Range[options.RangeAddress];
+                        }
+                        else
+                        {
+                            targetRange = _app.Selection as Excel.Range;
+                        }
+
+                        if (targetRange == null)
+                        {
+                            return BatchDeleteCheckboxResult.Failed("No selection or range specified for deleting checkboxes.");
+                        }
+
+                        var toDelete = new List<Excel.CheckBox>();
+                        foreach (Excel.CheckBox chk in checkBoxes)
+                        {
+                            try
+                            {
+                                Excel.Range? topLeft = chk.TopLeftCell;
+                                if (topLeft != null)
+                                {
+                                    Excel.Range? intersect = _app.Intersect(topLeft, targetRange);
+                                    if (intersect != null)
+                                    {
+                                        toDelete.Add(chk);
+                                    }
+                                }
+                            }
+                            catch { }
+                        }
+
+                        deletedCount = toDelete.Count;
+                        foreach (var chk in toDelete)
+                        {
+                            try { chk.Delete(); } catch { }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return BatchDeleteCheckboxResult.Failed($"Failed while deleting checkboxes: {ex.Message}");
+                }
+            }
+
+            return BatchDeleteCheckboxResult.Successful(
+                deletedCount,
+                deletedCount == 0 ? "No checkboxes found in the designated scope." : $"Successfully deleted {deletedCount} checkbox(es).");
+        }
+
+        public int GetCheckboxCount(string? rangeAddress = null)
+        {
+            if (!HasActiveWorkbook) return 0;
+            Excel.Worksheet? activeWs = _app.ActiveSheet as Excel.Worksheet;
+            if (activeWs == null) return 0;
+
+            try
+            {
+                Excel.CheckBoxes checkBoxes = (Excel.CheckBoxes)activeWs.CheckBoxes();
+                if (checkBoxes == null || checkBoxes.Count == 0) return 0;
+
+                if (string.IsNullOrWhiteSpace(rangeAddress))
+                {
+                    return checkBoxes.Count;
+                }
+
+                Excel.Range targetRange = activeWs.Range[rangeAddress];
+                int count = 0;
+                foreach (Excel.CheckBox chk in checkBoxes)
+                {
+                    try
+                    {
+                        Excel.Range? topLeft = chk.TopLeftCell;
+                        if (topLeft != null && _app.Intersect(topLeft, targetRange) != null)
+                        {
+                            count++;
+                        }
+                    }
+                    catch { }
+                }
+                return count;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
     }
 }
