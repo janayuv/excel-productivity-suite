@@ -296,6 +296,13 @@
                   screentip="About Excel Productivity Suite"
                   supertip="View version, diagnostics, and environment configuration."
                   onAction="OnRibbonButtonClicked" />
+          <button id="btnCheckUpdates"
+                  label="Check for Updates"
+                  size="normal"
+                  image="small/CheckUpdatesIcon"
+                  screentip="Check for Updates (GitHub)"
+                  supertip="Check GitHub for the latest release, download updates, and view release notes."
+                  onAction="OnRibbonButtonClicked" />
         </group>
 
         <!-- Group: Text Operations -->

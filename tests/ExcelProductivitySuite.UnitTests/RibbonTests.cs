@@ -54,7 +54,7 @@ namespace ExcelProductivitySuite.UnitTests
             var groups = doc.Root.Descendants(CustomUiNs + "group").ToList();
             var buttons = doc.Root.Descendants(CustomUiNs + "button").ToList();
             Assert.AreEqual(15, groups.Count);
-            Assert.AreEqual(117, buttons.Count);
+            Assert.AreEqual(118, buttons.Count);
 
             var expectedIcons = new List<(string Id, string ImageAttr, int ExpectedPx)>();
             foreach (var g in groups)

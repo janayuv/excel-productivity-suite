@@ -2146,6 +2146,24 @@ namespace ExcelProductivitySuite.AddIn.Startup
                 roadmapBatch: "Active"
             ));
 
+            // Check for Updates - GitHub Release Channel
+            registry.RegisterCommand(new SuiteCommand(
+                id: "CMD_CHECK_UPDATES",
+                title: "Check for Updates",
+                description: "Check GitHub for the latest release, view changelog notes, and download updates.",
+                category: CommandCategory.General,
+                executeAction: ctx =>
+                {
+                    var dlg = new CheckForUpdatesDialog(ctx);
+                    dlg.ShowModal(ctx);
+                },
+                keywords: new[] { "update", "upgrade", "check for updates", "github release", "version", "download update" },
+                officeIconName: "FileCheckForIssues",
+                status: FeatureStatus.ImplementedAndVerified,
+                moduleCode: "General",
+                roadmapBatch: "Active"
+            ));
+
             // Register the comprehensive planned tools across all 12 modules
             RoadmapCatalog.RegisterPlannedTools(registry);
         }

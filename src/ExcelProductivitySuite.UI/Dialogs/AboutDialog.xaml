@@ -32,7 +32,7 @@
                 <TextBlock Text="⚡" Foreground="White" FontSize="28" HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Border>
             <TextBlock Text="Excel Productivity Suite" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" />
-            <TextBlock Text="Version 1.0.0 • Professional Edition" FontSize="12" Foreground="{StaticResource BrandPrimaryBrush}" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,2,0,0" />
+            <TextBlock x:Name="VersionLabel" Text="Version 5.8.0 • Professional Edition" FontSize="12" Foreground="{StaticResource BrandPrimaryBrush}" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,2,0,0" />
         </StackPanel>
 
         <!-- System Details Card -->
@@ -73,7 +73,10 @@
         <!-- Footer -->
         <DockPanel Grid.Row="2" Margin="0,16,0,0">
             <TextBlock Text="© Excel Productivity Suite. All rights reserved." VerticalAlignment="Center" FontSize="10" Foreground="{StaticResource TextDisabledBrush}" />
-            <Button Content="Close" Style="{StaticResource PrimaryButtonStyle}" HorizontalAlignment="Right" Click="CloseButton_Click" IsCancel="True" IsDefault="True" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Check for Updates..." Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,8,0" Click="CheckUpdatesButton_Click" />
+                <Button Content="Close" Style="{StaticResource PrimaryButtonStyle}" Click="CloseButton_Click" IsCancel="True" IsDefault="True" />
+            </StackPanel>
         </DockPanel>
     </Grid>
 </controls:BaseDialogWindow>

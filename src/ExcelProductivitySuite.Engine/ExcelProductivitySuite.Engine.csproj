@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Reference Include="System.Net.Http" />
     <ProjectReference Include="..\ExcelProductivitySuite.Core\ExcelProductivitySuite.Core.csproj" />
   </ItemGroup>
 </Project>

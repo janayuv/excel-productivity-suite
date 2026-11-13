@@ -359,6 +359,7 @@ namespace ExcelProductivitySuite.AddIn.Ribbon
                 case "btnSuiteUndo": return "CMD_SUITE_UNDO";
                 case "btnSuiteRedo": return "CMD_SUITE_REDO";
                 case "btnAbout": return "CMD_ABOUT";
+                case "btnCheckUpdates": return "CMD_CHECK_UPDATES";
                 default: return controlId;
             }
         }
