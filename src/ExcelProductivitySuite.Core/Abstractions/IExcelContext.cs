@@ -429,6 +429,17 @@ namespace ExcelProductivitySuite.Core.Abstractions
         void SetRangeFormulasByAddress(string address, object?[,] formulas);
 
         /// <summary>
+        /// Copies formatting (styles, fonts, borders, fills, number formats) from source address to destination address.
+        /// </summary>
+        void CopyRangeFormatsByAddress(string sourceAddress, string destinationAddress);
+
+        /// <summary>
+        /// Prompts the user to interactively select a range in Excel (using Excel's native RefEdit range picker).
+        /// Returns the selected range address, or null if cancelled.
+        /// </summary>
+        string? PromptForRangeAddress(string prompt, string title, string defaultAddress = "");
+
+        /// <summary>
         /// Locates and audits formula error cells in the current worksheet or active selection.
         /// </summary>
         IReadOnlyList<FormulaErrorInfo> GetFormulaErrors(bool selectionOnly = false);

@@ -519,6 +519,22 @@ namespace ExcelProductivitySuite.UnitTests
             CurrentFormulas = (object?[,])formulas.Clone();
         }
 
+        public List<(string Source, string Destination)> CopiedFormatsHistory { get; } = new();
+
+        public void CopyRangeFormatsByAddress(string sourceAddress, string destinationAddress)
+        {
+            CopiedFormatsHistory.Add((sourceAddress, destinationAddress));
+        }
+
+        public string? PromptForRangeResult { get; set; }
+        public List<(string Prompt, string Title, string DefaultAddress)> RangePromptHistory { get; } = new();
+
+        public string? PromptForRangeAddress(string prompt, string title, string defaultAddress = "")
+        {
+            RangePromptHistory.Add((prompt, title, defaultAddress));
+            return PromptForRangeResult ?? defaultAddress;
+        }
+
         public IReadOnlyList<FormulaErrorInfo> GetFormulaErrors(bool selectionOnly = false) => MockFormulaErrors;
 
         public int CopyPageSetup(string sourceSheetName, IEnumerable<string> targetSheetNames, PageSetupOptions options)

@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:controls="clr-namespace:ExcelProductivitySuite.UI.Controls"
         mc:Ignorable="d"
-        Title="Exact Copy Formulas - Excel Productivity Suite"
-        Height="410" Width="460"
+        Title="Exact Formula Copy - Excel Productivity Suite"
+        Height="435" Width="475"
         Background="#F8F9FA">
 
     <Window.Resources>
@@ -34,8 +34,8 @@
                     <TextBlock Text="📑" Foreground="White" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Border>
                 <StackPanel>
-                    <TextBlock Text="Exact Copy Formulas" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
-                    <TextBlock Text="Copy formulas verbatim into new cells without adjusting relative references" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                    <TextBlock Text="Exact Formula Copy" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="This utility copies a range of cells to a different location. Relative cell references in formulas are not adjusted" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" MaxWidth="390" />
                 </StackPanel>
             </StackPanel>
         </DockPanel>
@@ -43,21 +43,36 @@
         <!-- Range Inputs -->
         <GroupBox Grid.Row="1" Header="Source &amp; Destination Ranges" Style="{StaticResource ModernGroupBoxStyle}">
             <StackPanel Margin="4">
-                <TextBlock Text="Source Range (Formulas to Copy):" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,2" />
-                <TextBox x:Name="SourceRangeText" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,0,8" />
+                <TextBlock Text="Ranges to be copied :" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,3" />
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="SourceRangeText" Style="{StaticResource ModernTextBoxStyle}" VerticalContentAlignment="Center" />
+                    <Button Grid.Column="1" x:Name="SelectSourceRangeButton" Style="{StaticResource RangeSelectButtonStyle}" Margin="4,0,0,0" ToolTip="Select source range in worksheet" Click="SelectSourceRange_Click" />
+                </Grid>
 
-                <TextBlock Text="Destination Cell or Range (e.g. E1 or Sheet2!B5):" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,2" />
-                <TextBox x:Name="DestinationRangeText" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,0,4" />
+                <TextBlock Text="Destination cell or range to paste into :" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,3" />
+                <Grid Margin="0,0,0,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="DestinationRangeText" Style="{StaticResource ModernTextBoxStyle}" VerticalContentAlignment="Center" />
+                    <Button Grid.Column="1" x:Name="SelectDestinationRangeButton" Style="{StaticResource RangeSelectButtonStyle}" Margin="4,0,0,0" ToolTip="Select destination cell or range in worksheet" Click="SelectDestinationRange_Click" />
+                </Grid>
             </StackPanel>
         </GroupBox>
 
         <!-- Copy Behavior -->
         <GroupBox Grid.Row="2" Header="Copy Options" Style="{StaticResource ModernGroupBoxStyle}" Margin="0,10,0,12">
             <StackPanel Margin="4">
-                <RadioButton x:Name="ExactDimensionsRadio" Content="Match source dimensions at destination top-left" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,0,6" />
-                <TextBlock Text="Pastes formulas into identical row and column dimensions without shifting cell references." FontSize="10" Foreground="{StaticResource TextSecondaryBrush}" Margin="20,-4,0,8" />
+                <RadioButton x:Name="ExactDimensionsRadio" Content="Match source dimensions at destination top-left" IsChecked="True" Style="{StaticResource ModernRadioButtonStyle}" Margin="0,0,0,4" />
+                <TextBlock Text="Pastes formulas into identical row and column dimensions without shifting cell references." FontSize="10" Foreground="{StaticResource TextSecondaryBrush}" Margin="20,-4,0,6" />
 
-                <CheckBox x:Name="ConfirmOverwriteCheck" Content="Prompt before overwriting non-empty cells" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" Margin="0,4,0,0" />
+                <CheckBox x:Name="CopyFormattingCheck" Content="Copy formatting" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" Margin="0,2,0,4" />
+                <CheckBox x:Name="ConfirmOverwriteCheck" Content="Prompt before overwriting non-empty cells" IsChecked="True" Style="{StaticResource ModernCheckBoxStyle}" Margin="0,2,0,0" />
             </StackPanel>
         </GroupBox>
 
@@ -65,8 +80,8 @@
         <DockPanel Grid.Row="3">
             <TextBlock x:Name="StatusLabel" Text="Ready" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="Copy Verbatim" Width="120" Margin="0,0,8,0" Style="{StaticResource ModernPrimaryButtonStyle}" Click="Copy_Click" />
-                <Button Content="Cancel" Width="75" Style="{StaticResource ModernSecondaryButtonStyle}" Click="Cancel_Click" />
+                <Button Content="OK" Width="85" Margin="0,0,8,0" Style="{StaticResource ModernPrimaryButtonStyle}" Click="Copy_Click" IsDefault="True" />
+                <Button Content="Cancel" Width="75" Style="{StaticResource ModernSecondaryButtonStyle}" Click="Cancel_Click" IsCancel="True" />
             </StackPanel>
         </DockPanel>
     </Grid>

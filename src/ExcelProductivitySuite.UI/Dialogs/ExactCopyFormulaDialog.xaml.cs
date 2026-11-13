@@ -1,5 +1,7 @@
 using System;
+using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Controls;
 using ExcelProductivitySuite.Core.Abstractions;
 using ExcelProductivitySuite.Engine.Formulas;
 using ExcelProductivitySuite.UI.Controls;
@@ -8,7 +10,17 @@ namespace ExcelProductivitySuite.UI.Dialogs
 {
     public partial class ExactCopyFormulaDialog : BaseDialogWindow
     {
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool EnableWindow(IntPtr hWnd, bool bEnable);
+
         private readonly IExcelContext _context;
+
+        public TextBox SourceTextBox => SourceRangeText;
+        public TextBox DestinationTextBox => DestinationRangeText;
+        public Button SourceSelectButton => SelectSourceRangeButton;
+        public Button DestinationSelectButton => SelectDestinationRangeButton;
+        public CheckBox CopyFormattingCheckBox => CopyFormattingCheck;
 
         public ExactCopyFormulaDialog(IExcelContext context)
         {
@@ -16,6 +28,63 @@ namespace ExcelProductivitySuite.UI.Dialogs
             InitializeComponent();
 
             SourceRangeText.Text = _context.SelectionAddress ?? string.Empty;
+        }
+
+        private void SelectSourceRange_Click(object sender, RoutedEventArgs e)
+        {
+            PromptRangeForTextBox(SourceRangeText, "Ranges to be copied :");
+        }
+
+        private void SelectDestinationRange_Click(object sender, RoutedEventArgs e)
+        {
+            PromptRangeForTextBox(DestinationRangeText, "Please select a cell or range to paste :");
+        }
+
+        public void PromptRangeForTextBox(TextBox targetBox, string prompt)
+        {
+            if (targetBox == null) return;
+
+            string current = targetBox.Text?.Trim() ?? string.Empty;
+            IntPtr hwndOwner = IntPtr.Zero;
+
+            try
+            {
+                hwndOwner = _context.MainWindowHandle;
+            }
+            catch
+            {
+                hwndOwner = IntPtr.Zero;
+            }
+
+            try
+            {
+                Visibility = Visibility.Hidden;
+                if (hwndOwner != IntPtr.Zero)
+                {
+                    EnableWindow(hwndOwner, true);
+                }
+
+                string? selected = _context.PromptForRangeAddress(prompt, "Exact Formula Copy", current);
+                if (!string.IsNullOrWhiteSpace(selected))
+                {
+                    targetBox.Text = selected;
+                    StatusLabel.Text = $"Selected range: {selected}";
+                }
+            }
+            catch (Exception ex)
+            {
+                StatusLabel.Text = $"Selection error: {ex.Message}";
+            }
+            finally
+            {
+                if (hwndOwner != IntPtr.Zero)
+                {
+                    EnableWindow(hwndOwner, false);
+                }
+                Visibility = Visibility.Visible;
+                Activate();
+                targetBox.Focus();
+            }
         }
 
         private void Copy_Click(object sender, RoutedEventArgs e)
@@ -81,6 +150,12 @@ namespace ExcelProductivitySuite.UI.Dialogs
                 }
 
                 _context.SetRangeFormulasByAddress(dstAddr, target);
+
+                if (CopyFormattingCheck?.IsChecked == true)
+                {
+                    _context.CopyRangeFormatsByAddress(srcAddr, dstAddr);
+                }
+
                 _context.ShowMessage($"Successfully copied {rows * cols} formula(s) verbatim to '{dstAddr}'.", "Exact Copy Formulas");
                 DialogResult = true;
                 Close();

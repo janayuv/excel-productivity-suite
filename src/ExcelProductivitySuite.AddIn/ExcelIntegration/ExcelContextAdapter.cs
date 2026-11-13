@@ -2295,11 +2295,97 @@ namespace ExcelProductivitySuite.AddIn.ExcelIntegration
             using (new ExcelStateScope(_app))
             {
                 Excel.Range targetRange = _app.Range[address];
+                int rows = formulas.GetLength(0);
+                int cols = formulas.GetLength(1);
+                if (rows > 0 && cols > 0 && (targetRange.Rows.Count != rows || targetRange.Columns.Count != cols))
+                {
+                    targetRange = targetRange.Resize[rows, cols];
+                }
 
                 RecordBeforeRangeChange(targetRange, formulas, isFormula: true, customDesc: "Formula Update");
 
                 targetRange.Formula = formulas;
             }
+        }
+
+        public void CopyRangeFormatsByAddress(string sourceAddress, string destinationAddress)
+        {
+            if (string.IsNullOrWhiteSpace(sourceAddress) || string.IsNullOrWhiteSpace(destinationAddress)) return;
+            if (!HasActiveWorkbook) return;
+
+            try
+            {
+                if (IsCurrentSheetProtected) return;
+
+                using (new ExcelStateScope(_app))
+                {
+                    Excel.Range srcRange = _app.Range[sourceAddress];
+                    Excel.Range dstRange = _app.Range[destinationAddress];
+
+                    if (dstRange.Rows.Count == 1 && dstRange.Columns.Count == 1 &&
+                        (srcRange.Rows.Count > 1 || srcRange.Columns.Count > 1))
+                    {
+                        dstRange = dstRange.Resize[srcRange.Rows.Count, srcRange.Columns.Count];
+                    }
+
+                    srcRange.Copy();
+                    dstRange.PasteSpecial(Excel.XlPasteType.xlPasteFormats);
+                    _app.CutCopyMode = (Excel.XlCutCopyMode)0;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to copy range formats: {ex.Message}");
+            }
+        }
+
+        public string? PromptForRangeAddress(string prompt, string title, string defaultAddress = "")
+        {
+            if (!HasActiveWorkbook) return null;
+
+            try
+            {
+                _app.ScreenUpdating = true;
+                _app.DisplayAlerts = true;
+
+                string def = string.IsNullOrWhiteSpace(defaultAddress) ? (SelectionAddress ?? "$A$1") : defaultAddress;
+
+                object result = _app.InputBox(
+                    Prompt: prompt,
+                    Title: title,
+                    Default: def,
+                    Type: 8);
+
+                if (result is Excel.Range range)
+                {
+                    string activeSheetName = "";
+                    try { activeSheetName = ((Excel.Worksheet)_app.ActiveSheet).Name; } catch { }
+
+                    string rangeSheetName = "";
+                    try { rangeSheetName = ((Excel.Worksheet)range.Parent).Name; } catch { }
+
+                    string addr = range.get_Address(Type.Missing, Type.Missing, Excel.XlReferenceStyle.xlA1, Type.Missing, Type.Missing);
+
+                    if (!string.IsNullOrEmpty(rangeSheetName) && !string.Equals(rangeSheetName, activeSheetName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return $"'{rangeSheetName}'!{addr}";
+                    }
+
+                    return addr;
+                }
+            }
+            catch (COMException)
+            {
+                // User cancelled Excel InputBox dialog
+                return null;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Range selection prompt error: {ex.Message}");
+                return null;
+            }
+
+            return null;
         }
 
         public IReadOnlyList<FormulaErrorInfo> GetFormulaErrors(bool selectionOnly = false)
